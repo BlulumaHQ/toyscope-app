@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ToyScope</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ToyScope">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F5F6F8">
+<meta name="robots" content="noindex">
+<script>window.TS_SERVER=true</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Noto+Sans+JP:wght@400;600&family=Noto+Sans+TC:wght@400;600&display=swap"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Noto+Sans+JP:wght@400;600&family=Noto+Sans+TC:wght@400;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'"><noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Noto+Sans+JP:wght@400;600&family=Noto+Sans+TC:wght@400;600&display=swap" rel="stylesheet"></noscript>
+<style>
+:root{
+  --bg:#F5F6F8;--surface:#FFFFFF;--surface2:#EEF0F4;--text:#12141A;--muted:#596070;--border:#E3E6EB;
+  --accent:#2E4FE8;--onAccent:#FFFFFF;--accentSoft:#E8ECFD;--good:#16A34A;--warn:#D97706;--bad:#DC2626;--gold:#B7791F;
+  --shadow:0 1px 2px rgba(16,24,40,.06),0 4px 16px rgba(16,24,40,.06);
+}
+.retro{
+  --bg:#F2EADB;--surface:#FBF6EC;--surface2:#E9DEC9;--text:#2A2018;--muted:#6E5E4C;--border:#DCCDB3;
+  --accent:#A63A24;--onAccent:#FFF8EE;--accentSoft:#F0DCCD;--good:#4D7C3A;--warn:#B7791F;--bad:#A63A24;--gold:#9A6B1E;
+  --shadow:0 1px 2px rgba(60,40,20,.08),0 4px 16px rgba(60,40,20,.08);
+}
+.retro .hl,.retro .logo,.retro .hdr h1,.retro .price{font-family:Fraunces,Georgia,serif;letter-spacing:-.01em}
+.dark{
+  --bg:#0B0C0F;--surface:#16181D;--surface2:#24272F;--text:#F2F3F5;--muted:#A3AAB6;--border:#2A2E36;
+  --accent:#E8B341;--onAccent:#1A1408;--accentSoft:#2B2416;--good:#4ADE80;--warn:#FBBF24;--bad:#F87171;--gold:#E8B341;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 20px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html,body{height:100%;overflow-x:hidden}
+body{font-family:Inter,"Noto Sans TC","Noto Sans JP",system-ui,sans-serif;background:#D9DCE3;color:var(--text);font-size:15px;line-height:1.45}
+body.dark-page{background:#000}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+input,textarea,select{font:inherit;color:var(--text)}
+.stage{min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px}
+.phone{max-width:100vw;color:var(--text);width:390px;height:844px;border-radius:44px;overflow:hidden;position:relative;background:var(--bg);box-shadow:0 30px 80px rgba(0,0,0,.25),0 0 0 10px #111,0 0 0 11px #333;display:flex;flex-direction:column}
+@media (max-width:520px){.stage{padding:0;display:block;height:100%}.phone{width:100%;height:100%;border-radius:0;box-shadow:none}}
+.statusbar{height:44px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:14px;font-weight:600;background:var(--bg)}
+@media (max-width:520px){.statusbar{height:env(safe-area-inset-top,0px)}.statusbar span{display:none}}
+.screen{flex:1;overflow-y:auto;overflow-x:hidden;position:relative;scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none}
+.hdr{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;align-items:center;gap:10px;padding:10px 16px;min-height:52px}
+.hdr h1{font-family:"Space Grotesk",Inter,sans-serif;font-size:22px;font-weight:700;letter-spacing:-.02em;flex:1}
+.hdr h2{font-size:17px;font-weight:600;flex:1;text-align:center}
+.logo{font-family:"Space Grotesk";font-weight:700;font-size:24px;letter-spacing:-.03em;flex:1}
+.logo b{color:var(--accent)}
+.ib{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;position:relative}
+.ib:active{background:var(--surface2)}
+.ib svg{width:22px;height:22px}
+.dot{position:absolute;top:7px;right:7px;width:8px;height:8px;border-radius:50%;background:var(--bad);border:2px solid var(--bg)}
+.nav{position:relative;z-index:20;flex:none;display:flex;justify-content:space-around;align-items:center;height:76px;padding-bottom:14px;background:var(--surface);border-top:1px solid var(--border)}
+@media (max-width:520px){.nav{padding-bottom:calc(8px + env(safe-area-inset-bottom,0px));height:auto;padding-top:8px}}
+.nav button{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;color:var(--muted);width:64px}
+.nav button.on{color:var(--text)}
+.nav button.on svg{stroke:var(--accent)}
+.nav svg{width:24px;height:24px}
+.nav .scanbtn{width:64px;height:64px;border-radius:22px;background:var(--accent);color:var(--onAccent);display:grid;place-items:center;margin-top:-30px;box-shadow:0 8px 22px rgba(0,0,0,.18),0 0 0 5px var(--surface)}
+.nav .scanbtn svg{stroke:var(--onAccent);width:30px;height:30px}
+.pad{padding:0 16px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:18px}
+.sec{padding:14px 16px 4px;display:flex;align-items:baseline;justify-content:space-between}
+.sec h3{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.sec a,.link{color:var(--accent);font-size:14px;font-weight:600;cursor:pointer}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 16px 8px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;padding:7px 13px;border-radius:999px;border:1px solid var(--border);background:var(--surface);font-size:13px;font-weight:500;white-space:nowrap}
+.chip.wrap{white-space:normal;text-align:left;line-height:1.35;flex:initial}
+.chip.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+.dark .chip.on{background:var(--accent);color:var(--onAccent);border-color:var(--accent)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:46px;padding:0 18px;border-radius:14px;font-weight:600;font-size:15px}
+.btn.pri{background:var(--accent);color:var(--onAccent)}
+.btn.sec2{background:var(--surface2);color:var(--text)}
+.btn.out{border:1px solid var(--border);background:var(--surface)}
+.btn.sm{height:34px;padding:0 14px;border-radius:10px;font-size:13px;white-space:nowrap;flex:none}
+.btn.full{width:100%}
+.btn:disabled{opacity:.45}
+.av{border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;flex:none;font-family:"Space Grotesk"}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.xs{font-size:11.5px}
+.row{display:flex;align-items:center;gap:10px}
+.grow{flex:1;min-width:0}
+.ell{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.post{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:10px}
+.post .ph{display:flex;align-items:center;gap:10px;padding:10px 14px}
+.post .art{aspect-ratio:1/1;position:relative}
+.post .acts{display:flex;align-items:center;gap:4px;padding:6px 8px 0}
+.post .acts .ib svg{width:25px;height:25px}
+.post .body{padding:4px 14px 12px}
+.liked svg{fill:#EF4444;stroke:#EF4444}
+.saved svg{fill:var(--text)}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:8px;font-size:11.5px;font-weight:600;white-space:nowrap;flex:none}
+.b-sale{background:#0F5132;color:#fff;letter-spacing:.04em;text-transform:uppercase;font-size:11px;padding:4px 8px}
+.retro .b-sale{background:#3F5A2E}.dark .b-sale{background:#E8B341;color:#1A1408}
+.b-grade{background:var(--surface2);color:var(--text)}
+.b-priv{background:var(--surface2);color:var(--muted)}
+.b-rare{background:#1A1A1A;color:#F5C451;letter-spacing:.04em;text-transform:uppercase;font-size:11px;padding:4px 8px}
+.retro .b-rare{background:#2A2018;color:#E9C46A}.dark .b-rare{background:#F5C451;color:#1A1408}
+.cc{display:inline-grid;place-items:center;min-width:30px;height:22px;padding:0 6px;border-radius:6px;background:var(--surface);border:1px solid var(--border);font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--muted)}
+.sdot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:1px}
+.d-private{background:#9AA1AD}.d-public{background:#2E4FE8}.d-sale{background:#0F7A4A}
+.dark .d-public{background:#7C93FF}.retro .d-public{background:#A63A24}
+.ipill{flex:1;min-width:0;display:flex;align-items:center;gap:8px;margin:0 4px;padding:6px 10px;border-radius:12px;background:var(--surface2);cursor:pointer}
+.ipill .n{font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:4px 16px 16px}
+.fcard{cursor:pointer}
+.fcover{aspect-ratio:1;border-radius:16px;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:2px;background:var(--surface2)}
+.fcover>div{overflow:hidden}.fcover svg,.fcover img{width:100%;height:100%;object-fit:cover;display:block}
+.fcover.one{grid-template-columns:1fr;grid-template-rows:1fr}
+.fnew{aspect-ratio:1;border-radius:16px;border:1.5px dashed var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--muted);font-size:13px;font-weight:600}
+.rscan{flex:none;width:112px;cursor:pointer}
+.rscan .a{width:112px;height:112px;border-radius:14px;overflow:hidden;background:var(--surface2)}
+.rscan .a svg,.rscan .a img{width:100%;height:100%;object-fit:cover;display:block}
+.fchip{padding:9px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--surface);font-size:14px;font-weight:500}
+.fchip.on{border-color:var(--accent);background:var(--accentSoft)}
+.hero{position:relative;height:300px;overflow:hidden;color:#fff}
+.hero .bg{position:absolute;inset:0}.hero .bg svg,.hero .bg img{width:100%;height:100%;object-fit:cover;display:block}
+.hero .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,0) 35%,rgba(0,0,0,.15) 55%,rgba(0,0,0,.7))}
+.hero .top{position:absolute;left:16px;right:12px;top:10px;display:flex;align-items:center}
+.hero .logo{color:#fff}.hero .logo b{color:#fff;opacity:.85}
+.hero .bgbtn{width:36px;height:36px;border-radius:12px;background:rgba(0,0,0,.4);display:grid;place-items:center;color:#fff}
+.hero .bgbtn svg{width:18px;height:18px}
+.hero .cta{position:absolute;left:16px;right:16px;bottom:16px}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:12px 16px 4px}
+.stats div{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:10px 8px;text-align:center;cursor:pointer}
+.stats b{display:block;font-family:"Space Grotesk";font-size:19px}
+.retro .stats b{font-family:Fraunces,Georgia,serif}
+.stats span{font-size:11.5px;color:var(--muted)}
+.gcard{flex:none;width:220px;border-radius:18px;overflow:hidden;position:relative;aspect-ratio:4/5;cursor:pointer;background:var(--surface2)}
+.gcard svg{width:100%;height:100%;display:block}
+.gcard .t{position:absolute;left:0;right:0;bottom:0;padding:40px 14px 14px;color:#fff;font-weight:700;font-size:16px;line-height:1.25;background:linear-gradient(transparent,rgba(0,0,0,.75))}
+.gcard .t small{display:block;font-weight:500;font-size:11.5px;opacity:.8;margin-bottom:3px;text-transform:uppercase;letter-spacing:.05em}
+.slots{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 16px 12px}
+.slot{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:var(--muted);cursor:pointer}
+.slot .b{width:100%;aspect-ratio:3/4;border-radius:12px;border:1.5px dashed var(--border);background:var(--surface);overflow:hidden;display:grid;place-items:center;position:relative}
+.slot .b img{width:100%;height:100%;object-fit:cover;display:block}
+.slot.on{color:var(--text)}.slot.on .b{border:2.5px solid var(--accent)}
+.slot .req{position:absolute;top:4px;right:4px;font-size:11px;font-weight:700;background:var(--accent);color:var(--onAccent);border-radius:6px;padding:1px 5px}
+.coach{position:absolute;z-index:45;left:50%;transform:translateX(-50%);width:270px;background:var(--text);color:var(--bg);border-radius:16px;padding:14px 16px;box-shadow:0 12px 30px rgba(0,0,0,.3);animation:fade .3s}
+.coach:after{content:"";position:absolute;left:50%;margin-left:-8px;width:16px;height:16px;background:var(--text);transform:rotate(45deg)}
+.coach.down:after{bottom:-7px}.coach.up:after{top:-7px}
+.coach b{display:block;font-size:15px;margin-bottom:3px}.coach p{font-size:13px;opacity:.85;margin-bottom:10px}
+.coach button{background:var(--bg);color:var(--text);font-weight:600;font-size:13px;padding:7px 14px;border-radius:10px}
+.article p{margin:0 0 14px;font-size:15.5px;line-height:1.6}.article h4{font-size:16px;margin:18px 0 6px}
+.rhero{position:relative;aspect-ratio:1/1;background:#0d0f14;overflow:hidden}
+.rhero>img,.rhero>svg{width:100%;height:100%;object-fit:cover;display:block}
+.rhero .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,0) 22%,rgba(0,0,0,0) 50%,rgba(0,0,0,.8))}
+.rhero .bar{position:absolute;left:8px;right:8px;top:8px;display:flex;justify-content:space-between}
+.rhero .bar .ib{background:rgba(0,0,0,.45);color:#fff;border-radius:50%}
+.rhero .ttl{position:absolute;left:16px;right:16px;bottom:14px;color:#fff}
+.rhero .ttl .hl{font-size:28px;line-height:1.1;color:#fff}
+.mcards{display:flex;gap:10px;overflow-x:auto;padding:4px 16px 8px;margin:0 -16px;scroll-snap-type:x mandatory;scrollbar-width:none}
+.mcards::-webkit-scrollbar{display:none}
+.mcard{flex:none;width:76%;scroll-snap-align:center;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:14px 16px}
+.mcard .h{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:16px}
+.mcard .n{color:var(--muted);font-size:13.5px;margin:4px 0 8px;min-height:38px}
+.mcard .sc{font-family:"Space Grotesk";font-size:34px;font-weight:700;line-height:1}
+.retro .mcard .sc{font-family:Fraunces,Georgia,serif}
+.segs{display:flex;gap:4px;margin-top:10px}.segs i{flex:1;height:6px;border-radius:3px;background:var(--surface2)}.segs i.on{background:var(--accent)}
+.grades{display:flex;gap:6px;margin-top:6px}.grades b{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:var(--surface2);font-size:16px;color:var(--muted)}
+.grades b.on{background:var(--good);color:#fff}
+.dtable{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2px 14px}
+.dtable .r{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);font-size:14px}
+.dtable .r:last-child{border:0}.dtable .r span:first-child{color:var(--muted);flex:none}.dtable .r span:last-child{text-align:right;font-weight:600}
+.src{display:inline-block;font-size:11px;font-weight:600;padding:2px 6px;border-radius:6px;margin-left:6px;vertical-align:1px}
+.src.p{background:#DCFCE7;color:#166534}.src.a{background:#FEF3C7;color:#92400E}
+.dark .src.p{background:#14361F;color:#86EFAC}.dark .src.a{background:#3A2E10;color:#FCD34D}
+.fb{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.coachdim{position:absolute;inset:0;z-index:44;pointer-events:none}
+.obrow{display:flex;align-items:center;gap:12px;padding:16px;border-radius:18px;border:1.5px solid var(--border);background:var(--surface);margin-bottom:10px;cursor:pointer;font-weight:600;font-size:15px}
+.obrow .ck{margin-left:auto;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border);display:grid;place-items:center;flex:none;color:var(--muted)}
+.obrow.on{border-color:var(--accent);background:var(--accentSoft)}.obrow.on .ck{background:var(--accent);border-color:var(--accent);color:var(--onAccent)}
+.obprog{display:flex;gap:6px;margin:4px 0 18px}.obprog i{flex:1;height:5px;border-radius:3px;background:var(--surface2)}.obprog i.on{background:var(--text)}
+/* scanning playground */
+.actor{position:absolute;pointer-events:none}
+.actor svg{display:block}
+@keyframes fio{0%{opacity:0}12%,85%{opacity:1}100%{opacity:0}}
+@keyframes punchA{0%,100%{transform:translateX(0)}40%{transform:translateX(16px) rotate(8deg)}55%{transform:translateX(0)}}
+@keyframes punchB{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}60%{transform:translateX(-16px) rotate(-8deg)}75%{transform:translateX(0)}}
+@keyframes spark{0%,100%{opacity:0;transform:scale(.3)}45%{opacity:1;transform:scale(1.25) rotate(20deg)}}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-9deg)}50%{transform:translateY(-14px) rotate(9deg)}}
+@keyframes note{0%{opacity:0;transform:translate(0,0)}25%{opacity:1}100%{opacity:0;transform:translate(14px,-46px)}}
+@keyframes boom{0%{transform:scale(.15);opacity:1}65%{opacity:1}100%{transform:scale(1.9);opacity:0}}
+@keyframes shake{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+@keyframes peekL{0%,100%{transform:translateX(-105%)}28%,72%{transform:translateX(-35%) rotate(8deg)}}
+@keyframes peekR{0%,100%{transform:translateX(105%)}28%,72%{transform:translateX(35%) rotate(-8deg)}}
+@keyframes peekB{0%,100%{transform:translateY(105%)}28%,72%{transform:translateY(40%)}}
+@keyframes fall{from{transform:translate(0,-40px) rotate(0)}to{transform:translate(var(--dx),920px) rotate(540deg)}}
+@media (prefers-reduced-motion:reduce){.actor{display:none}}
+.rbar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.rbar button{height:62px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:12.5px;font-weight:600;background:var(--surface);border:1px solid var(--border)}
+.rbar button svg{width:20px;height:20px}
+.rbar button.pri{background:var(--accent);color:var(--onAccent);border-color:var(--accent)}
+.thumbs{display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px;scrollbar-width:none}
+.thumbs::-webkit-scrollbar{display:none}
+.thumbs .t{flex:none;width:84px;height:84px;border-radius:12px;overflow:hidden;position:relative;background:var(--surface2)}
+.thumbs .t img,.thumbs .t svg{width:100%;height:100%;object-fit:cover;display:block}
+.thumbs .t .x{position:absolute;right:4px;top:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;display:grid;place-items:center}
+.thumbs .add{border:1.5px dashed var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11.5px;color:var(--muted);cursor:pointer}
+.gal{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;border-radius:22px;scrollbar-width:none}
+.gal::-webkit-scrollbar{display:none}
+.gal>div{flex:none;width:100%;aspect-ratio:1;scroll-snap-align:start}
+.gal img,.gal svg{width:100%;height:100%;object-fit:cover;display:block}
+.aibox{border:1px solid var(--border);border-radius:16px;padding:12px 14px;display:flex;gap:12px;align-items:center;background:var(--surface)}
+select.field{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 18px) 20px,calc(100% - 13px) 20px;background-size:5px 5px;background-repeat:no-repeat}
+.shr{display:grid;grid-template-columns:repeat(4,1fr);gap:14px 6px;margin:6px 0 14px}
+.shr button{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11.5px;color:var(--text)}
+.shr i{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;color:#fff;font-style:normal;font-weight:700;font-size:15px}
+.shr i svg{width:24px;height:24px}
+.b-v2{background:var(--accentSoft);color:var(--accent)}
+.price{font-family:"Space Grotesk";font-weight:700}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:4px 16px 16px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px}
+.tile{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer}
+.tile .art{aspect-ratio:1/1;position:relative}
+.tile .meta{padding:8px 10px 10px}
+.tile .meta .n{font-size:13px;font-weight:600;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:32px}
+.art svg,.art img{width:100%;height:100%;display:block;object-fit:cover}
+.art .st{position:absolute;left:8px;top:8px}
+.sheetbg{position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:40;display:flex;align-items:flex-end;animation:fade .2s}
+.sheet{background:var(--surface);width:100%;border-radius:24px 24px 0 0;padding:10px 18px 26px;max-height:88%;overflow-y:auto;animation:up .25s cubic-bezier(.2,.8,.2,1)}
+.sheet .grab{width:40px;height:5px;border-radius:3px;background:var(--border);margin:0 auto 14px}
+.sheet h3{font-size:19px;font-weight:700;margin-bottom:4px}
+@keyframes up{from{transform:translateY(100%)}to{transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.toast{position:absolute;left:50%;bottom:96px;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:13.5px;font-weight:500;z-index:60;white-space:nowrap;animation:fade .2s}
+.field{width:100%;border:1px solid var(--border);background:var(--surface);border-radius:12px;padding:12px 14px;outline:none}
+.field:focus{border-color:var(--accent)}
+.lbl{font-size:13px;font-weight:600;margin:14px 0 6px;display:block}
+.list{background:var(--surface);border:1px solid var(--border);border-radius:16px;margin:0 16px;overflow:hidden}
+.li{display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid var(--border);cursor:pointer;min-height:52px}
+.li:last-child{border-bottom:0}
+.li .ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--surface2);flex:none}
+.li .ic svg{width:18px;height:18px}
+.li>svg{width:20px;height:20px;flex:none;color:var(--muted)}
+.tog{width:46px;height:28px;border-radius:999px;background:var(--border);position:relative;flex:none;transition:.2s}
+.tog::after{content:"";position:absolute;width:22px;height:22px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.tog.on{background:var(--good)}
+.tog.on::after{left:21px}
+.seg{display:flex;background:var(--surface2);border-radius:12px;padding:3px;gap:3px}
+.seg button{flex:1;height:34px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--muted)}
+.seg button.on{background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.tabs{display:flex;border-bottom:1px solid var(--border);position:sticky;top:52px;background:var(--bg);z-index:4}
+.tabs button{flex:1;height:44px;font-weight:600;font-size:14px;color:var(--muted);border-bottom:2px solid transparent}
+.tabs button.on{color:var(--text);border-color:var(--text)}
+.dark .tabs button.on{border-color:var(--accent)}
+.empty{text-align:center;padding:40px 30px;color:var(--muted)}
+.vf{position:relative;margin:0 16px;border-radius:28px;overflow:hidden;aspect-ratio:3/4;background:#0d0f14}
+.vf .corners{position:absolute;inset:14%;}
+.vf .corners i{position:absolute;width:38px;height:38px;border:3px solid #fff;opacity:.9}
+.vf .corners i:nth-child(1){left:0;top:0;border-right:0;border-bottom:0;border-radius:14px 0 0 0}
+.vf .corners i:nth-child(2){right:0;top:0;border-left:0;border-bottom:0;border-radius:0 14px 0 0}
+.vf .corners i:nth-child(3){left:0;bottom:0;border-right:0;border-top:0;border-radius:0 0 0 14px}
+.vf .corners i:nth-child(4){right:0;bottom:0;border-left:0;border-top:0;border-radius:0 0 14px 0}
+.scanline{position:absolute;left:8%;right:8%;height:3px;background:linear-gradient(90deg,transparent,var(--accent),transparent);box-shadow:0 0 24px var(--accent);animation:scan 1.6s ease-in-out infinite alternate}
+@keyframes scan{from{top:12%}to{top:86%}}
+.shutter{width:76px;height:76px;border-radius:50%;border:4px solid var(--text);display:grid;place-items:center}
+.shutter i{width:60px;height:60px;border-radius:50%;background:var(--accent);display:block}
+.gauge text{font-family:"Space Grotesk"}
+.ladder .rung{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:12px}
+.ladder .rung.here{background:var(--accentSoft);outline:2px solid var(--accent)}
+.bar{height:8px;border-radius:4px;background:var(--surface2);overflow:hidden;flex:1}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:4px}
+.warn{display:flex;gap:10px;padding:12px 14px;border-radius:14px;font-size:13.5px;line-height:1.4}
+.warn.y{background:#FEF3C7;color:#78350F}.warn.r{background:#FEE2E2;color:#7F1D1D}.warn.b{background:var(--accentSoft);color:var(--text)}
+.dark .warn.y{background:#3A2E10;color:#FDE68A}.dark .warn.r{background:#3B1414;color:#FECACA}
+.namebox{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--surface2)}
+.namebox .flag{font-size:18px}
+.copyb{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--border);flex:none}
+.copyb svg{width:16px;height:16px}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border-radius:14px;overflow:hidden;border:1px solid var(--border)}
+.kv div{background:var(--surface);padding:10px 12px}
+.kv b{display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.acc{display:flex;align-items:center;gap:8px;padding:7px 0;font-size:14px;border-bottom:1px dashed var(--border)}
+.acc:last-child{border:0}
+.ok{color:var(--good);font-weight:700}.no{color:var(--bad);font-weight:700}
+.spin{width:18px;height:18px;border-radius:50%;border:2.5px solid var(--border);border-top-color:var(--accent);animation:rot .8s linear infinite;display:inline-block}
+@keyframes rot{to{transform:rotate(360deg)}}
+.ob-chip{padding:10px 14px;border-radius:14px;border:1.5px solid var(--border);background:var(--surface);font-size:14px;font-weight:500;display:inline-flex;gap:6px;align-items:center}
+.ob-chip.on{border-color:var(--accent);background:var(--accentSoft);color:var(--text)}
+.ob-chip.on::before{content:"✓";color:var(--accent);font-weight:700}
+.cm{display:flex;gap:10px;padding:10px 16px}
+.mask{background:var(--surface2);border-radius:6px;padding:0 6px;font-size:12px;color:var(--muted)}
+.hl{font-family:"Space Grotesk";font-weight:700;letter-spacing:-.02em}
+.collect-tag{display:inline-block;padding:4px 10px;border-radius:999px;background:var(--surface2);font-size:12.5px;margin:0 6px 6px 0}
+.plan{border:2px solid var(--border);border-radius:16px;padding:14px;cursor:pointer;margin-bottom:10px}
+.plan.on{border-color:var(--accent);background:var(--accentSoft)}
+.engine-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:var(--surface2);font-size:12px;font-weight:600}
+.engine-pill i{width:7px;height:7px;border-radius:50%;background:var(--good);display:block}
+.hscroll{display:flex;gap:10px;overflow-x:auto;padding:4px 16px 12px;scrollbar-width:none}
+.hscroll::-webkit-scrollbar{display:none}
+.ccard{flex:none;width:150px;padding:14px;text-align:center}
+</style>
+</head>
+<body>
+<div class="stage"><div class="phone" id="phone"><div class="statusbar"><span>9:41</span><span>●●● 􀙇 ▮</span></div><div class="screen" id="screen"><div id="splash" style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;font-family:system-ui,-apple-system,sans-serif"><div style="font-weight:800;font-size:34px;letter-spacing:-.03em;color:#12141A">Toy<span style="color:#2E4FE8">Scope</span></div><div style="width:26px;height:26px;border-radius:50%;border:3px solid #E3E6EB;border-top-color:#2E4FE8;animation:rot .8s linear infinite"></div><div style="font-size:13px;color:#596070">Loading…</div></div></div><div id="navwrap"></div><div id="overlay"></div></div></div>
+<input type="file" id="filein" accept="image/*" style="display:none"><input type="file" id="postin" accept="image/*" style="display:none"><input type="file" id="sellin" accept="image/*" multiple style="display:none"><input type="file" id="bgin" accept="image/*" style="display:none"><input type="file" id="avatarin" accept="image/*" style="display:none"><input type="file" id="albumin" accept="image/*" multiple style="display:none">
+
+<script>
+/* ===================== ICONS ===================== */
+const I={
+home:'<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>',
+search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+scan:'<path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><circle cx="12" cy="12" r="3.5"/>',
+hunt:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>',
+me:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',
+heart:'<path d="M12 20s-7.5-4.6-9.2-9.3C1.6 7.3 3.7 4 7 4c2 0 3.4 1.1 5 3 1.6-1.9 3-3 5-3 3.3 0 5.4 3.3 4.2 6.7C19.5 15.4 12 20 12 20z"/>',
+comment:'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>',
+bookmark:'<path d="M6 3h12v18l-6-4-6 4z"/>',
+share:'<path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v13"/>',
+bell:'<path d="M18 16V11a6 6 0 0 0-12 0v5l-2 2h16zM10 21h4"/>',
+back:'<path d="m15 5-7 7 7 7"/>',
+gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+copy:'<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/>',
+more:'<circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/>',
+mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+lock:'<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
+globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+moon:'<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
+star:'<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+flag:'<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
+trash:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>',
+block:'<circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/>',
+tag:'<path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
+upload:'<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>',
+image:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 17-5-5-8 8"/>',
+bolt:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+check:'<path d="m5 12 5 5 9-10"/>',
+x:'<path d="M6 6l12 12M18 6 6 18"/>',
+send:'<path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/>',
+key:'<circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l3 3"/>',
+help:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.5"/>',
+pin:'<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+users:'<circle cx="9" cy="8" r="3.5"/><path d="M2 20c1-3.5 3.8-5.5 7-5.5s6 2 7 5.5M16 4.5a3.5 3.5 0 0 1 0 7M22 20c-.6-2.4-2-4-4-4.8"/>',
+};
+const ic=(n,w=2,extra='')=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" ${extra}>${I[n]}</svg>`;
+
+/* ===================== TOY ART (original generic illustrations) ===================== */
+function art(a){
+  const [kind,c1,c2,bg]=a; const B=bg||'#E9ECF5';
+  const bgg=`<defs><radialGradient id="g${kind}${c1.slice(1)}" cx="50%" cy="40%" r="75%"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs><rect width="200" height="200" fill="${B}"/><rect width="200" height="200" fill="url(#g${kind}${c1.slice(1)})"/><ellipse cx="100" cy="178" rx="58" ry="8" fill="#000" opacity=".12"/>`;
+  let s='';
+  if(kind==='robot'){s=`<rect x="78" y="30" width="44" height="34" rx="6" fill="${c1}"/><rect x="85" y="40" width="30" height="9" rx="3" fill="#FCD34D"/><path d="M80 30 72 18M120 30l8-12" stroke="${c2}" stroke-width="6" stroke-linecap="round"/><rect x="66" y="66" width="68" height="56" rx="8" fill="${c2}"/><path d="M86 74h28l-6 16H92z" fill="#FCD34D"/><rect x="46" y="70" width="18" height="50" rx="7" fill="${c1}"/><rect x="136" y="70" width="18" height="50" rx="7" fill="${c1}"/><rect x="72" y="122" width="22" height="50" rx="5" fill="${c1}"/><rect x="106" y="122" width="22" height="50" rx="5" fill="${c1}"/><rect x="68" y="160" width="30" height="14" rx="4" fill="${c2}"/><rect x="102" y="160" width="30" height="14" rx="4" fill="${c2}"/>`}
+  else if(kind==='giant'){s=`<rect x="74" y="20" width="52" height="40" rx="10" fill="${c1}"/><path d="M74 26 62 10M126 26l12-16" stroke="#FCD34D" stroke-width="7" stroke-linecap="round"/><rect x="84" y="32" width="32" height="10" rx="4" fill="#111"/><rect x="88" y="34" width="9" height="6" rx="2" fill="#FDE047"/><rect x="103" y="34" width="9" height="6" rx="2" fill="#FDE047"/><path d="M58 62h84l-8 64H66z" fill="${c2}"/><circle cx="100" cy="86" r="12" fill="#FCD34D"/><rect x="34" y="64" width="22" height="64" rx="9" fill="${c1}"/><rect x="144" y="64" width="22" height="64" rx="9" fill="${c1}"/><circle cx="45" cy="134" r="10" fill="${c2}"/><circle cx="155" cy="134" r="10" fill="${c2}"/><rect x="70" y="126" width="26" height="46" rx="6" fill="${c1}"/><rect x="104" y="126" width="26" height="46" rx="6" fill="${c1}"/>`}
+  else if(kind==='kaiju'){s=`<path d="M60 170c-6-40 4-80 30-104 6-22 30-34 44-22 10 8 8 24-2 30 14 20 18 56 10 96z" fill="${c1}"/><path d="M92 70l-14-12 6 18M84 92l-16-8 8 16M80 118l-16-4 10 14M78 144l-16 0 12 12" fill="${c2}"/><path d="M142 170c16-4 30-16 34-30-12 8-24 12-36 12z" fill="${c1}"/><circle cx="128" cy="52" r="5" fill="#FDE047"/><circle cx="129" cy="52" r="2" fill="#111"/><path d="M118 66c8 4 16 4 22 0" stroke="#111" stroke-width="3" fill="none"/><path d="M100 110c8 0 16 6 18 16" stroke="${c2}" stroke-width="5" fill="none" stroke-linecap="round"/>`}
+  else if(kind==='figure'){s=`<circle cx="100" cy="42" r="18" fill="${c1}"/><rect x="88" y="38" width="24" height="8" rx="3" fill="#111"/><rect x="80" y="62" width="40" height="52" rx="8" fill="${c2}"/><rect x="88" y="70" width="24" height="14" rx="3" fill="${c1}"/><rect x="64" y="64" width="14" height="46" rx="6" fill="${c2}"/><rect x="122" y="64" width="14" height="46" rx="6" fill="${c2}"/><rect x="82" y="114" width="16" height="56" rx="5" fill="${c1}"/><rect x="102" y="114" width="16" height="56" rx="5" fill="${c1}"/><rect x="118" y="66" width="22" height="36" rx="6" fill="#64748B"/><path d="M128 102v14" stroke="#F97316" stroke-width="5" stroke-linecap="round"/>`}
+  else if(kind==='doll'){s=`<path d="M78 46c0-22 44-22 44 0v10H78z" fill="${c2}"/><path d="M118 40c18 0 22 30 10 46" stroke="${c2}" stroke-width="10" fill="none" stroke-linecap="round"/><circle cx="100" cy="52" r="17" fill="#F5D0B5"/><path d="M84 46c4-12 28-12 32 0" fill="${c2}"/><circle cx="94" cy="54" r="2" fill="#1E3A8A"/><circle cx="106" cy="54" r="2" fill="#1E3A8A"/><path d="M96 62c3 2 5 2 8 0" stroke="#DC2626" stroke-width="2" fill="none"/><rect x="95" y="68" width="10" height="8" fill="#F5D0B5"/><path d="M84 76h32l14 70H70z" fill="${c1}"/><path d="M80 80 64 116M120 80l16 36" stroke="#F5D0B5" stroke-width="7" stroke-linecap="round"/><rect x="88" y="146" width="8" height="26" rx="3" fill="#F5D0B5"/><rect x="104" y="146" width="8" height="26" rx="3" fill="#F5D0B5"/>`}
+  else if(kind==='car'){s=`<path d="M30 132c0-10 8-16 18-18l22-20c6-5 12-8 22-8h28c10 0 18 4 24 10l16 18c14 2 20 8 20 18v8H30z" fill="${c1}"/><path d="M76 98h20v18H62zM104 98h18c6 0 10 2 14 6l8 12h-40z" fill="#BFDBFE"/><path d="M32 128h150" stroke="${c2}" stroke-width="4"/><circle cx="64" cy="142" r="15" fill="#111"/><circle cx="64" cy="142" r="7" fill="#D1D5DB"/><circle cx="64" cy="142" r="15" fill="none" stroke="#DC2626" stroke-width="2.5"/><circle cx="148" cy="142" r="15" fill="#111"/><circle cx="148" cy="142" r="7" fill="#D1D5DB"/><circle cx="148" cy="142" r="15" fill="none" stroke="#DC2626" stroke-width="2.5"/>`}
+  else if(kind==='tin'){s=`<rect x="80" y="26" width="40" height="34" rx="4" fill="${c1}"/><path d="M100 26V10" stroke="#9CA3AF" stroke-width="4"/><circle cx="100" cy="9" r="5" fill="#EF4444"/><circle cx="90" cy="42" r="6" fill="#FDE047" stroke="#111" stroke-width="2"/><circle cx="110" cy="42" r="6" fill="#FDE047" stroke="#111" stroke-width="2"/><rect x="88" y="52" width="24" height="4" fill="#111"/><rect x="70" y="62" width="60" height="64" rx="4" fill="${c2}"/><rect x="78" y="70" width="44" height="30" rx="3" fill="#111" opacity=".85"/><path d="M82 92l8-12 6 8 6-14 8 18" stroke="#22C55E" stroke-width="2.5" fill="none"/><circle cx="84" cy="112" r="4" fill="#EF4444"/><circle cx="98" cy="112" r="4" fill="#FDE047"/><circle cx="112" cy="112" r="4" fill="#3B82F6"/><rect x="54" y="66" width="14" height="44" rx="4" fill="${c1}"/><rect x="132" y="66" width="14" height="44" rx="4" fill="${c1}"/><rect x="74" y="126" width="22" height="46" rx="3" fill="${c1}"/><rect x="104" y="126" width="22" height="46" rx="3" fill="${c1}"/><path d="M146 88h14v8h-14" fill="#9CA3AF"/>`}
+  else if(kind==='box'){s=`<path d="M40 40h120v132H40z" fill="${c2}"/><path d="M40 40l14-12h120l-14 12z" fill="${c1}"/><path d="M160 40l14-12v132l-14 12z" fill="${c1}" opacity=".8"/><rect x="54" y="64" width="92" height="94" rx="4" fill="#E0F2FE" opacity=".85"/><rect x="88" y="74" width="24" height="20" rx="3" fill="${c1}"/><rect x="82" y="96" width="36" height="32" rx="4" fill="#64748B"/><rect x="84" y="128" width="12" height="24" rx="3" fill="${c1}"/><rect x="104" y="128" width="12" height="24" rx="3" fill="${c1}"/><rect x="48" y="46" width="70" height="12" rx="2" fill="#FDE047"/><rect x="122" y="46" width="30" height="12" rx="2" fill="#fff" opacity=".8"/>`}
+  else if(kind==='ship'){s=`<path d="M20 120 100 60l80 60-24 10H44z" fill="${c1}"/><path d="M100 60v70" stroke="${c2}" stroke-width="5"/><path d="M60 104h80l-10 16H70z" fill="${c2}"/><circle cx="100" cy="92" r="9" fill="#BFDBFE" stroke="#111" stroke-width="2"/><path d="M20 120l-6 16 30-6M180 120l6 16-30-6" fill="${c2}"/><path d="M84 132h32l-4 22H88z" fill="#F97316"/>`}
+  return `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">${bgg}${s}</svg>`;
+}
+function shelfArt(ids){const its=ids.map(item).slice(0,3);const n=its.length;const w=200/n;
+ return `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"><rect width="200" height="200" fill="#1F2430"/><rect y="0" width="200" height="200" fill="url(#lite)"/><defs><radialGradient id="lite" cx="50%" cy="10%" r="90%"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs><rect x="0" y="168" width="200" height="32" fill="#8B6B4A"/><rect x="0" y="166" width="200" height="4" fill="#A9845C"/>${its.map((it,k)=>{const sz=n===1?170:n===2?110:78;const x=k*w+(w-sz)/2;return `<svg x="${x}" y="${170-sz}" width="${sz}" height="${sz}" viewBox="20 10 160 170">${art([it.art[0],it.art[1],it.art[2],'transparent']).replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'').replace(/<rect width="200" height="200"[^>]*\/>/g,'').replace(/<ellipse[^>]*\/>/,'')}</svg>`}).join('')}</svg>`}
+function heroArt(v){const sets=[[['tin','#9CA3AF','#475569'],['kaiju','#15803D','#BBF7D0'],['car','#B91C1C','#FCA5A5']],[['robot','#1E40AF','#E5E7EB'],['tin','#B45309','#78350F'],['kaiju','#475569','#F59E0B']],[['car','#0891B2','#A5F3FC'],['robot','#EAB308','#334155'],['tin','#64748B','#1F2937']]];
+ const bgs=[['#2A2018','#4A3726'],['#141821','#2B3342'],['#1E2A22','#34483A']];const [a,b]=bgs[v%3];const its=sets[v%3];
+ const strip=t=>t.replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'').replace(/<defs>.*?<\/defs>/,'').replace(/<rect width="200" height="200"[^>]*\/>/g,'').replace(/<ellipse[^>]*\/>/,'');
+ return `<svg viewBox="0 0 390 300" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="hb${v}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${b}"/><stop offset="1" stop-color="${a}"/></linearGradient><radialGradient id="hl${v}" cx="50%" cy="0%" r="80%"><stop offset="0" stop-color="#FFE7B0" stop-opacity=".45"/><stop offset="1" stop-color="#FFE7B0" stop-opacity="0"/></radialGradient></defs><rect width="390" height="300" fill="url(#hb${v})"/><rect width="390" height="300" fill="url(#hl${v})"/><rect x="20" y="14" width="350" height="5" rx="2" fill="#FFF3D6" opacity=".7"/><rect x="0" y="196" width="390" height="10" fill="#B9C7D0" opacity=".35"/>${its.map((x,k)=>`<svg x="${20+k*120}" y="66" width="120" height="132" viewBox="20 10 160 170">${strip(art([x[0],x[1],x[2],'transparent']))}</svg>`).join('')}</svg>`}
+const postPic=p=>p.img?`<img src="${p.img}" alt="">`:p.shelf?shelfArt(p.items):pic(item(p.items[0]));
+const pic=(it)=> it.photos&&it.photos.length?`<img src="${it.photos[0]}" alt="">`:it.img?`<img src="${it.img}" alt="">`:art(it.art);
+
+/* ===================== FAKE DATA ===================== */
+const USERS={
+ me:{id:'me',name:'Sony Lin',handle:'sonykun',city:'Vancouver, BC',color:'#2E4FE8',bio:'Japanese vintage robots & Super Sentai. Mostly Popy and early Bandai. Always hunting boxed Chogokin.',collects:['Chogokin','Super Sentai','Jumbo Machinder','Tin robots'],followers:312,following:184,allowContact:false,private:false},
+ kenji:{id:'kenji',name:'Kenji Morita',handle:'kaiju_kenji',city:'Osaka, Japan',color:'#16A34A',bio:'Showa soft vinyl kaiju. Bullmark, Marusan, early Popy. Happy to trade with collectors overseas.',collects:['Soft vinyl','Bullmark','Marusan','Kaiju'],followers:5840,following:221,allowContact:true,verified:true},
+ rina:{id:'rina',name:'Rina Takahashi',handle:'retro_rina',city:'Tokyo, Japan',color:'#DB2777',bio:'Popy Chogokin and Jumbo Machinder, 1973–1982. Boxes matter.',collects:['Chogokin','Jumbo Machinder','Popy'],followers:9120,following:402,allowContact:true,verified:true},
+ joe:{id:'joe',name:'Joe Alvarez',handle:'mint_joe',city:'Los Angeles, CA',color:'#EA580C',bio:'Vintage Kenner Star Wars, 1977–1985. Carded and loose. Looking for clean Palitoy cards.',collects:['Kenner','Star Wars vintage','Carded'],followers:2210,following:610,allowContact:true},
+ claire:{id:'claire',name:'Claire Dubois',handle:'barbie_vault',city:'Montréal, QC',color:'#C026D3',bio:'Vintage Barbie 1959–1972. Ponytails, bubblecuts, original outfits.',collects:['Vintage Barbie','Fashion dolls','Mattel'],followers:4300,following:150,allowContact:false},
+ minjun:{id:'minjun',name:'Minjun Park',handle:'sentai_seoul',city:'Seoul, Korea',color:'#0891B2',bio:'DX Sentai robots from Battle Fever J onward. Complete with stickers or it does not count.',collects:['Super Sentai','DX robots','Bandai'],followers:1780,following:330,allowContact:true},
+ tom:{id:'tom',name:'Tom Becker',handle:'tinplate_tom',city:'Hamburg, Germany',color:'#78716C',bio:'Tin wind-ups and battery robots.',collects:['Tin toys','Wind-ups'],followers:890,following:97,private:true},
+ gwen:{id:'gwen',name:'Gwen Liu',handle:'gundam_gwen',city:'Taipei, Taiwan',color:'#4F46E5',bio:'First-run Gunpla 1980–1985, unbuilt. 舊版鋼彈模型。',collects:['Gunpla','Unbuilt kits','Bandai'],followers:3010,following:288,allowContact:true},
+ harper:{id:'harper',name:'Harper Quinn',handle:'redline_harper',city:'Portland, OR',color:'#DC2626',bio:'Hot Wheels Redlines 1968–1977 only.',collects:['Hot Wheels','Redlines','Die-cast'],followers:1320,following:205,allowContact:true},
+};
+let ITEMS=[
+ {id:'i1',owner:'me',name:'Combattler V (Chogokin)',origin:'超電磁ロボ コン・バトラーV 超合金',flag:'JP',brand:'Popy',series:'Combattler V',year:1976,grade:4,low:450,high:650,status:'public',art:['giant','#DC2626','#1D4ED8','#FDE8E8'],added:20},
+ {id:'i2',owner:'me',name:'Getter-1 Jumbo Machinder',origin:'ゲッター1 ジャンボマシンダー',flag:'JP',brand:'Popy',series:'Getter Robo',year:1975,grade:2,low:380,high:520,status:'sale',art:['giant','#B91C1C','#F8FAFC','#FEF2F2'],added:19},
+ {id:'i3',owner:'me',name:'Daidenjin DX',origin:'電子戦隊デンジマン DX ダイデンジン',flag:'JP',brand:'Popy',series:'Super Sentai',year:1980,grade:3,low:220,high:340,status:'public',art:['robot','#1E40AF','#E5E7EB','#E0E7FF'],added:18},
+ {id:'i4',owner:'me',name:'Space Explorer tin robot',origin:'ブリキ 宇宙ロボット（堀川玩具）',flag:'JP',brand:'Horikawa',series:'Tin robots',year:1968,grade:2,low:280,high:420,status:'private',art:['tin','#9CA3AF','#475569','#F1F5F9'],added:17},
+ {id:'i5',owner:'me',name:'Microman Command (boxed)',origin:'ミクロマン コマンド',flag:'JP',brand:'Takara',series:'Microman',year:1975,grade:5,low:150,high:240,status:'sale',price:210,art:['box','#0EA5E9','#1E3A8A','#E0F2FE'],added:16},
+ {id:'i6',owner:'me',name:'Machine Robo MR-series jet',origin:'マシンロボ',flag:'JP',brand:'Bandai',series:'Machine Robo',year:1983,grade:1,low:15,high:30,status:'sale',price:25,art:['robot','#EAB308','#334155','#FEF9C3'],added:15},
+ {id:'i7',owner:'me',name:'Gaiking Chogokin',origin:'大空魔竜ガイキング 超合金',flag:'JP',brand:'Popy',series:'Gaiking',year:1976,grade:3,low:260,high:380,status:'public',art:['giant','#111827','#DC2626','#F3F4F6'],added:14},
+ {id:'i8',owner:'me',name:'Voltes V transforming robot',origin:'超電磁マシーン ボルテスV',flag:'JP',brand:'Popy',series:'Voltes V',year:1977,grade:2,low:300,high:450,status:'sale',art:['giant','#1D4ED8','#DC2626','#DBEAFE'],added:13},
+ {id:'k1',owner:'kenji',name:'Godzilla soft vinyl, 1st color',origin:'ブルマァク ゴジラ ソフビ',flag:'JP',brand:'Bullmark',series:'Godzilla',year:1970,grade:3,low:800,high:1200,status:'sale',art:['kaiju','#15803D','#BBF7D0','#ECFDF5'],added:12},
+ {id:'k2',owner:'kenji',name:'Baltan-type space alien vinyl',origin:'ブルマァク 宇宙人 ソフビ',flag:'JP',brand:'Bullmark',series:'Ultra kaiju',year:1971,grade:2,low:350,high:500,status:'sale',price:460,art:['kaiju','#475569','#F59E0B','#F1F5F9'],added:11},
+ {id:'k3',owner:'kenji',name:'Marusan kaiju, cream vinyl',origin:'マルサン 怪獣 ソフビ',flag:'JP',brand:'Marusan',series:'Kaiju',year:1966,grade:2,low:900,high:1400,status:'public',rarity:'very_rare',art:['kaiju','#D6D3D1','#B45309','#FAFAF9'],added:10},
+ {id:'r1',owner:'rina',name:'Mazinger-type Jumbo Machinder',origin:'ジャンボマシンダー',flag:'JP',brand:'Popy',series:'Jumbo Machinder',year:1974,grade:4,low:600,high:900,status:'public',art:['giant','#1F2937','#DC2626','#E5E7EB'],added:9},
+ {id:'r2',owner:'rina',name:'Chogokin GA series (boxed)',origin:'ポピー 超合金 箱付き',flag:'JP',brand:'Popy',series:'Chogokin',year:1974,grade:5,low:700,high:1100,status:'sale',art:['box','#DC2626','#111827','#FEE2E2'],added:8},
+ {id:'j1',owner:'joe',name:'Boba Fett, loose (1979)',origin:'Boba Fett — Kenner',flag:'US',brand:'Kenner',series:'Star Wars vintage',year:1979,grade:3,low:40,high:80,status:'sale',price:65,art:['figure','#4D7C0F','#A3A3A3','#F7FEE7'],added:7},
+ {id:'j2',owner:'joe',name:'Darth Vader 12" (1978)',origin:'Darth Vader 12 inch — Kenner',flag:'US',brand:'Kenner',series:'Star Wars vintage',year:1978,grade:3,low:180,high:280,status:'sale',art:['figure','#111827','#374151','#E5E7EB'],added:6},
+ {id:'c1',owner:'claire',name:'#1 Ponytail Barbie (1959)',origin:'Barbie Teen Age Fashion Model #850',flag:'US',brand:'Mattel',series:'Vintage Barbie',year:1959,grade:4,low:5000,high:8000,status:'public',rarity:'grail',art:['doll','#111827','#FDE68A','#FCE7F3'],added:5},
+ {id:'m1',owner:'minjun',name:'Battle Fever Robo DX',origin:'バトルフィーバーロボ DX',flag:'JP',brand:'Popy',series:'Super Sentai',year:1979,grade:4,low:250,high:400,status:'sale',price:360,art:['robot','#B91C1C','#FBBF24','#FEF2F2'],added:4},
+ {id:'g1',owner:'gwen',name:'1/144 RX-78-2, first run',origin:'1/144 ガンダム 初版',flag:'JP',brand:'Bandai',series:'Gunpla',year:1980,grade:5,low:45,high:80,status:'sale',price:70,art:['box','#F8FAFC','#1D4ED8','#EFF6FF'],added:3},
+ {id:'h1',owner:'harper',name:'Custom Camaro Redline (1968)',origin:'Hot Wheels Custom Camaro',flag:'US',brand:'Mattel',series:'Hot Wheels Redline',year:1968,grade:3,low:90,high:160,status:'sale',art:['car','#7C3AED','#C4B5FD','#F5F3FF'],added:2},
+ {id:'h2',owner:'harper',name:'Beatnik Bandit Redline',origin:'Hot Wheels Beatnik Bandit',flag:'US',brand:'Mattel',series:'Hot Wheels Redline',year:1968,grade:2,low:25,high:45,status:'sale',price:38,art:['car','#0891B2','#A5F3FC','#ECFEFF'],added:1},
+ {id:'t1',owner:'tom',name:'Battery space robot',origin:'Blechspielzeug Roboter',flag:'DE',brand:'Unknown',series:'Tin toys',year:1962,grade:2,low:200,high:300,status:'public',art:['tin','#B45309','#78350F','#FFF7ED'],added:0},
+];
+const POSTS=[
+ {id:'p1',user:'kenji',items:['k1'],time:'2h',likes:842,cap:'Finally found the first-color run. The green is noticeably darker than the reissue — check the foot stamp if you are buying one.',comments:[
+   {u:'joe',t:'That color is unreal. What would you take for it? email me at joe.alvarez@gmail.com',masked:true},
+   {u:'rina',t:'おめでとう！初期カラーは本当に少ないよね。'},
+   {u:'me',t:'Foot stamp tip is gold, thanks.'}]},
+ {id:'p2',user:'rina',items:['r2'],time:'5h',likes:1530,cap:'Box is 90% there, styrofoam complete, missiles sealed. This one stays in the showcase.',comments:[{u:'minjun',t:'Sealed missiles 😮'}]},
+ {id:'p3',user:'claire',items:['c1'],time:'8h',likes:3204,cap:'Authenticated by two dealers. Holes in the feet with copper tubes — the details that separate a #1 from a #2.',comments:[{u:'harper',t:'Grail of grails.'},{u:'gwen',t:'Museum piece.'}]},
+ {id:'p4',user:'minjun',items:['m1'],time:'1d',likes:410,cap:'Complete with all stickers unused. Listing it — open to trades for early Bandai Sentai.',comments:[]},
+ {id:'p5',user:'joe',items:['j1'],time:'1d',likes:276,cap:'Loose but clean. Remember: the rocket-firing version was never released — if someone sells you one, ask a lot of questions.',comments:[{u:'kenji',t:'Good reminder 👍'}]},
+ {id:'p6',user:'harper',items:['h1'],time:'2d',likes:198,cap:'Spectraflame purple, minimal toning. Redline tires still bright.',comments:[]},
+ {id:'p7',user:'gwen',items:['g1'],time:'3d',likes:655,cap:'1980 first run, runners still sealed. 300円 price sticker still on the box.',comments:[]},
+];
+POSTS.splice(1,0,{id:'p8',user:'rina',items:['r1','r2'],shelf:true,time:'3h',likes:2410,cap:'Shelf refresh. Jumbo on the left, boxed Chogokin on the right. Lighting is finally right.',comments:[{u:'kenji',t:'This shelf is the dream.'}]});
+POSTS.splice(4,0,{id:'p9',user:'kenji',items:['k1','k2','k3'],shelf:true,time:'7h',likes:1902,cap:'Sunday kaiju line-up. Bullmark on the left, Marusan cream vinyl in the middle.',comments:[]});
+POSTS.push({id:'p10',user:'me',items:['i1','i7','i8'],shelf:true,time:'4d',likes:188,cap:'Popy Chogokin corner, finally lit properly.',comments:[{u:'rina',t:'Great trio!'}]});
+const OLDPOSTS=POSTS.slice();
+const svgUrl=x=>'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(x);
+const variants=(a,n)=>['',' transform="translate(200 0) scale(-1 1)"',' transform="translate(100 100) scale(1.35) translate(-100 -100)"',' transform="translate(100 100) rotate(-8) translate(-100 -100)"'].slice(0,n).map((tf,k)=>svgUrl(art([a[0],a[1],a[2],['#EDEFF3','#E7E1D6','#E3ECF2','#F2E7EA'][k]]).replace('<svg ','<svg ').replace(/(<rect width="200" height="200"[^>]*\/>)(<rect[^>]*\/>)/,'$1$2<g'+tf+'>').replace(/<\/svg>$/,'</g></svg>')));
+['k2','j1','m1','g1','h2','i5'].forEach((id,k)=>{const i=ITEMS.find(x=>x.id===id);if(i)i.photos=variants(i.art,[4,3,5,3,2,3][k]>4?4:[4,3,5,3,2,3][k])});
+// my items -> saved (owned) with folders by series
+ITEMS.forEach(i=>{if(i.owner==='me'){if(i.status!=='sale')i.status='saved';i.owned=true;i.folder=i.folder||(i.series==='Super Sentai'?'Super Sentai':i.series==='Tin robots'?'Tin robots':i.series==='Microman'||i.series==='Machine Robo'?'Misc':'Popy Chogokin')}});
+const BM={k1:'Kaiju wishlist',k3:'Kaiju wishlist',m1:'Super Sentai',r1:'Popy Chogokin'}; // bookmarks of others' toys -> folder
+const ALBUMS={
+ me:[{id:'a_me1',shelf:['i1'],cap:'Combattler V, finally boxed'},{id:'a_me2',shelf:['i2'],cap:'Getter-1 Jumbo'},{id:'a_me3',shelf:['i3'],cap:'Daidenjin'},{id:'a_me4',shelf:['i4'],cap:'From the Toronto show'},{id:'a_me5',shelf:['i7'],cap:'Gaiking'}],
+ kenji:[{id:'a_k1',shelf:['k1'],cap:'First-color Godzilla'},{id:'a_k2',shelf:['k3'],cap:'Marusan cream vinyl, 1966'},{id:'a_k3',shelf:['k2'],cap:'Bullmark alien'}],
+ rina:[{id:'a_r1',shelf:['r1'],cap:'Jumbo, front light'},{id:'a_r2',shelf:['r2'],cap:'Box is 90% there'}],
+ joe:[{id:'a_j1',shelf:['j2'],cap:'12-inch Vader'},{id:'a_j2',shelf:['j1'],cap:'Clean loose Fett'}],claire:[{id:'a_c1',shelf:['c1'],cap:'#1 Ponytail, authenticated'}],minjun:[{id:'a_m1',shelf:['m1'],cap:'Battle Fever Robo, complete'}],
+ gwen:[{id:'a_g1',shelf:['g1'],cap:'1980 first run, sealed'}],harper:[{id:'a_h1',shelf:['h1'],cap:'Spectraflame purple'},{id:'a_h2',shelf:['h2'],cap:'Beatnik Bandit'}],tom:[]};
+function itemToResult(i){const mid=((i.low||0)+(i.high||0))/2;const base=mid/(TIERS[i.grade||0].m||1);const tiers={};TIERS.forEach(x=>{tiers[x.k]=[Math.round(base*x.m*.85/5)*5,Math.round(base*x.m*1.15/5)*5]});
+ return {name:i.name,name_en:i.name,origin:i.origin,country:{JP:'Japan',US:'United States',DE:'Germany'}[i.flag]||'',brand:i.brand,series:i.series,year:String(i.year),collectible:true,repro:false,rarity:i.rarity||'common',conf:.88,cands:[],grade:i.grade||0,reasons:[],accExp:[],accVis:[],low:i.low,high:i.high,tiers,history:i.history||'',tips:[],reproSigns:[],art:i.art,ms:3400,engine:'Earlier scan'}}
+const seedRecent=()=>[['k2','Sat · flea market'],['j1','Sat · flea market'],['h2','Fri']].map(([id,when])=>Object.assign(itemToResult(item(id)),{when}));
+const folderNames=()=>{const f=['Favorites'];ITEMS.filter(i=>i.owner==='me'&&i.folder).forEach(i=>f.includes(i.folder)||f.push(i.folder));Object.values(BM).forEach(x=>f.includes(x)||f.push(x));(S.extraFolders||[]).forEach(x=>f.includes(x)||f.push(x));return f};
+const folderItems=f=>[...ITEMS.filter(i=>i.owner==='me'&&i.folder===f),...Object.entries(BM).filter(([,v])=>v===f).map(([k])=>item(k)).filter(Boolean)];
+function buildFeed(){const out=[];let k=0;
+ Object.entries(ALBUMS).forEach(([u,arr])=>{if(u==='me'||USERS[u].private)return;arr.slice(0,2).forEach(a=>{const old=OLDPOSTS.find(p=>p.user===u&&p.items&&p.items.join()===a.shelf.join());out.push({id:'f_'+a.id,kind:'album',user:u,items:a.shelf,shelf:true,album:a,time:['2h','5h','8h','1d','2d','3d'][k%6],likes:old?old.likes:300+((k*211)%1500),cap:a.cap,comments:old?old.comments:[]});k++})});
+ ITEMS.filter(i=>i.status==='sale'&&i.owner!=='me'&&!USERS[i.owner].private).forEach(i=>{const old=OLDPOSTS.find(p=>p.items&&p.items.length===1&&p.items[0]===i.id);out.push({id:'f_'+i.id,kind:'listing',user:i.owner,items:[i.id],time:old?old.time:['3h','6h','1d','2d'][k%4],likes:old?old.likes:120+((k*137)%600),cap:i.desc?i.desc.split('\n')[0]:old?old.cap:'',comments:old?old.comments:[]});k++});
+ out.sort((a,b)=>tv(a.time)-tv(b.time));POSTS.length=0;out.forEach(x=>POSTS.push(x))}
+function tv(t){return t==='now'?0:parseInt(t)*({m:1,h:60,d:1440}[t.slice(-1)]||1)}
+const NOTIFS=[
+ {u:'minjun',t:'sent you a message about Getter-1 Jumbo Machinder. Check your email.',time:'20m',ico:'mail'},
+ {sys:true,t:'New in “Super Sentai”: Battle Fever Robo DX listed for $360',time:'2h',ico:'tag',go:"openItem('m1')"},
+ {u:'rina',t:'started following you',time:'5h',ico:'users'},
+ {u:'kenji',t:'saved your Combattler V',time:'1d',ico:'bookmark'},
+ {sys:true,t:'Your listing Microman Command was viewed 48 times this week',time:'2d',ico:'bolt',go:"openItem('i5')"},
+];
+const WATCH=[
+ {q:'ボルテスV 超合金 箱',en:'Voltes V Chogokin, boxed',max:500,hits:3},
+ {q:'ジャンボマシンダー コンバトラー',en:'Combattler V Jumbo Machinder',max:700,hits:1},
+ {q:'ダイデンジン DX 完品',en:'Daidenjin DX, complete',max:350,hits:0},
+];
+const MATCHES=[
+ {t:'超電磁マシーン ボルテスV 超合金 箱付き 当時物',src:'Yahoo!オク',yen:62000,usd:410,left:'14h',art:['box','#1D4ED8','#DC2626','#DBEAFE']},
+ {t:'ボルテスV ポピー 超合金 美品 箱あり',src:'Mercari JP',yen:71000,usd:470,left:'Buy now',art:['giant','#1D4ED8','#DC2626','#E0E7FF']},
+ {t:'ジャンボマシンダー コンバトラーV 当時物',src:'Yahoo!オク',yen:98000,usd:650,left:'2d 3h',art:['giant','#DC2626','#1D4ED8','#FEE2E2']},
+];
+const INTERESTS={
+ 'Japanese':['Chogokin','Jumbo Machinder','Super Sentai','Soft vinyl','Gunpla','Microman','Tin robots','Ultraman','Kamen Rider'],
+ 'Western':['Star Wars vintage','Transformers G1','G.I. Joe','Masters of the Universe','Vintage Barbie','Hot Wheels','LEGO','Marvel Legends'],
+ 'Era':['Pre-1970','1970s','1980s','1990s','2000s+'],
+ 'I want to':['Know what my toys are worth','Show off my collection','Sell or trade','Hunt for grails','Learn toy history'],
+};
+const TIERS=[
+ {k:'broken',en:'Broken / parts',zh:'損壞／零件',ja:'ジャンク',m:.15},
+ {k:'loose_poor',en:'Loose · worn',zh:'裸裝・磨損',ja:'本体のみ・難あり',m:.35},
+ {k:'loose_good',en:'Loose · good',zh:'裸裝・良好',ja:'本体のみ・良好',m:.55},
+ {k:'loose_complete',en:'Loose · complete',zh:'裸裝・配件齊全',ja:'本体のみ・付属品完備',m:.72},
+ {k:'boxed_opened',en:'Boxed (opened)',zh:'有盒（已拆）',ja:'箱付き・開封',m:1},
+ {k:'mint_in_box',en:'Mint in box',zh:'全新未拆',ja:'未開封・美品',m:1.6},
+];
+const STATUS={private:{en:'Private',zh:'私人',ja:'非公開',d:'d-private',sub:'Only you can see it'},public:{en:'Public',zh:'公開',ja:'公開',d:'d-public',sub:'Collectors can see it — not for sale'},sale:{en:'For sale',zh:'出售中',ja:'販売中',d:'d-sale',sub:'Shows a For sale label. Collectors can contact you to ask or offer'}};
+
+/* ===================== I18N (partial, prototype) ===================== */
+const L={
+ en:{home:'Home',discover:'Discover',scan:'Scan',hunt:'Hunt',me:'Me',following:'Following',foryou:'For you',collectors:'Collectors to follow',trending:'Trending this week',forsale:'For sale',settings:'Settings',collection:'Collection',posts:'Posts',saved:'Saved',follow:'Follow',followingB:'Following',contact:'Contact',addcol:'Add to collection',watch:'Watch price',condition:'Condition',history:'History',tips:'Buying tips',acc:'Accessories',ladder:'Value by condition',youhere:'You are here',estvalue:'Estimated value',items:'items',followers:'followers',followingN:'following',search:'Search toys, series, collectors',appearance:'Appearance',language:'Language',editprofile:'Edit profile',shareprofile:'Share profile'},
+ zh:{home:'首頁',discover:'探索',scan:'掃描',hunt:'尋寶',me:'我的',following:'追蹤中',foryou:'推薦',collectors:'推薦收藏家',trending:'本週熱門',forsale:'出售中',settings:'設定',collection:'收藏',posts:'貼文',saved:'已儲存',follow:'追蹤',followingB:'追蹤中',contact:'聯絡',addcol:'加入收藏',watch:'追蹤價格',condition:'品相',history:'歷史介紹',tips:'購買注意事項',acc:'配件',ladder:'各品相價格',youhere:'你在這裡',estvalue:'估計價值',items:'件',followers:'粉絲',followingN:'追蹤',search:'搜尋玩具、系列、收藏家',appearance:'外觀',language:'語言',editprofile:'編輯個人檔案',shareprofile:'分享個人檔案'},
+ ja:{home:'ホーム',discover:'見つける',scan:'スキャン',hunt:'ハント',me:'マイページ',following:'フォロー中',foryou:'おすすめ',collectors:'おすすめコレクター',trending:'今週のトレンド',forsale:'販売中',settings:'設定',collection:'コレクション',posts:'投稿',saved:'保存済み',follow:'フォロー',followingB:'フォロー中',contact:'連絡する',addcol:'コレクションに追加',watch:'価格をウォッチ',condition:'状態',history:'歴史',tips:'購入時の注意',acc:'付属品',ladder:'状態別の価格',youhere:'現在の状態',estvalue:'推定価格',items:'点',followers:'フォロワー',followingN:'フォロー',search:'おもちゃ・シリーズ・コレクターを検索',appearance:'外観',language:'言語',editprofile:'プロフィール編集',shareprofile:'プロフィールを共有'},
+};
+const LANGS=[['en','English'],['zh','繁體中文'],['ja','日本語'],['ko','한국어'],['fr','Français'],['es','Español'],['de','Deutsch']];
+const t=k=>(L[S.lang]||L.en)[k]||L.en[k]||k;
+const tierName=i=>TIERS[i][S.lang==='zh'?'zh':S.lang==='ja'?'ja':'en'];
+const stName=s=>STATUS[s][S.lang==='zh'?'zh':S.lang==='ja'?'ja':'en'];
+
+/* ===================== STATE ===================== */
+const LS={get(k,d){try{const v=localStorage.getItem('ts_'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('ts_'+k,JSON.stringify(v))}catch(e){}}};
+const S={
+ theme:LS.get('theme','light'),lang:LS.get('lang','en'),onboarded:LS.get('onboarded',false),interests:new Set(LS.get('interests',[])),
+ key:LS.get('key',''),tab:'explore',stack:[],feedTab:'following',liked:new Set(['p2']),saved:new Set(),follow:new Set(['kenji','rina','joe','minjun']),
+ colFilter:'all',colSort:'value',meTab:'collection',profTab:'posts',discChip:'All',q:'',scanMode:'single',
+ toggles:Object.assign({analytics:false,improve:false},LS.get('toggles',{private:false,contact:false,value:true,pushLikes:true,pushFollow:true,pushHunt:true,emailNews:false})),
+ contactsLeft:5,plan:'free',scansToday:2,sheet:null,lastResult:null,engine:'demo',sample:null,
+};
+USERS.me.allowContact=S.toggles.contact;USERS.me.private=S.toggles.private;
+// restore user-added items
+LS.get('myitems',[]).forEach(x=>ITEMS.unshift(x));
+USERS.me.photo=LS.get('avatar',null);
+
+/* ===================== ROUTER ===================== */
+const cur=()=>S.stack.length?S.stack[S.stack.length-1]:{s:S.tab};
+function go(s,p){S.stack.push({s,p});render(true)}
+function back(){S.stack.pop();render(true)}
+function tab(n){S.tab=n;S.stack=[];render(true)}
+const $=id=>document.getElementById(id);
+function render(top){
+ const ph=$('phone');const th=themeNow();ph.classList.toggle('dark',th==='dark');ph.classList.toggle('retro',th==='retro');document.body.classList.toggle('dark-page',isDark());
+ const c=cur();const fn=SCR[c.s]||SCR.home;
+ $('screen').innerHTML=fn(c.p||{});
+ const hideNav=['onboard','welcome','scanning','contact','newpost','sell','result','item','post','scan','photo','profile','folder','guide','forsale','legal'].includes(c.s);
+ $('navwrap').innerHTML=hideNav?'':nav();
+ $('overlay').innerHTML=coachHTML()+(S.sheet?`<div class="sheetbg" onclick="if(event.target===this)closeSheet()"><div class="sheet"><div class="grab"></div>${S.sheet()}</div></div>`:'');placeSpot();
+ if(top)$('screen').scrollTop=0;
+}
+function themeNow(){if(S.toggles.auto&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)return 'dark';return S.theme==='system'?'light':S.theme}
+function isDark(){return themeNow()==='dark'}
+S.tips=new Set(LS.get('tips',[]));
+const COACH={explore:{pos:'bottom:92px',dir:'down',t:'Tap here to scan any toy',p:'Point your camera at a toy and see what it’s worth. No account needed.'},
+ scan:{pos:'top:150px',dir:'up',t:'Add more angles',p:'Front is enough. Back, Box and Accessories make the value more accurate.'},
+ result:{pos:'bottom:96px',dir:'down',t:'Save it or sell it',p:'Save puts it in a folder. Sell lets you list it with more photos.'},
+ saved:{pos:'top:200px',dir:'up',t:'Everything you keep',p:'Recent scans stay here automatically. Folders are yours to organise.'}};
+function coachHTML(){const k=cur().s;const c=COACH[k];if(!c||S.tips.has(k)||S.sheet)return '';if(k==='explore'&&!S.onboarded)return '';
+ return `${k==='explore'?`<div class="coachdim" id="cdim" onclick="dismissTip('explore')"></div>`:''}<div class="coach ${c.dir}" style="${c.pos}"><b>${c.t}</b><p>${c.p}</p><button onclick="dismissTip('${k}')">Got it</button></div>`}
+function placeSpot(){const d=$('cdim');const b=document.querySelector('.scanbtn');if(!d||!b)return;const pr=$('phone').getBoundingClientRect(),r=b.getBoundingClientRect();const x=r.left-pr.left+r.width/2,y=r.top-pr.top+r.height/2;d.style.background=`radial-gradient(circle at ${x}px ${y}px, transparent 40px, rgba(0,0,0,.68) 44px)`}
+function dismissTip(k){S.tips.add(k);LS.set('tips',[...S.tips]);render()}
+function sheet(fn){S.sheet=fn;render()}
+function closeSheet(){S.sheet=null;render()}
+function toast(m){const d=document.createElement('div');d.className='toast';d.textContent=m;$('phone').appendChild(d);setTimeout(()=>d.remove(),2000)}
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=n=>n==null?'—':'$'+Math.round(n).toLocaleString('en-US');
+const range=(a,b)=>a==null?'—':(b&&b!==a?money(a)+'–'+money(b).slice(1):money(a));
+const av=(u,sz=36)=>{const U=USERS[u];return U.photo?`<div class="av" style="width:${sz}px;height:${sz}px;background:var(--surface2);overflow:hidden"><img src="${U.photo}" style="width:100%;height:100%;object-fit:cover;display:block"></div>`:`<div class="av" style="width:${sz}px;height:${sz}px;background:${U.color};font-size:${sz*.4}px">${U.name[0]}</div>`};
+const item=id=>ITEMS.find(x=>x.id===id);
+const stBadge=s=>s==='sale'?`<span class="badge b-sale">${stName('sale')}</span>`:'';
+const priceOf=i=>i.status==='sale'?(i.price?money(i.price):'For sale'):range(i.low,i.high);
+const copy=(txt)=>{try{navigator.clipboard.writeText(txt).then(()=>toast('Copied · paste it into Yahoo!オク or Mercari'),()=>toast('Copied'))}catch(e){toast('Copied')}};
+const verified=u=>USERS[u].verified?'<span style="color:var(--accent)">✔︎</span>':'';
+
+function nav(){
+ const on=n=>S.tab===n&&!S.stack.length?'on':'';
+ return `<div class="nav">
+ <button class="${on('explore')}" onclick="tab('explore')">${ic('search',1.8)}Explore</button>
+ <button class="${on('saved')}" onclick="tab('saved')">${ic('bookmark',1.8)}${t('saved')}</button>
+ <button onclick="pickScan()" aria-label="Scan"><span class="scanbtn">${ic('scan',2.2)}</span></button>
+ <button class="${on('notifs')}" onclick="tab('notifs')" style="position:relative">${ic('bell',1.8)}Activity${S.unread?'<span class="dot" style="top:0;right:16px"></span>':''}</button>
+ <button class="${on('me')}" onclick="tab('me')">${ic('me',1.8)}${t('me')}</button></div>`;
+}
+function pickScan(){if(!S.tips.has('explore')){S.tips.add('explore');LS.set('tips',[...S.tips])}go('scan')}
+const hdrBack=(title,right='')=>`<div class="hdr"><button class="ib" onclick="back()">${ic('back')}</button><h2>${title}</h2><div style="width:38px;display:flex;justify-content:flex-end">${right}</div></div>`;
+
+/* ===================== SCREENS ===================== */
+const SCR={};
+
+SCR.welcome=()=>`<div style="min-height:100%;display:flex;flex-direction:column;padding:30px 24px 40px">
+ <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:18px">
+  <div style="display:grid;grid-template-columns:repeat(3,84px);gap:10px;transform:rotate(-4deg)">
+   ${[ITEMS[0],ITEMS[8],ITEMS[15],ITEMS[13],ITEMS[3],ITEMS[18]].map(i=>`<div class="art" style="border-radius:20px;overflow:hidden;aspect-ratio:1;box-shadow:var(--shadow)">${pic(i)}</div>`).join('')}
+  </div>
+  <div class="logo" style="font-size:40px;flex:none;margin-top:16px">Toy<b>Scope</b></div>
+  <div style="font-size:18px;font-weight:600;max-width:280px">Scan any toy. Know what it is, what it’s worth, and where it came from.</div>
+  <div class="muted small">Original Japanese names · Condition-based value · Collector community</div>
+ </div>
+ <button class="btn pri full" onclick="S.onboarded=true;LS.set('onboarded',true);S.stack=[];S.tab='explore';go('scan')">${ic('scan',2,'width="20" height="20"')} Scan a toy — no account needed</button>
+ <button class="btn full" style="margin-top:6px" onclick="signup('Welcome back')">I already have an account</button>
+</div>`;
+
+S.obStep=1;S.goals=new Set(LS.get('goals',[]));
+const GOALS=['Find out what my toys are worth','Check prices before I buy','Spot rare toys and grails','Sell part of my collection','Learn the history of my toys','Keep track of what I own'];
+const obHead=n=>`<div class="hdr">${n===2?`<button class="ib" onclick="S.obStep=1;render(true)">${ic('back')}</button>`:''}<div style="flex:1"></div><button class="link" onclick="finishOnboard(true)">Skip</button></div><div class="pad"><div class="muted small" style="font-weight:600">Step ${n} of 2</div><div class="obprog"><i class="on"></i><i class="${n===2?'on':''}"></i></div></div>`;
+SCR.onboard=()=>S.obStep===2?obInterests():`${obHead(1)}<div class="pad"><div class="hl" style="font-size:28px;line-height:1.15">What do you need help with?</div><div class="muted" style="margin:6px 0 16px">Select all that apply.</div>
+ ${GOALS.map((g,k)=>`<div class="obrow ${S.goals.has(g)?'on':''}" onclick="S.goals.has(GOALS[${k}])?S.goals.delete(GOALS[${k}]):S.goals.add(GOALS[${k}]);LS.set('goals',[...S.goals]);render()"><span>${g}</span><span class="ck">${S.goals.has(g)?ic('check',3,'width="16" height="16"'):'+'}</span></div>`).join('')}</div>
+ <div style="height:90px"></div><div style="position:sticky;bottom:0;padding:14px 16px 22px;background:linear-gradient(transparent,var(--bg) 30%)"><button class="btn pri full" onclick="S.obStep=2;render(true)">Continue</button></div>`;
+const obInterests=()=>{const n=S.interests.size;return `${obHead(2)}
+ <div class="pad"><div class="hl" style="font-size:28px;line-height:1.15">What do you collect?</div>
+ <div class="muted" style="margin:6px 0 10px">Pick as many as you like. We use this to tune your feed and Discover. You can change it later in Settings.</div></div>
+ ${Object.entries(INTERESTS).map(([g,arr])=>`<div class="sec"><h3>${g}</h3></div><div class="pad" style="display:flex;flex-wrap:wrap;gap:8px">${arr.map(x=>`<button class="ob-chip ${S.interests.has(x)?'on':''}" onclick="toggleInt('${x.replace(/'/g,"\\'")}')">${esc(x)}</button>`).join('')}</div>`).join('')}
+ <div style="height:110px"></div>
+ <div style="position:sticky;bottom:0;padding:14px 16px 22px;background:linear-gradient(transparent,var(--bg) 30%)"><button class="btn pri full" ${n?'':'disabled'} onclick="finishOnboard()">Continue${n?' · '+n+' selected':''}</button></div>`};
+function toggleInt(x){S.interests.has(x)?S.interests.delete(x):S.interests.add(x);LS.set('interests',[...S.interests]);const st=$('screen').scrollTop;render();$('screen').scrollTop=st}
+function finishOnboard(skip){S.onboarded=true;LS.set('onboarded',true);S.stack.pop();if(!S.stack.length)S.tab=S.tab||'explore';render(true);toast(skip?'You can pick interests later in Settings':'Feed tuned to your interests')}
+
+SCR.home=()=>{
+ const tb=(k,l)=>`<button class="${S.feedTab===k?'on':''}" onclick="S.feedTab='${k}';render(true)">${l}</button>`;
+ let body;
+ if(S.feedTab==='sale'){const its=ITEMS.filter(i=>i.status==='sale'&&i.owner!=='me'&&!USERS[i.owner].private);
+  body=`<div class="pad muted small" style="padding-top:12px">Toys collectors want to sell. Tap one and use Contact to ask or make an offer.</div><div class="grid2" style="padding-top:10px">${its.map(tileHTML).join('')}</div>`}
+ else{const list=POSTS.filter(p=>S.follow.has(p.user));
+  body=`<div style="height:10px"></div>`+(list.map(postHTML).join('')||`<div class="empty">Follow collectors to see their collections and listings.<br><br><button class="btn pri sm" onclick="tab('discover')">Find collectors</button></div>`)+`<div class="empty small">You’re all caught up</div>`}
+ return `<div class="hdr"><div class="logo">Toy<b>Scope</b></div><button class="ib" onclick="go('notifs')">${ic('bell',1.8)}<span class="dot"></span></button></div>
+ <div class="tabs" style="top:52px">${tb('following',t('following'))}${tb('sale',t('forsale'))}</div>${body}`;
+};
+function postHTML(p){const its=p.items.map(item).filter(Boolean);const it=its[0];const U=USERS[p.user];const L=S.liked.has(p.id);const listing=p.kind==='listing';
+ const open=listing?`openItem('${it.id}')`:`go('photo',{u:'${p.user}',id:'${p.album.id}'})`;
+ return `<div class="post"><div class="ph"><span onclick="openUser('${p.user}')" style="cursor:pointer">${av(p.user,34)}</span><div class="grow" onclick="openUser('${p.user}')" style="cursor:pointer"><div style="font-weight:600;font-size:14px">${U.handle} ${verified(p.user)}</div><div class="muted xs">${listing?'Listed for sale':'Added to My Collection'} · ${p.time}</div></div><button class="ib" onclick="postMenu('${p.id}')">${ic('more')}</button></div>
+ <div class="art" onclick="${open}" ondblclick="like('${p.id}',true)" style="cursor:pointer">${postPic(p)}</div>
+ <div class="acts"><button class="ib ${L?'liked':''}" onclick="like('${p.id}')">${ic('heart',1.8)}</button><button class="ib" onclick="go('post',{id:'${p.id}'})">${ic('comment',1.8)}</button><button class="ib" onclick="shareSheet('${p.id}')">${ic('send',1.8)}</button>
+ <div class="ipill" onclick="${open}">${listing?`<span class="n">${esc(it.title||it.name)}</span><span class="badge b-sale">${priceOf(it)}</span>`:`<span class="n">${esc(p.cap)}</span>`}<span class="muted">›</span></div>
+ ${listing?`<button class="ib ${BM[it.id]?'saved':''}" onclick="bm('${it.id}')">${ic('bookmark',1.8)}</button>`:'<div style="width:38px"></div>'}</div>
+ <div class="body"><div style="font-weight:600;font-size:14px">${(p.likes+(L?1:0)).toLocaleString()} likes</div>${listing&&p.cap?`<div style="font-size:14px"><b>${U.handle}</b> ${esc(p.cap)}</div>`:''}${p.comments.length?`<div class="muted small" style="cursor:pointer;padding:6px 0 2px" onclick="go('post',{id:'${p.id}'})">View ${p.comments.length===1?'1 comment':'all '+p.comments.length+' comments'}</div>`:''}</div></div>`}
+function postItems(id){const p=POSTS.find(x=>x.id===id);sheet(()=>`<h3>In this photo</h3><div class="muted small" style="margin-bottom:10px">Tap a toy to see details.</div><div class="list" style="margin:0">${p.items.map(item).map(i=>`<div class="li" onclick="closeSheet();openItem('${i.id}')"><div class="art" style="width:44px;height:44px;border-radius:10px;overflow:hidden;flex:none">${pic(i)}</div><div class="grow"><div style="font-weight:600;font-size:14px" class="ell">${esc(i.name)}</div><div class="muted xs">${esc(i.brand)} · ${i.year}</div></div>${i.status==='sale'?`<span class="badge b-sale">${priceOf(i)}</span>`:`<span class="price small">${range(i.low,i.high)}</span>`}</div>`).join('')}</div>`)}
+function like(id,only){if(only&&S.liked.has(id))return;S.liked.has(id)?S.liked.delete(id):S.liked.add(id);const st=$('screen').scrollTop;render();$('screen').scrollTop=st}
+function save(id){S.saved.has(id)?(S.saved.delete(id),toast('Removed from saved')):(S.saved.add(id),toast('Saved'));const st=$('screen').scrollTop;render();$('screen').scrollTop=st}
+function shareSheet(id){const o=[['Messages','#34C759','comment'],['WhatsApp','#25D366','W'],['Messenger','#0A7CFF','M'],['Instagram','#D62976','IG'],['Facebook','#1877F2','f'],['X','#111','X'],['Email','#6B7280','mail'],['More','#9CA3AF','more']];
+ sheet(()=>`<h3>Share</h3><div class="muted small" style="margin-bottom:10px">In the real app this opens your phone’s share sheet.</div><div class="shr">${o.map(([n,c,g])=>`<button onclick="closeSheet();toast('Shared to ${n} (prototype)')"><i style="background:${c}">${I[g]?ic(g,2):g}</i>${n}</button>`).join('')}</div><div class="list" style="margin:0"><div class="li" onclick="closeSheet();toast('Link copied')">${ic('copy',1.8)}<span class="grow">Copy link</span></div></div>`)}
+function postMenu(id){const mine=POSTS.find(p=>p.id===id)?.user==='me';sheet(()=>`<div class="list" style="margin:0">${mine?`<div class="li" onclick="closeSheet();toast('Edit post (prototype)')">${ic('tag',1.8)}<span class="grow">Edit post</span></div><div class="li" onclick="closeSheet();toast('Post deleted (prototype)')">${ic('trash',1.8)}<span class="grow">Delete post</span></div>`:`<div class="li" onclick="closeSheet();toast('Thanks — we review reports within 24h')">${ic('flag',1.8)}<span class="grow">Report post</span></div><div class="li" onclick="closeSheet();toast('Blocked')">${ic('block',1.8)}<span class="grow">Block user</span></div>`}<div class="li" onclick="closeSheet();toast('Link copied')">${ic('copy',1.8)}<span class="grow">Copy link</span></div></div><button class="btn sec2 full" style="margin-top:12px" onclick="closeSheet()">Cancel</button>`)}
+
+SCR.post=({id})=>{const p=POSTS.find(x=>x.id===id);return hdrBack('Comments')+postHTML(p)+
+ `<div style="padding-bottom:90px">${p.comments.map(c=>`<div class="cm">${av(c.u,30)}<div class="grow"><div class="small"><b>${USERS[c.u].handle}</b> ${c.masked?esc(maskText(c.t)):esc(c.t)}</div>${c.masked?`<div class="xs muted" style="margin-top:4px;display:flex;gap:6px;align-items:center">${ic('lock',2,'width="12" height="12"')} Email hidden for safety · Use the Contact button on ${USERS[p.user].name.split(' ')[0]}’s profile</div>`:''}<div class="xs muted" style="margin-top:3px">Reply · Report</div></div></div>`).join('')||'<div class="empty small">No comments yet</div>'}</div>
+ <div style="position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--border);padding:10px 12px;display:flex;gap:8px;align-items:center">${av('me',30)}<input id="cmt" class="field" style="padding:9px 12px" placeholder="Add a comment…" onkeydown="if(event.key==='Enter')addCmt('${id}')"><button class="link" onclick="addCmt('${id}')">Post</button></div>`};
+function maskText(s){return s.replace(/[\w.+-]+@[\w-]+\.[\w.]+/g,'••••@••••').replace(/(\+?\d[\d\s().-]{7,}\d)/g,'•••-•••-••••')}
+function addCmt(id){const v=$('cmt').value.trim();if(!v)return;const p=POSTS.find(x=>x.id===id);const m=maskText(v)!==v;p.comments.push({u:'me',t:v,masked:m});render();$('screen').scrollTop=1e6;if(m)toast('Email / phone hidden automatically')}
+
+SCR.notifs=()=>{S.unread=false;return `<div class="hdr"><h1>Activity</h1></div><div style="padding:2px 0">${NOTIFS.map(n=>`<div class="li" style="border-bottom:1px solid var(--border);background:var(--bg)" onclick="${n.go||(n.u?`openUser('${n.u}')`:'')}">${n.sys?`<div class="av" style="width:40px;height:40px;background:var(--surface2);color:var(--text)">${ic(n.ico,1.8,'width="20" height="20"')}</div>`:av(n.u,40)}<div class="grow small">${n.sys?'':`<b>${USERS[n.u].handle}</b> `}${esc(n.t)} <span class="muted">· ${n.time}</span></div></div>`).join('')}</div>
+ <div class="pad muted xs" style="padding-top:14px">Messages from buyers arrive by email. Your address stays hidden.</div>`};
+S.bg=LS.get('bg',0);
+SCR.explore=()=>{
+ const q=S.q.toLowerCase();const chips=['All','Japanese','Star Wars','Barbie','Hot Wheels','Gunpla','Soft vinyl','Sentai'];
+ const match=it=>!q||(it.name+(it.title||'')+it.origin+it.brand+it.series).toLowerCase().includes(q);
+ const chipOk=it=>{const c=S.discChip;if(c==='All')return true;const m={Japanese:it.flag==='JP','Star Wars':it.series.includes('Star Wars'),Barbie:it.series.includes('Barbie'),'Hot Wheels':it.series.includes('Hot Wheels'),Gunpla:it.series==='Gunpla','Soft vinyl':it.brand==='Bullmark'||it.brand==='Marusan',Sentai:it.series==='Super Sentai'};return m[c]};
+ const pool=ITEMS.filter(i=>i.owner!=='me'&&!USERS[i.owner].private&&match(i)&&chipOk(i));
+ const filtering=q||S.discChip!=='All';
+ const mySale=ITEMS.filter(i=>i.owner==='me'&&i.status==='sale'&&match(i)&&chipOk(i)).sort((a,b)=>b.added-a.added);
+ const sale=[...mySale.slice(0,2),...pool.filter(i=>i.status==='sale')];
+ const rare=pool.filter(i=>i.rarity||(i.high||0)>=600).sort((a,b)=>(b.high||0)-(a.high||0));
+ const cols=Object.values(USERS).filter(u=>u.id!=='me'&&(!q||(u.name+u.handle+u.collects.join()).toLowerCase().includes(q)));
+ const hTile=i=>`<div style="flex:none;width:150px">${tileHTML(i)}</div>`;
+ const mine=ITEMS.filter(i=>i.owner==='me');const owned=mine.filter(i=>i.owned);const val=owned.reduce((a,i)=>a+((i.low||0)+(i.high||i.low||0))/2,0);
+ const sec=(t,more)=>`<div class="sec"><h3>${t}</h3>${more||''}</div>`;
+ return `<div class="hero"><div class="bg">${typeof S.bg==='string'?`<img src="${S.bg}">`:heroArt(S.bg)}</div><div class="shade"></div>
+  <div class="top"><div class="logo" style="flex:1">Toy<b>Scope</b></div><button class="bgbtn" onclick="bgSheet()" aria-label="Change background">${ic('image',2)}</button></div>
+  <div class="cta"><button class="btn pri full" style="height:52px;font-size:16px" onclick="pickScan()">${ic('scan',2,'width="20" height="20"')} Scan a toy</button></div></div>
+ <div class="stats"><div onclick="tab('saved')"><b>${mine.length}</b><span>Saved toys</span></div><div onclick="tab('saved')"><b>${owned.length&&S.toggles.value?money(val):'—'}</b><span>What I own</span></div><div onclick="tab('saved')"><b>${folderNames().length}</b><span>Folders</span></div></div>
+ <div class="pad" style="margin-top:12px"><div style="position:relative"><span style="position:absolute;left:12px;top:12px;color:var(--muted)">${ic('search',2,'width="20" height="20"')}</span><input class="field" style="padding-left:40px" placeholder="${t('search')}" value="${esc(S.q)}" oninput="S.q=this.value;const p=this.selectionStart;render();const f=document.querySelector('.field');f.focus();f.setSelectionRange(p,p)"></div></div>
+ <div class="chips" style="margin-top:8px">${chips.map(c=>`<button class="chip ${S.discChip===c?'on':''}" onclick="S.discChip='${c}';render()">${c}</button>`).join('')}</div>
+ ${filtering?`${sec('Results',`<span class="muted xs">${pool.length} toys</span>`)}<div class="grid2">${pool.sort((a,b)=>(b.status==='sale')-(a.status==='sale')).map(tileHTML).join('')||'<div class="empty" style="grid-column:1/-1">Nothing found</div>'}</div>
+ ${cols.length&&q?`${sec('Collectors')}<div class="hscroll">${cols.map(colCard).join('')}</div>`:''}`
+ :`${sec('New for sale',`<span class="link small" onclick="go('forsale')">See all ${sale.length}</span>`)}<div class="hscroll">${sale.slice(0,8).map(hTile).join('')}</div>
+ ${rare.length?`${sec('Rare & high value')}<div class="hscroll">${rare.map(hTile).join('')}</div>`:''}
+ ${sec('Collector’s Guide')}<div class="hscroll">${GUIDE.map(gcard).join('')}</div>
+ ${sec('Collectors worth following')}<div class="hscroll">${cols.map(colCard).join('')}</div>
+ <div class="pad muted xs" style="padding:10px 16px 24px;text-align:center">ToyScope is not affiliated with any toy maker or brand.</div>`}`};
+SCR.forsale=()=>{const mine=ITEMS.filter(i=>i.owner==='me'&&i.status==='sale');const all=[...mine,...ITEMS.filter(i=>i.owner!=='me'&&i.status==='sale'&&!USERS[i.owner].private)];
+ return hdrBack('For sale')+`<div class="pad muted small">Tap a toy and use Contact to ask or make an offer.</div><div class="grid2" style="padding-top:10px">${all.map(tileHTML).join('')}</div>`};
+function bgSheet(){sheet(()=>`<h3>Home background</h3><div class="muted small" style="margin-bottom:12px">Only you see this. Use your own photo — your shelf, your favourite piece.</div>
+ <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">${[0,1,2].map(v=>`<button onclick="S.bg=${v};LS.set('bg',${v});closeSheet()" style="border-radius:12px;overflow:hidden;aspect-ratio:1;border:2.5px solid ${S.bg===v?'var(--accent)':'transparent'}">${heroArt(v)}</button>`).join('')}</div>
+ <button class="btn pri full" style="margin-top:14px" onclick="$('bgin').click()">${ic('image',2,'width="18" height="18"')} Choose my own photo</button>
+ ${typeof S.bg==='string'?`<button class="btn sec2 full" style="margin-top:8px" onclick="S.bg=0;LS.set('bg',0);closeSheet()">Reset to default</button>`:''}`)}
+const colCard=u=>`<div class="card ccard" onclick="openUser('${u.id}')" style="cursor:pointer"><div style="display:flex;justify-content:center;margin-bottom:8px">${av(u.id,56)}</div><div style="font-weight:600;font-size:14px" class="ell">${u.name} ${verified(u.id)}</div><div class="muted xs ell">${u.collects.slice(0,2).join(' · ')}</div><div class="muted xs" style="margin-bottom:10px">${ITEMS.filter(i=>i.owner===u.id&&i.status==='sale').length} for sale</div><button class="btn sm ${S.follow.has(u.id)?'sec2':'pri'} full" onclick="event.stopPropagation();need(()=>fol('${u.id}'))">${S.follow.has(u.id)?t('followingB'):t('follow')}</button></div>`;
+SCR.discover=SCR.explore;SCR.home=SCR.explore;
+function tileHTML(i){return `<div class="tile" onclick="openItem('${i.id}')"><div class="art">${pic(i)}<div class="st">${stBadge(i.status)}</div>${i.photos&&i.photos.length>1?`<span style="position:absolute;right:6px;top:6px;background:rgba(0,0,0,.55);color:#fff;font-size:11px;font-weight:600;padding:2px 7px;border-radius:999px">1/${i.photos.length}</span>`:''}${i.rarity?`<div style="position:absolute;right:6px;bottom:6px"><span class="badge b-rare">Rare</span></div>`:''}</div><div class="meta"><div class="n">${esc(i.name)}</div><div class="row" style="justify-content:space-between;margin-top:4px"><span class="price small">${priceOf(i)}</span>${i.owner!=='me'?`<span class="muted xs ell" style="max-width:60px">@${USERS[i.owner].handle}</span>`:i.status==='sale'&&cur().s!=='folder'&&S.tab==='explore'&&!S.stack.length?`<span class="badge" style="border:1px solid var(--accent);color:var(--accent);padding:2px 7px">Yours</span>`:`<span class="muted xs">${i.owned?'Owned':i.year}</span>`}</div></div></div>`}
+function fol(id){S.follow.has(id)?S.follow.delete(id):(S.follow.add(id),toast('Following @'+USERS[id].handle));const st=$('screen').scrollTop;render();$('screen').scrollTop=st}
+function openUser(id){id==='me'?tab('me'):go('profile',{id})}
+function openItem(id){go('item',{id})}
+
+/* ---------- SCAN ---------- */
+const SLOTS=[['front','Front','Show the whole toy from the front.'],['back','Back','Turn it around. Show the back.'],['box','Box','Front of the box, if you have one.'],['acc','Accessories','Lay out weapons, parts and papers.']];
+S.shots={};S.slot='front';
+SCR.scan=()=>{const cur=SLOTS.find(x=>x[0]===S.slot);const sh=S.shots[S.slot];const n=Object.keys(S.shots).length;
+ return `<div class="hdr"><button class="ib" onclick="S.shots={};S.slot='front';back()">${ic('x')}</button><h2>${t('scan')}</h2><button class="ib" onclick="scanHelp()">${ic('help',1.8)}</button></div>
+ <div class="slots">${SLOTS.map(([k,l])=>`<div class="slot ${S.slot===k?'on':''}" onclick="S.slot='${k}';render()"><div class="b">${S.shots[k]?`<img src="${S.shots[k].dataUrl}">`:ic(k==='front'?'scan':k==='box'?'tag':k==='acc'?'more':'back',1.6,'width="20" height="20" style="opacity:.5"')}${k==='front'?'<span class="req">Needed</span>':''}</div>${l}</div>`).join('')}</div>
+ <div class="vf" style="aspect-ratio:4/4.3" onclick="pickPhoto()">${sh?`<img src="${sh.dataUrl}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">`:`<div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 40%,#2a2f3a,#0d0f14)"></div><div class="corners"><i></i><i></i><i></i><i></i></div>
+  <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;gap:8px;text-align:center;padding:30px">${ic('image',1.6,'width="40" height="40" style="opacity:.8"')}<div style="font-weight:600">${cur[1]}</div><div style="opacity:.7;font-size:13px">${cur[2]}</div></div>`}
+  <div style="position:absolute;left:12px;bottom:12px;right:12px;display:flex;justify-content:center"><span class="engine-pill" style="background:rgba(0,0,0,.45);color:#fff"><i></i>${engineLabel()}</span></div></div>
+ <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 24px 6px">
+  <button class="ib" onclick="tryDemo()" aria-label="Sample">${ic('bolt',1.8)}</button>
+  <button class="shutter" onclick="pickPhoto()" aria-label="Take photo"><i></i></button>
+  <button class="btn sm pri" style="height:42px;padding:0 16px" ${S.shots.front?'':'disabled'} onclick="identifyShots()">Identify${n>1?' · '+n:''}</button></div>
+ <div class="muted xs" style="text-align:center;padding:4px 30px 20px">Only the front is needed. More angles = more accurate.<br>${!S.signedIn?`${Math.max(0,3-S.anon)} free scans before you need an account`:S.plan==='pro'?'Unlimited scans':`${Math.max(0,5-S.scansToday)} free scans left today`} · <span class="link" onclick="tryDemo()" style="font-size:12px">No toy? Try a sample</span></div>`};
+function consent(fn){if(LS.get('aiok',false))return fn();sheet(()=>`<div class="row" style="gap:10px;margin-bottom:12px">${ic('bolt',2,'width="24" height="24" style="color:var(--accent)"')}<h3 style="margin:0">Your photos are analysed by AI</h3></div>
+ <div class="acc" style="align-items:flex-start;border:0">${ic('image',1.8,'width="20" height="20" style="flex:none;color:var(--accent)"')}<span>To identify your toy and estimate its value, the photos you take are sent to our servers.</span></div>
+ <div class="acc" style="align-items:flex-start;border:0">${ic('globe',1.8,'width="20" height="20" style="flex:none;color:var(--accent)"')}<span>They are processed by a third-party AI service (${window.TS_SERVER?(S.eng==='accurate'?'Google Gemini':'OpenAI GPT')+', through OpenRouter':S.key?'OpenAI via OpenRouter':'Anthropic’s Claude'}) to create your result.</span></div>
+ <div class="acc" style="align-items:flex-start;border:0">${ic('trash',1.8,'width="20" height="20" style="flex:none;color:var(--accent)"')}<span>You can delete your account and data any time in Settings.</span></div>
+ <div class="small" style="margin:8px 0 16px">${legalLink('privacy','Read our Privacy Policy')}</div>
+ <button class="btn pri full" onclick="LS.set('aiok',true);S.sheet=null;render();(${fn.toString()})()">Agree & continue</button><button class="btn full" style="margin-top:6px" onclick="closeSheet()">Not now</button>`)}
+function identifyShots(){return consent(()=>identifyShots2())}
+function identifyShots2(){if(!S.signedIn&&S.anon>=3)return signup('You’ve used your 3 free scans');if(S.plan!=='pro'&&S.scansToday>=5)return paywall();
+ const f=S.shots.front;const extra=SLOTS.slice(1).filter(([k])=>S.shots[k]).map(([k,l])=>({label:l,...S.shots[k]}));S.stack.pop();S.shots={};S.slot='front';startScan(f.dataUrl,f.blob,false,extra)}
+function scanHelp(){sheet(()=>`<h3>Get a better result</h3><div class="muted small" style="margin-bottom:12px">The AI only sees what is in the photo.</div>${['One toy per scan','Front is enough — Back, Box and Accessories make it more accurate','Plain background, daylight','Photograph stamps on the base or feet','Unsure results show alternatives'].map(x=>`<div class="acc"><span class="ok">✓</span>${x}</div>`).join('')}<button class="btn pri full" style="margin-top:16px" onclick="closeSheet()">Got it</button>`)}
+function pickPhoto(){$('filein').value='';$('filein').click()}
+$('filein').addEventListener('change',async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;try{const {dataUrl,blob}=await resize(f,1024);S.shots[S.slot]={dataUrl,blob};const nx=SLOTS.find(([k])=>!S.shots[k]);if(nx)S.slot=nx[0];render();toast(S.shots.front&&Object.keys(S.shots).length===1?'Front added · add more angles or tap Identify':'Photo added')}catch(err){toast('Could not read that photo — try another');}});
+$('bgin').addEventListener('change',async e=>{const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;try{const {dataUrl}=await resize(f,1200);S.bg=dataUrl;LS.set('bg',dataUrl);S.sheet=null;render();toast('Background updated')}catch(err){toast('Could not read that photo')}});
+$('avatarin').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;const img=new Image();img.onload=()=>{const sz=Math.min(img.width,img.height);const c=document.createElement('canvas');c.width=c.height=400;c.getContext('2d').drawImage(img,(img.width-sz)/2,(img.height-sz)/2,sz,sz,0,0,400,400);USERS.me.photo=c.toDataURL('image/jpeg',.85);LS.set('avatar',USERS.me.photo);S.sheet=null;render();toast('Profile photo updated')};img.onerror=()=>toast('Could not read that photo');img.src=URL.createObjectURL(f)});
+$('albumin').addEventListener('change',async e=>{const fs=[...(e.target.files||[])];e.target.value='';let n=0;for(const f of fs){if(ALBUMS.me.length>=20)break;try{const {dataUrl}=await resize(f,1200);ALBUMS.me.unshift({id:'a'+Date.now()+n,img:dataUrl,cap:''});n++}catch(err){}}render();toast(n+' photo'+(n>1?'s':'')+' added')});
+$('sellin').addEventListener('change',async e=>{const fs=[...(e.target.files||[])];e.target.value='';if(!fs.length||!S.sell)return;toast('Adding '+fs.length+' photo'+(fs.length>1?'s':'')+'…');for(const f of fs){if(S.sell.photos.length>=12)break;try{const {dataUrl}=await resize(f,1000);S.sell.photos.push(dataUrl)}catch(err){}}if(S.sell.demoArt&&S.sell.photos.length)S.sell.demoArt=null;keepScroll()});
+$('postin').addEventListener('change',async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;try{const {dataUrl}=await resize(f,1200);S.np.img=dataUrl;render()}catch(err){toast('Could not read that photo')}});
+function resize(file,max){return new Promise((res,rej)=>{const img=new Image();img.onerror=()=>rej(new Error('img'));setTimeout(()=>rej(new Error('timeout')),15000);img.onload=()=>{let w=img.width,h=img.height;const r=Math.min(1,max/Math.max(w,h));w=Math.round(w*r);h=Math.round(h*r);const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);const dataUrl=c.toDataURL('image/jpeg',.85);c.toBlob(b=>res({dataUrl,blob:b}),'image/jpeg',.85)};img.src=URL.createObjectURL(file)})}
+
+const FACTS=['Popy’s Chogokin line started in 1974. “Chogokin” means super alloy.','Jumbo Machinder robots stood about 60 cm tall.','Hot Wheels launched in 1968. Early cars have red-stripe “Redline” tires.','Kenner’s first Star Wars figures reached stores in 1978.','An original box can be worth as much as the toy inside.','Maker stamps on the feet or base help tell originals from reissues.'];
+SCR.scanning=({img})=>`<div style="height:100%;position:relative;background:#0d0f14;color:#fff;overflow:hidden"><div id="playground" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:1"></div>
+ <div style="position:relative;z-index:2;height:100%;display:flex;flex-direction:column">
+ <div class="hdr" style="background:transparent"><button class="ib" style="color:#fff" onclick="cancelScan()">${ic('x')}</button><h2 style="color:#fff;line-height:1.2">Identifying…<div style="font-size:12px;font-weight:500;opacity:.6"><span id="timer">0.0s</span> · ${engineLabel()}</div></h2><div style="width:38px"></div></div>
+ <div style="width:210px;height:210px;margin:20px auto 0;border-radius:26px;overflow:hidden;position:relative;box-shadow:0 0 0 4px rgba(255,255,255,.08),0 20px 50px rgba(0,0,0,.5)">${img?`<img src="${img}" style="width:100%;height:100%;object-fit:cover">`:art(['giant','#B91C1C','#F8FAFC','#1F2937'])}<div class="scanline"></div></div>
+ <div style="padding:26px 30px 0;display:flex;flex-direction:column;gap:11px;font-size:14.5px" id="steps">${scanSteps(0)}</div>
+ <div id="fact" style="margin:22px 24px 0;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.07);font-size:13px;line-height:1.45;opacity:.9"><b style="display:block;font-size:11px;letter-spacing:.06em;opacity:.7;margin-bottom:3px">DID YOU KNOW?</b>${FACTS[Math.floor(Math.random()*FACTS.length)]}</div>
+ </div></div>`;
+let pgT=null,pgLast='';
+const bare=a=>art([a[0],a[1],a[2],'transparent']).replace(/<defs>.*?<\/defs>/,'').replace(/<rect width="200" height="200"[^>]*\/>/g,'').replace(/<ellipse[^>]*\/>/,'');
+const PAL=[['#DC2626','#1D4ED8'],['#1E40AF','#E5E7EB'],['#EAB308','#334155'],['#15803D','#BBF7D0'],['#7C3AED','#C4B5FD'],['#0891B2','#F59E0B']];
+const pick=a=>a[Math.floor(Math.random()*a.length)],rnd=(a,b)=>a+Math.random()*(b-a);
+const TANK=c=>`<svg width="124" height="72" viewBox="0 0 120 70"><rect x="8" y="44" width="104" height="20" rx="10" fill="#1F2937"/>${[22,42,62,82,98].map(x=>`<circle cx="${x}" cy="54" r="6" fill="#6B7280"/>`).join('')}<rect x="16" y="28" width="88" height="18" rx="5" fill="${c}"/><rect x="40" y="14" width="36" height="17" rx="6" fill="${c}"/><rect x="72" y="18" width="44" height="6" rx="3" fill="#374151"/></svg>`;
+const BOOM=`<svg width="90" height="90" viewBox="0 0 100 100"><polygon points="50,2 61,32 95,22 70,48 98,70 63,68 55,98 44,70 10,86 30,58 2,40 36,36" fill="#F97316"/><polygon points="50,22 57,40 76,36 62,52 76,66 56,62 50,80 44,62 26,68 38,52 24,38 43,40" fill="#FDE047"/></svg>`;
+const STAR=`<svg width="34" height="34" viewBox="0 0 40 40"><polygon points="20,0 25,14 40,14 28,23 33,38 20,29 7,38 12,23 0,14 15,14" fill="#FDE047"/></svg>`;
+function spawn(){const pg=$('playground');if(!pg)return stopPlay();const W=pg.clientWidth,H=pg.clientHeight;if(pg.querySelectorAll('.actor.big').length>=2)return;
+ let t=pick(['fight','tank','dance','peek'].filter(x=>x!==pgLast));pgLast=t;const el=document.createElement('div');el.className='actor big';let dur=3600;
+ const fb=$('fact');const zt=fb?fb.offsetTop+fb.offsetHeight+14:H*.6,zb=H-14;const yBand=(h)=>rnd(zt,Math.max(zt,zb-h));
+ if(t==='fight'){const [a,b]=pick(PAL),[c,d]=pick(PAL);el.style.cssText=`left:${rnd(8,W-218)}px;top:${yBand(100)}px;width:210px;height:100px;animation:fio ${dur}ms both`;
+  el.innerHTML=`<div style="position:absolute;left:0;top:0;animation:punchA .7s infinite"><svg width="98" height="98" viewBox="20 10 160 170">${bare(['robot',a,b])}</svg></div><div style="position:absolute;right:0;top:0;animation:punchB .7s infinite"><div style="transform:scaleX(-1)"><svg width="98" height="98" viewBox="20 10 160 170">${bare(['giant',c,d])}</svg></div></div><div style="position:absolute;left:88px;top:22px;animation:spark .7s infinite">${STAR}</div>`}
+ else if(t==='dance'){const [a,b]=pick([['#DB2777','#FDE68A'],['#7C3AED','#78350F'],['#0EA5E9','#111827']]);dur=3400;el.style.cssText=`left:${rnd(8,W-130)}px;top:${yBand(116)}px;width:120px;height:116px;animation:fio ${dur}ms both`;
+  el.innerHTML=`<div style="animation:bob .6s ease-in-out infinite"><svg width="106" height="106" viewBox="20 10 160 170">${bare(['doll',a,b])}</svg></div>${['♪','♫','♪'].map((n,k)=>`<span style="position:absolute;left:${70+k*6}px;top:${10+k*8}px;font-size:${16+k*3}px;color:#FDE68A;animation:note 1.2s ${k*.4}s infinite">${n}</span>`).join('')}`}
+ else if(t==='tank'){const fromL=Math.random()<.5;const y=yBand(90);dur=4200;el.style.cssText=`left:0;top:${y}px;width:${W}px;height:90px`;
+  el.innerHTML=`<div style="position:absolute;top:20px;left:${fromL?-100:W}px;transition:left ${dur}ms linear;animation:shake .25s infinite">${fromL?TANK(pick(['#4D7C0F','#78716C','#92400E'])):`<div style="transform:scaleX(-1)">${TANK(pick(['#4D7C0F','#78716C','#92400E']))}</div>`}</div>`;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{const tk=el.firstChild;if(tk)tk.style.left=(fromL?W+20:-120)+'px'}));
+  setTimeout(()=>{if(!el.isConnected)return;const b=document.createElement('div');b.className='actor';b.style.cssText=`left:${rnd(W*.2,W*.7)}px;top:${y-10}px;animation:boom .9s ease-out both`;b.innerHTML=BOOM;pg.appendChild(b);setTimeout(()=>b.remove(),950)},dur*.45)}
+ else{const side=pick(['L','R','B']);const [a,b]=pick([['#15803D','#BBF7D0'],['#475569','#F59E0B'],['#7C3AED','#FDE68A']]);dur=3200;const sz=120;
+  el.style.cssText=side==='B'?`left:${rnd(10,W-sz-10)}px;bottom:-6px;width:${sz}px;height:${sz}px;animation:peekB ${dur}ms ease-in-out both`:`${side==='L'?'left':'right'}:0;top:${rnd(70,Math.max(80,zt-sz))}px;width:${sz}px;height:${sz}px;animation:peek${side} ${dur}ms ease-in-out both`;
+  el.innerHTML=`<div style="${side==='R'?'transform:scaleX(-1)':''}"><svg width="${sz}" height="${sz}" viewBox="20 10 160 170">${bare(['kaiju',a,b])}</svg></div>`}
+ pg.appendChild(el);setTimeout(()=>el.remove(),dur+200)}
+function season(pg){const m=new Date().getMonth();const kind=[11,0,1].includes(m)?'snow':[2,3,4].includes(m)?'bloom':[5,6,7].includes(m)?'spark':'leaf';
+ for(let k=0;k<14;k++){const p=document.createElement('div');p.className='actor';const sz=rnd(8,16);const d=rnd(6,11);
+  p.style.cssText=`left:${rnd(0,100)}%;top:0;--dx:${rnd(-60,60)}px;animation:fall ${d}s linear ${-rnd(0,d)}s infinite;opacity:.75`;
+  p.innerHTML=kind==='snow'?`<div style="width:${sz*.6}px;height:${sz*.6}px;border-radius:50%;background:#fff"></div>`:kind==='bloom'?`<div style="width:${sz}px;height:${sz*.7}px;border-radius:50% 0;background:#F9A8D4"></div>`:kind==='spark'?`<div style="width:${sz*.4}px;height:${sz*.4}px;border-radius:50%;background:#FDE047;box-shadow:0 0 8px #FDE047"></div>`:`<svg width="${sz}" height="${sz}" viewBox="0 0 20 20"><path d="M10 1C4 6 3 12 10 19 17 12 16 6 10 1z" fill="${pick(['#EA580C','#D97706','#B45309','#DC2626'])}"/></svg>`;
+  pg.appendChild(p)}}
+function startPlay(){stopPlay();const pg=$('playground');if(!pg)return;season(pg);setTimeout(spawn,400);pgT=setInterval(()=>{if(!$('playground'))return stopPlay();spawn()},2400);
+ S._factT=setInterval(()=>{const f=$('fact');if(!f)return clearInterval(S._factT);f.innerHTML='<b style="display:block;font-size:11px;letter-spacing:.06em;opacity:.7;margin-bottom:3px">DID YOU KNOW?</b>'+pick(FACTS)},6000)}
+function stopPlay(){clearInterval(pgT);pgT=null;clearInterval(S._factT)}
+const STEPS=['Reading shapes, colors and markings','Matching maker, series and year','Grading condition & accessories','Pricing every condition tier'];
+function scanSteps(n){return STEPS.map((s,i)=>`<div class="row" style="opacity:${i<=n?1:.35}">${i<n?'<span style="color:#4ADE80">✓</span>':i===n?'<span class="spin" style="border-color:#333;border-top-color:#fff"></span>':'<span style="width:18px;display:inline-block">·</span>'}<span>${s}</span></div>`).join('')}
+let scanAbort=null,scanTimer=null;
+function cancelScan(){if(scanAbort)scanAbort.abort();clearInterval(scanTimer);stopPlay();back()}
+async function startScan(dataUrl,blob,demo,extra){extra=extra||[];
+ S.stack.push({s:'scanning',p:{img:dataUrl}});render(true);startPlay();
+ const t0=performance.now();let step=0;
+ scanTimer=setInterval(()=>{const el=$('timer');if(!el)return;const s=(performance.now()-t0)/1000;el.textContent=s.toFixed(1)+'s';const ns=Math.min(3,Math.floor(s/2.6));if(ns!==step){step=ns;const st=$('steps');if(st)st.innerHTML=scanSteps(step)}},100);
+ let r,err;
+ try{
+  if(demo){await new Promise(r=>setTimeout(r,2600));r=DEMO()}
+  else r=await identify(dataUrl,blob,extra);
+ }catch(e){err=e}
+ clearInterval(scanTimer);stopPlay();
+ if(cur().s!=='scanning')return;
+ S.stack.pop();
+ if(err){render();return sheet(()=>`<h3>Scan didn’t finish</h3><div class="muted small" style="margin:6px 0 14px">${esc(err.message||err)}</div><button class="btn pri full" onclick="closeSheet()">OK</button>`)}
+ r.ms=performance.now()-t0;r.img=demo?null:dataUrl;r.extra=extra.map(x=>({label:x.label,dataUrl:x.dataUrl}));r.engine=demo?'Demo result':engineLabel();
+ S.scansToday++;if(!S.signedIn){S.anon++;LS.set('anon',S.anon)}r.when='Just now';S.recent.unshift(r);S.recent=S.recent.slice(0,20);S.lastResult=r;go('result');
+}
+function tryDemo(){if(!S.signedIn&&S.anon>=3)return signup('You’ve used your 3 free scans');startScan(null,null,true)}
+
+/* ---------- ACCOUNT GATE ---------- */
+S.signedIn=LS.get('signedIn',false);S.anon=LS.get('anon',0);
+function need(fn){if(S.signedIn)return fn();S.after=fn;signup()}
+function signupBlocked(){return sheet(()=>`<h3>Sorry, you can’t create an account</h3><div class="muted small" style="margin:6px 0 16px">ToyScope is for people 13 and older.</div><button class="btn pri full" onclick="closeSheet()">OK</button>`)}
+function signup(title){if(S.blocked)return signupBlocked();sheet(()=>`<div style="text-align:center;padding-top:4px"><div class="logo" style="font-size:26px">Toy<b>Scope</b></div><h3 style="margin-top:8px">${title||'Create a free account'}</h3><div class="muted small" style="margin:4px 0 16px">Save toys into folders, sell, and follow collectors. Free — no ads, ever.</div></div>
+ <button class="btn full" style="background:#000;color:#fff" onclick="doSignup()">Continue with Apple</button>
+ <button class="btn out full" style="margin-top:8px" onclick="doSignup()">Continue with Google</button>
+ <button class="btn sec2 full" style="margin-top:8px" onclick="doSignup()">Continue with email</button>
+ <div class="muted xs" style="text-align:center;margin-top:12px">You must be 13 or older. ${legalLink('terms','Terms')} · ${legalLink('privacy','Privacy')}</div>`)}
+function doSignup(){ageSheet()}
+const _fo=finishOnboard;finishOnboard=function(skip){_fo(skip);if(S._afterOnboard){const f=S._afterOnboard;S._afterOnboard=null;setTimeout(f,50)}};
+
+/* ---------- AI ENGINE ---------- */
+S.tier=LS.get('tier','complex');S.eng=LS.get('eng','accurate');
+function engineLabel(){if(window.TS_SERVER)return S.eng==='accurate'?'Gemini · Accurate':'GPT · Fast';if(S.key)return 'GPT-5.4-mini · OpenRouter';if(S.sample)return S.tier==='complex'?'Claude · Smart':'Claude · Fast';return 'Demo mode'}
+const LANGNAME={en:'English',zh:'Traditional Chinese (Taiwan)',ja:'Japanese',ko:'Korean',fr:'French',es:'Spanish',de:'German'};
+function PROMPT(){return ''}
+async function serverIdentify(engine,images){
+ scanAbort=new AbortController();const to=setTimeout(()=>scanAbort.abort(),90000);let res;
+ try{res=await fetch('/api/identify',{method:'POST',signal:scanAbort.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify({engine,lang:S.lang,images})})}
+ catch(e){clearTimeout(to);throw new Error(e.name==='AbortError'?'Timed out after 90s.':'No connection. Check your internet and try again.')}
+ if(!res.ok){clearTimeout(to);const j=await res.json().catch(()=>({}));throw new Error(j.error||('Server error '+res.status))}
+ const rd=res.body.getReader(),dec=new TextDecoder();let buf='',out='';
+ try{while(true){const {done,value}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});let k;
+  while((k=buf.indexOf('\n'))>=0){const line=buf.slice(0,k).trim();buf=buf.slice(k+1);if(!line.startsWith('data:'))continue;const d=line.slice(5).trim();if(d==='[DONE]')continue;
+   try{const j=JSON.parse(d);if(j.error)throw new Error(j.error.message||'AI error');out+=(j.choices&&j.choices[0]&&j.choices[0].delta&&j.choices[0].delta.content)||''}catch(err){if(err.message&&!/JSON/.test(err.message))throw err}}}}
+ finally{clearTimeout(to)}
+ return out}
+async function identify(dataUrl,blob,extra){extra=extra||[];S._labels=['Front',...extra.map(x=>x.label)];
+ if(window.TS_SERVER){const imgs=[{label:'Front',url:dataUrl},...extra.map(x=>({label:x.label,url:x.dataUrl}))];let raw;
+  try{raw=await serverIdentify(S.eng,imgs);if(!/\{[\s\S]*\}/.test(raw))throw new Error('empty')}
+  catch(e){if(S.eng==='accurate'&&e.message!=='Timed out after 90s.'&&!/connection/.test(e.message)){raw=await serverIdentify('fast',imgs)}else throw e}
+  const m=String(raw||'').match(/\{[\s\S]*\}/);if(!m)throw new Error('The AI reply was not readable. Try again.');return normalize(JSON.parse(m[0]))}
+ let raw;
+ if(S.key){
+  scanAbort=new AbortController();const to=setTimeout(()=>scanAbort.abort(),60000);
+  let res;
+  try{res=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',signal:scanAbort.signal,headers:{'Authorization':'Bearer '+S.key,'Content-Type':'application/json','X-Title':'ToyScope prototype'},body:JSON.stringify({model:'openai/gpt-5.4-mini',response_format:{type:'json_object'},max_tokens:3000,messages:[{role:'user',content:[{type:'text',text:PROMPT()},{type:'text',text:'Photo 1: Front'},{type:'image_url',image_url:{url:dataUrl}},...extra.flatMap((x,k)=>[{type:'text',text:'Photo '+(k+2)+': '+x.label},{type:'image_url',image_url:{url:x.dataUrl}}])]}]})})}
+  catch(e){clearTimeout(to);throw new Error(e.name==='AbortError'?'Timed out after 60s.':'Could not reach OpenRouter. If you opened this inside Claude, the page blocks outside connections — open the downloaded file in Chrome, or remove the key in Settings to use the built-in engine.')}
+  clearTimeout(to);
+  const j=await res.json().catch(()=>({}));
+  if(!res.ok)throw new Error((j.error&&j.error.message)||('OpenRouter error '+res.status));
+  raw=j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content;
+ }else if(S.sample){
+  const out=await Promise.race([S.sample(PROMPT(),{images:[blob,...extra.map(x=>x.blob)],modelTier:S.tier}),new Promise((_,rej)=>setTimeout(()=>rej(new Error('The built-in engine did not answer in 120s. Try again.')),120000))]).catch(e=>{throw new Error(e&&e.code==='not_granted'?'Permission to use Claude was declined. Allow it when asked, then scan again.':(e&&e.message)||'Scan failed')});raw=out.text;
+ }else{await new Promise(r=>setTimeout(r,2000));return DEMO()}
+ const m=String(raw||'').match(/\{[\s\S]*\}/);if(!m)throw new Error('The AI reply was not readable. Try again.');
+ return normalize(JSON.parse(m[0]));
+}
+function normalize(a){
+ const gi=Math.max(0,TIERS.findIndex(x=>x.k===a.condition_grade));
+ const tiers={};TIERS.forEach(x=>{const v=a.price_tiers_usd&&a.price_tiers_usd[x.k];tiers[x.k]=Array.isArray(v)?v:null});
+ return {name:a.name_app||a.name_en||'Unknown toy',name_en:a.name_en,origin:a.name_origin,country:a.origin_country,brand:a.brand,series:a.series,year:a.year,category:a.category,
+  collectible:a.is_collectible!==false,repro:!!a.is_reproduction_or_custom,rarity:a.rarity||'common',conf:+a.confidence||0,cands:(a.candidates||[]).filter(c=>c&&c.name),
+  grade:gi,reasons:(a.condition_reasons||[]).filter(Boolean),accExp:(a.accessories_expected||[]).filter(Boolean),accVis:(a.accessories_visible||[]).filter(Boolean),
+  low:a.price_low_usd,high:a.price_high_usd,tiers,reproVal:a.reproduction_value_usd,history:a.history,tips:(a.buying_tips||[]).filter(Boolean),reproSigns:(a.reproduction_signs||[]).filter(Boolean),notes:a.notes,category:a.category,itemNo:a.item_number||null,itemSrc:a.item_number_source||null,cd:a.condition_details||null};
+}
+function DEMO(){return normalize({name_app:S.lang==='zh'?'蓋特 1 號 巨大機器人（Jumbo Machinder）':'Getter-1 Jumbo Machinder',name_en:'Getter-1 Jumbo Machinder',name_origin:'ゲッター1 ジャンボマシンダー',origin_country:'Japan',brand:'Popy',series:'Getter Robo',year:'1975',category:'Large polyethylene robot',is_collectible:true,rarity:'uncommon',confidence:.86,candidates:[{name:'Getter-1 Jumbo Machinder',confidence:.86},{name:'Getter-1 (later reissue)',confidence:.1}],condition_grade:'loose_good',condition_reasons:['Loose, no box','Light paint wear on chest','Fist launcher missing','Plastic not yellowed'],accessories_expected:['Missile fists ×2','Getter Tomahawk','Instruction sheet'],accessories_visible:['Missile fists ×2'],price_low_usd:380,price_high_usd:520,price_tiers_usd:{broken:[60,110],loose_poor:[180,260],loose_good:[380,520],loose_complete:[520,700],boxed_opened:[800,1100],mint_in_box:[1400,2000]},history:'Popy launched the Jumbo Machinder line in 1973 — 60 cm polyethylene robots that kids could actually play with. Getter-1 came out alongside the 1974–75 Getter Robo TV series and is one of the core early releases.',buying_tips:['Check the shoulder joints for stress cracks','Original fists have a maker stamp inside','Many sellers mix in reissue parts — compare the plastic color'],reproduction_signs:[],notes:'',item_number:null,item_number_source:null,condition_details:{paint:{score:7,note:'Light wear on chest'},structure:{score:8,note:'Joints firm, no cracks'},plastic:{score:8,note:'No yellowing'},stickers:{score:6,note:'Edges slightly lifting'},accessories:{score:5,note:'One fist launcher missing'},packaging:{score:null,note:'No box in photos'}}})}
+
+const CONF=[['A','High confidence — strong match'],['B','Likely match'],['C','Possible match — check the alternatives'],['D','Low confidence — add more angles'],['E','Very unsure — try another photo']];
+const confIdx=c=>c>=.85?0:c>=.7?1:c>=.55?2:c>=.4?3:4;
+const CDN={paint:['Paint','How much of the original paint is left.'],structure:['Structure','Cracks, stress marks, loose or broken joints.'],plastic:['Plastic','Yellowing, fading, sticky or warped plastic.'],stickers:['Stickers & decals','Applied, peeling or missing stickers.'],accessories:['Accessories','How complete it is compared with the original release.'],packaging:['Packaging','Box, inserts and instructions.']};
+function infoTip(k){const d=CDN[k]||['Confidence','How sure the AI is about which toy this is. A is very sure, E is a guess.'];sheet(()=>`<h3>${d[0]}</h3><div class="muted small" style="margin:6px 0 14px">${d[1]}</div><button class="btn pri full" onclick="closeSheet()">OK</button>`)}
+SCR.result=()=>{const r=S.lastResult;if(!r)return SCR.home();
+ const low=r.conf<.6;const grail=['grail','very_rare'].includes(r.rarity);
+ const exp=r.accExp;const vis=new Set(r.accVis.map(x=>x.toLowerCase()));const ci=confIdx(r.conf);
+ const segs=n=>`<div class="segs">${[...Array(10)].map((_,k)=>`<i class="${n!=null&&k<n?'on':''}"></i>`).join('')}</div>`;
+ const det=[['Name',r.name],['Original name',r.origin],['Maker',r.brand],['Series',r.series],['Year',r.year],['Item no.',r.itemNo?`${esc(r.itemNo)}<span class="src ${r.itemSrc==='photo'?'p':'a'}">${r.itemSrc==='photo'?'From photo':'AI · verify'}</span>`:'<span class="muted" style="font-weight:500">Not visible</span>',true],['Condition',tierName(r.grade)],['Rarity',(r.rarity||'common').replace('_',' ')],['Category',r.category]].filter(x=>x[1]);
+ return `<div class="rhero">${r.img?`<img src="${r.img}">`:art(r.art||['giant','#B91C1C','#F8FAFC','#FEF2F2'])}<div class="shade"></div>
+  <div class="bar"><button class="ib" onclick="back()">${ic('x')}</button><button class="ib" onclick="sheet(reportSheet)">${ic('flag',1.8)}</button></div>
+  <div class="ttl"><span class="engine-pill" style="background:rgba(0,0,0,.5);color:#fff;margin-bottom:8px"><i></i>${(r.ms/1000).toFixed(1)}s · ${esc(r.engine)}</span><div class="hl">${esc(r.name)}</div><div style="opacity:.85;font-size:14px;margin-top:4px">${[r.series,r.brand,r.year].filter(Boolean).map(esc).join(' · ')}</div></div></div>
+ <div class="pad" style="padding-top:12px;padding-bottom:120px">
+ ${r.extra&&r.extra.length?`<div class="thumbs" style="margin-bottom:8px">${r.extra.map(x=>`<div class="t" style="width:56px;height:56px"><img src="${x.dataUrl}"></div>`).join('')}<div class="muted xs" style="align-self:center">+${r.extra.length} angle${r.extra.length>1?'s':''} used</div></div>`:''}
+ ${grail?`<div class="warn y" style="margin-bottom:10px"><div><b>Very rare · High-value item</b><br>Have it authenticated by an expert before buying or selling.${r.reproVal?` Reproductions usually sell for about ${money(r.reproVal)}.`:''}</div></div>`:''}
+ ${low&&r.collectible?`<div class="warn r" style="margin-bottom:10px">${ic('info',2,'width="20" height="20" style="flex:none"')}<div><b>Not sure about this one</b><br>Check the alternatives below, or add Back and Box photos.</div></div>`:''}
+ ${r.repro?`<div class="warn y" style="margin-bottom:10px">${ic('info',2,'width="20" height="20" style="flex:none"')}<div><b>May be a reproduction or custom</b>${r.reproSigns.length?'<br>'+r.reproSigns.map(esc).join(' · '):''}</div></div>`:''}
+ ${r.origin?`<div class="namebox"><span class="cc">${flagOf(r.country)}</span><div class="grow"><div class="xs muted">Original name${r.country?' · '+esc(r.country):''}</div><div style="font-weight:600" lang="ja">${esc(r.origin)}</div></div><button class="copyb" onclick="copy(${esc(JSON.stringify(r.origin))})">${ic('copy')}</button></div>`:''}
+ ${r.name_en&&r.name_en!==r.name?`<div class="namebox" style="margin-top:8px"><span class="cc">EN</span><div class="grow"><div class="xs muted">English</div><div style="font-weight:600">${esc(r.name_en)}</div></div><button class="copyb" onclick="copy(${esc(JSON.stringify(r.name_en))})">${ic('copy')}</button></div>`:''}
+ ${r.collectible?gaugeCard(r):`<div class="card" style="padding:16px;margin-top:14px"><div style="font-weight:700;margin-bottom:4px">Not a collectible toy</div><div class="muted small">We only price collectible toys. ${esc(r.notes||'')}</div></div>`}
+ <div class="sec" style="padding:18px 0 6px"><h3>Match & condition</h3><span class="muted xs">Swipe</span></div>
+ <div class="mcards">
+  <div class="mcard"><div class="h">Confidence<button onclick="infoTip('conf')" class="muted">${ic('info',1.8,'width="20" height="20"')}</button></div><div class="n">${CONF[ci][1]}</div><div class="grades">${CONF.map((c,k)=>`<b class="${k===ci?'on':''}" style="${k===ci&&k>1?`background:${k===2?'var(--warn)':'var(--bad)'}`:''}">${c[0]}</b>`).join('')}</div></div>
+  ${r.collectible&&r.cd?Object.keys(CDN).filter(k=>r.cd[k]).map(k=>{const c=r.cd[k];return `<div class="mcard"><div class="h">${CDN[k][0]}<button onclick="infoTip('${k}')" class="muted">${ic('info',1.8,'width="20" height="20"')}</button></div><div class="n">${esc(c.note||'')}</div><div class="sc">${c.score!=null?c.score+'<span class="muted" style="font-size:16px">/10</span>':'—'}</div>${segs(c.score)}</div>`}).join(''):''}
+ </div>
+ ${r.collectible&&r.reasons.length?`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">${r.reasons.map(x=>`<span class="chip wrap">${esc(x)}</span>`).join('')}</div>`:''}
+ ${r.cands.length>1?`<div class="sec" style="padding:18px 0 6px"><h3>Is it one of these?</h3></div><div class="card" style="padding:4px 14px">${r.cands.map((c,i)=>`<div class="acc" style="justify-content:space-between"><span>${i===0?'✓ ':''}${esc(c.name)}</span><span class="muted small">${['A','B','C','D','E'][confIdx(+c.confidence||0)]}</span></div>`).join('')}</div>`:''}
+ ${exp.length?`<div class="sec" style="padding:18px 0 6px"><h3>${t('acc')}</h3><span class="muted xs">${exp.filter(x=>vis.has(x.toLowerCase())).length}/${exp.length} visible</span></div><div class="card" style="padding:4px 14px">${exp.map(x=>{const ok=vis.has(x.toLowerCase());return `<div class="acc"><span class="${ok?'ok':'no'}">${ok?'✓':'✗'}</span><span class="grow">${esc(x)}</span><span class="muted xs">${ok?'In photo':'Missing'}</span></div>`}).join('')}</div>`:''}
+ ${r.collectible?ladder(r):''}
+ <div class="sec" style="padding:18px 0 6px"><h3>Toy details</h3><button class="ib" style="width:34px;height:34px;background:var(--surface2)" onclick="editDetails()" aria-label="Edit">${ic('tag',1.8,'width="16" height="16"')}</button></div>
+ <div class="dtable">${det.map(([k,v,raw])=>`<div class="r"><span>${k}</span><span>${raw?v:esc(v)}</span></div>`).join('')}</div>
+ ${r.edited?`<div class="muted xs" style="margin-top:6px">You corrected these details. Thanks — it helps everyone.</div>`:''}
+ ${r.history?`<div class="sec" style="padding:18px 0 6px"><h3>${t('history')}</h3></div><div class="card" style="padding:14px;font-size:14.5px;line-height:1.55">${esc(r.history)}</div>`:''}
+ ${r.tips.length?`<div class="sec" style="padding:18px 0 6px"><h3>${t('tips')}</h3></div><div class="card" style="padding:4px 14px">${r.tips.map(x=>`<div class="acc"><span style="color:var(--accent)">●</span><span>${esc(x)}</span></div>`).join('')}</div>`:''}
+ <div class="card" style="padding:16px;margin-top:18px;text-align:center">${r.fb?`<div style="font-weight:700">Thanks for the feedback</div><div class="muted small">${r.fb==='yes'?'Glad it helped.':'We’ll use it to improve this result.'}</div>`:`<div style="font-weight:700;font-size:16px">Are you happy with this result?</div><div class="fb"><button class="btn out" onclick="S.lastResult.fb='yes';keepScroll();toast('Thanks!')">${ic('check',2,'width="18" height="18"')} Yes</button><button class="btn out" onclick="S.lastResult.fb='no';sheet(reportSheet)">${ic('x',2,'width="18" height="18"')} No</button></div>`}</div>
+ <div class="muted xs" style="margin-top:14px;text-align:center">AI estimate from your photos. Prices are guides, not offers.</div>
+ </div>
+ <div style="position:sticky;bottom:0;padding:12px 16px 14px;background:linear-gradient(transparent,var(--bg) 22%)"><div class="rbar">
+ <button onclick="S.stack=[];go('scan')">${ic('scan',2)}Scan next</button>
+ <button class="pri" onclick="need(()=>saveSheet('result'))">${ic('bookmark',2)}Save</button>
+ <button onclick="needAdult(()=>openSell('result'),'Selling')">${ic('tag',2)}Sell</button></div></div>`};
+function editDetails(){const r=S.lastResult;sheet(()=>`<h3>Correct the details</h3><div class="muted small" style="margin-bottom:6px">Fix anything the AI got wrong.</div>
+ ${[['name','Name',r.name],['origin','Original name',r.origin],['brand','Maker',r.brand],['series','Series',r.series],['year','Year',r.year],['itemNo','Item no.',r.itemNo]].map(([k,l,v])=>`<label class="lbl">${l}</label><input class="field" data-k="${k}" value="${esc(v||'')}">`).join('')}
+ <button class="btn pri full" style="margin-top:16px" onclick="document.querySelectorAll('.sheet [data-k]').forEach(i=>{S.lastResult[i.dataset.k]=i.value.trim()||null});if(S.lastResult.itemNo)S.lastResult.itemSrc='photo';S.lastResult.edited=true;closeSheet();toast('Saved — thanks for the correction')">Save</button>`)}
+function flagOf(c){c=(c||'').toLowerCase();return c.includes('japan')||c.includes('日本')?'JP':c.includes('united states')||c==='usa'||c.includes('美國')?'US':c.includes('german')?'DE':c.includes('korea')?'KR':c.includes('hong kong')?'HK':c.includes('china')?'CN':c.includes('france')?'FR':c.includes('united kingdom')||c==='uk'?'UK':c.includes('taiwan')?'TW':'—'}
+function gaugeCard(r){
+ const pos=(r.grade+.5)/6;const ang=Math.PI*(1-pos);const cx=120,cy=118,R=92;const nx=cx+Math.cos(ang)*(R-14),ny=cy-Math.sin(ang)*(R-14);
+ const arc=(a0,a1,col)=>{const p=a=>[cx+Math.cos(Math.PI*(1-a))*R,cy-Math.sin(Math.PI*(1-a))*R];const [x0,y0]=p(a0),[x1,y1]=p(a1);return `<path d="M${x0} ${y0}A${R} ${R} 0 0 1 ${x1} ${y1}" stroke="${col}" stroke-width="16" fill="none"/>`};
+ const cols=['#EF4444','#F97316','#EAB308','#84CC16','#22C55E','#10B981'];
+ return `<div class="card" style="padding:16px 16px 14px;margin-top:14px;text-align:center"><div class="muted xs" style="text-transform:uppercase;letter-spacing:.06em;font-weight:600">${t('estvalue')} · this item</div>
+ <svg class="gauge" viewBox="0 0 240 140" style="width:100%;max-width:280px;margin:4px auto 0;display:block">${cols.map((c,i)=>arc(i/6+.004,(i+1)/6-.004,c)).join('')}<line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="var(--text)" stroke-width="4" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="8" fill="var(--text)"/></svg>
+ <div class="price" style="font-size:34px;margin-top:-6px">${range(r.low,r.high)}</div>
+ <div style="margin-top:4px"><span class="badge b-grade">${tierName(r.grade)}</span></div></div>`}
+function ladder(r){const any=TIERS.some(x=>r.tiers[x.k]);if(!any)return '';const mx=Math.max(...TIERS.map(x=>r.tiers[x.k]?r.tiers[x.k][1]:0))||1;
+ return `<div class="sec" style="padding:18px 0 6px"><h3>${t('ladder')}</h3></div><div class="card ladder" style="padding:6px">${TIERS.map((x,i)=>{const v=r.tiers[x.k];const here=i===r.grade;return `<div class="rung ${here?'here':''}"><div style="width:112px;font-size:13px;font-weight:${here?700:500}">${tierName(i)}${here?`<div class="xs" style="color:var(--accent);font-weight:700">▶ ${t('youhere')}</div>`:''}</div><div class="bar"><i style="width:${v?Math.max(4,v[1]/mx*100):0}%;opacity:${here?1:.45}"></i></div><div class="price small" style="width:86px;text-align:right">${v?range(v[0],v[1]):'—'}</div></div>`}).join('')}</div>`}
+function reportSheet(){return `<h3>What’s wrong?</h3><div class="muted small" style="margin-bottom:12px">Your report helps the AI get better.</div><div class="list" style="margin:0">${['Wrong toy','Wrong condition','Price looks off','Not a toy / inappropriate'].map(x=>`<div class="li" onclick="closeSheet();toast('Thanks — report sent')">${esc(x)}</div>`).join('')}</div><button class="btn pri full" style="margin-top:12px" onclick="editDetails()">Correct the details myself</button>`}
+function saveSheet(src){const r=src==='result'?S.lastResult:null;const it=r?null:item(src);const base=r||it;
+ const sug=(base.series&&base.series!=='—'?base.series:base.brand)||'Saved';const names=folderNames();
+ if(S._sv==null){S._sv={folder:(it&&BM[it.id])||(names.includes(sug)?sug:sug),own:false,newName:''}}
+ const all=[...new Set([sug,...names])];
+ sheet(()=>`<h3>Save to folder</h3><div class="muted small" style="margin-bottom:12px">${esc(base.name)}</div>
+ <div style="display:flex;flex-wrap:wrap;gap:8px">${all.map(f=>`<button class="fchip ${S._sv.folder===f?'on':''}" onclick="S._sv.folder=${esc(JSON.stringify(f))};render()">${esc(f)}${f===sug&&!names.includes(f)?' <span class="muted xs">· new, suggested</span>':f===sug?' <span class="muted xs">· suggested</span>':''}</button>`).join('')}</div>
+ <div class="row" style="margin-top:10px"><input id="nf" class="field" placeholder="New folder name" value="${esc(S._sv.newName)}" oninput="S._sv.newName=this.value"><button class="btn sm sec2" onclick="const v=$('nf').value.trim();if(v){S._sv.folder=v;S._sv.newName='';render()}">Add</button></div>
+ ${r?`<div class="li" style="padding:14px 0 6px;border:0;cursor:pointer" onclick="S._sv.own=!S._sv.own;render()"><div class="grow"><div style="font-size:14.5px;font-weight:600">I own this</div><div class="muted xs">Counts toward “What I own” value. Only you see it.</div></div><div class="tog ${S._sv.own?'on':''}"></div></div>`:''}
+ <button class="btn pri full" style="margin-top:12px" onclick="doSave('${src}')">Save to ${esc(S._sv.folder)}</button>`)}
+function doSave(src){const sv=S._sv;S._sv=null;if(src==='result'){const r=S.lastResult;const it=newItemFromResult(r,'saved');it.folder=sv.folder;it.owned=sv.own;ITEMS.unshift(it);try{LS.set('myitems',ITEMS.filter(x=>x.id.startsWith('u')))}catch(e){}}
+ else BM[src]=sv.folder;
+ S.sheet=null;render();toast('Saved to '+sv.folder)}
+function unsave(id){delete BM[id];keepScroll();toast('Removed from Saved')}
+function bm(id){need(()=>{BM[id]?unsave(id):saveSheet(id)})}
+function addSheet(){window._st=window._st||'private';sheet(()=>`<h3>${t('addcol')}</h3><div class="muted small" style="margin-bottom:14px">Who can see it? You can change this anytime.</div>${['private','public'].map(k=>`<div class="plan ${k===window._st?'on':''}" onclick="window._st='${k}';render()"><div class="row"><span class="sdot ${STATUS[k].d}"></span><div class="grow"><b>${stName(k)}</b><div class="muted small">${STATUS[k].sub}</div></div></div></div>`).join('')}<button class="btn pri full" style="margin-top:8px" onclick="saveScan()">Save to collection</button>`)}
+function newItemFromResult(r,st){return {owned:true,folder:(r.series&&r.series!=='—'?r.series:r.brand)||'Saved',id:'u'+Date.now(),owner:'me',name:r.name,origin:r.origin||'',flag:flagOf(r.country),brand:r.brand||'—',series:r.series||'—',year:+r.year||r.year||'',grade:r.grade,low:r.low,high:r.high,status:st,price:null,img:r.img,art:['giant','#B91C1C','#F8FAFC','#FEF2F2'],added:99,history:r.history}}
+function saveScan(){const r=S.lastResult;const st=window._st||'private';const ask=null;
+ const it={id:'u'+Date.now(),owner:'me',name:r.name,origin:r.origin||'',flag:flagOf(r.country),brand:r.brand||'—',series:r.series||'—',year:+r.year||r.year||'',grade:r.grade,low:r.low,high:r.high,status:st,price:ask,img:r.img,art:['giant','#B91C1C','#F8FAFC','#FEF2F2'],added:99,history:r.history};
+ ITEMS.unshift(it);try{LS.set('myitems',ITEMS.filter(x=>x.id.startsWith('u')))}catch(e){}
+ S.sheet=null;window._st=null;S.stack=[];S.tab='me';S.meTab='collection';render(true);buildFeed();toast(st==='private'?'Saved to your collection (private)':'Saved · visible on your profile')}
+function paywall(){sheet(()=>`<div style="text-align:center"><h3 class="hl" style="font-size:24px">ToyScope Pro</h3><div class="muted small" style="margin-bottom:16px">You’ve used today’s 5 free scans.</div></div>
+ ${[['Unlimited scans',1],['Full value-by-condition ladder',1],['Hunt: watch Japanese auctions (v2)',1],['Collection export & insurance report',1],['No ads, ever — free plan too',1]].map(x=>`<div class="acc"><span class="ok">✓</span>${x[0]}</div>`).join('')}
+ <div class="plan on" style="margin-top:14px" onclick=""><div class="row"><div class="grow"><b>Yearly</b> <span class="badge b-sale">Save 33%</span><div class="muted small">7-day free trial, then $39.99/yr</div></div><div class="price">$3.33/mo</div></div></div>
+ <div class="plan"><div class="row"><div class="grow"><b>Monthly</b><div class="muted small">$4.99/mo</div></div></div></div>
+ <button class="btn pri full" onclick="S.plan='pro';closeSheet();toast('Pro unlocked (prototype)')">Start free trial</button><button class="btn full" onclick="closeSheet()">Not now</button>`)}
+
+/* ---------- SELL ---------- */
+function openSell(from,id){const it=id?item(id):null;const r=S.lastResult;
+ const first=it?(it.photos&&it.photos.length?it.photos:[it.img||null]):[r&&r.img||null];
+ S.sell={from,id:id||null,base:it||r,photos:first.filter(Boolean),demoArt:!first.filter(Boolean).length?(it?it.art:['giant','#B91C1C','#F8FAFC','#FEF2F2']):null,
+  title:it&&it.status==='sale'?(it.title||''):'',price:it&&it.status==='sale'&&it.price?String(it.price):'',cond:it&&it.status==='sale'?String(it.grade):'',desc:it&&it.status==='sale'?(it.desc||''):'',ai:false,busy:false};go('sell')}
+SCR.sell=()=>{const f=S.sell;const b=f.base||{};
+ return `<div class="hdr"><button class="ib" onclick="back()">${ic('x')}</button><h2>Sell</h2><div style="width:38px"></div></div>
+ <div class="pad" style="padding-bottom:30px">
+ <label class="lbl" style="margin-top:4px">Photos <span class="muted" style="font-weight:500">· ${f.photos.length+(f.demoArt?1:0)}/12 · show every side</span></label>
+ <div class="thumbs">${f.demoArt?`<div class="t">${art(f.demoArt)}</div>`:''}${f.photos.map((ph,k)=>`<div class="t"><img src="${ph}"><button class="x" onclick="S.sell.photos.splice(${k},1);keepScroll()">${ic('x',3,'width="12" height="12"')}</button></div>`).join('')}${f.photos.length<12?`<div class="t add" onclick="$('sellin').click()">${ic('image',1.8,'width="22" height="22"')}Add photos</div>`:''}</div>
+ <div class="aibox" style="margin-top:14px">${f.busy?'<span class="spin"></span>':ic('bolt',2,'width="22" height="22" style="color:var(--accent);flex:none"')}<div class="grow"><div style="font-weight:600;font-size:14px">${f.busy?'Writing your listing…':'Let AI fill this in'}</div><div class="muted xs">Title, description and a suggested price, based on your scan. You can edit everything.</div></div><button class="btn sm ${f.ai?'sec2':'pri'}" ${f.busy?'disabled':''} onclick="aiFill()">${f.ai?'Redo':'Fill'}</button></div>
+ ${f.ai?`<div class="warn y small" style="margin-top:10px">${ic('info',2,'width="18" height="18" style="flex:none"')}<div>AI filled this from your scan. <b>Check every field</b> — the scan can be wrong.</div></div>`:''}
+ <label class="lbl">Title</label><input class="field" value="${esc(f.title)}" placeholder="e.g. Popy Getter-1 Jumbo Machinder, 1975" oninput="S.sell.title=this.value">
+ <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><label class="lbl">Price (USD)</label><input class="field" inputmode="numeric" value="${esc(f.price)}" placeholder="Optional" oninput="S.sell.price=this.value.replace(/[^0-9]/g,'')"></div>
+ <div><label class="lbl">Condition</label><select class="field" onchange="S.sell.cond=this.value"><option value="">Select</option>${TIERS.map((x,k)=>`<option value="${k}" ${String(f.cond)===String(k)?'selected':''}>${tierName(k)}</option>`).join('')}</select></div></div>
+ ${b.low!=null&&f.price?`<div class="muted xs" style="margin-top:6px">Scan estimate: ${range(b.low,b.high)}</div>`:''}
+ <label class="lbl">Is it original?</label><select class="field" onchange="S.sell.orig=this.value"><option value="">Select</option>${['Original release','Reissue / re-release','Reproduction or custom','Not sure'].map(o=>`<option ${f.orig===o?'selected':''}>${o}</option>`).join('')}</select>
+ <label class="lbl">Description</label><textarea class="field" rows="6" placeholder="What is it, what’s included, any flaws, shipping or pickup…" oninput="S.sell.desc=this.value">${esc(f.desc)}</textarea>
+ <div class="li" style="padding:14px 0 0;border:0;align-items:flex-start;cursor:pointer" onclick="S.sell.own=!S.sell.own;keepScroll()"><span style="width:22px;height:22px;border-radius:6px;border:2px solid ${f.own?'var(--accent)':'var(--border)'};background:${f.own?'var(--accent)':'transparent'};color:var(--onAccent);display:grid;place-items:center;flex:none">${f.own?ic('check',3,'width="14" height="14"'):''}</span><span class="small">I own this item, I took these photos (or have permission), and my description is accurate. I’ve read the ${legalLink('community','marketplace guidelines')}.</span></div>
+ <div class="warn b xs" style="margin-top:14px">${ic('lock',2,'width="16" height="16" style="flex:none"')}<div>Buyers contact you by email through ToyScope. Your address stays hidden. ToyScope isn’t part of the sale.</div></div>
+ <button class="btn pri full" style="margin-top:16px" onclick="postSale()">${f.id&&item(f.id)&&item(f.id).status==='sale'?'Save changes':'Post for sale'}</button>
+ </div>`};
+function keepScroll(){const t=$('screen').scrollTop;render();$('screen').scrollTop=t}
+async function aiFill(){const f=S.sell,b=f.base||{};f.busy=true;keepScroll();await new Promise(r=>setTimeout(r,1300));
+ const mid=b.low!=null?Math.round(((b.low||0)+(b.high||b.low||0))/2/5)*5:null;
+ const miss=(b.accExp||[]).filter(x=>!(b.accVis||[]).map(y=>y.toLowerCase()).includes(x.toLowerCase()));
+ f.title=[b.brand&&b.brand!=='—'?b.brand:'',b.name,b.year?'('+b.year+')':''].filter(Boolean).join(' ');
+ f.price=mid?String(mid):'';f.cond=String(b.grade??'');
+ f.desc=[`${b.name}${b.origin?' — '+b.origin:''}.`,b.year||b.brand?`Original ${b.brand&&b.brand!=='—'?b.brand+' ':''}release${b.year?', '+b.year:''}.`:'',
+  `Condition: ${tierName(b.grade||0)}.${b.reasons&&b.reasons.length?' '+b.reasons.join('. ')+'.':''}`,
+  miss.length?`Not included: ${miss.join(', ')}.`:'',
+  'More photos on request. Pickup or tracked shipping.'].filter(Boolean).join('\n');
+ f.ai=true;f.busy=false;keepScroll()}
+function postSale(){const f=S.sell;if(!f.title.trim())return toast('Add a title');if(!f.orig)return toast('Say whether it’s original');if(!f.own)return toast('Confirm you own the item and photos');if(!f.photos.length&&!f.demoArt)return toast('Add at least one photo');
+ let it=f.id?item(f.id):null;
+ if(!it){it=newItemFromResult(f.base,'sale');ITEMS.unshift(it)}
+ Object.assign(it,{orig:f.orig,owned:true,status:'sale',title:f.title.trim(),price:+f.price||null,desc:f.desc.trim(),photos:f.photos.slice(),grade:f.cond!==''?+f.cond:it.grade});
+ if(!S.toggles.contact){S.toggles.contact=true;USERS.me.allowContact=true;LS.set('toggles',S.toggles)}
+ try{LS.set('myitems',ITEMS.filter(x=>x.id.startsWith('u')))}catch(e){}
+ buildFeed();S.sell=null;S.stack=[];S.tab='me';S.meTab='sale';go('item',{id:it.id});toast('Posted in For sale')}
+
+/* ---------- ITEM ---------- */
+SCR.item=({id})=>{const i=item(id);const mine=i.owner==='me';const U=USERS[i.owner];const pid='f_'+id;const L=S.liked.has(pid);
+ return hdrBack('',`<button class="ib" onclick="postMenu('x')">${ic('more')}</button>`)+`<div class="pad" style="padding-bottom:${!mine&&i.status==='sale'?110:30}px">
+ ${i.photos&&i.photos.length>1?`<div style="position:relative"><div class="gal" onscroll="const n=Math.round(this.scrollLeft/this.clientWidth)+1;this.parentNode.querySelector('.gcount').textContent=n+'/${i.photos.length}';this.parentNode.querySelectorAll('.gdot').forEach((d,k)=>d.style.opacity=k===n-1?1:.4)">${i.photos.map(ph=>`<div><img src="${ph}"></div>`).join('')}</div><div class="st" style="position:absolute;left:10px;top:10px">${stBadge(i.status)}</div><div class="gcount" style="position:absolute;right:10px;top:10px;background:rgba(0,0,0,.6);color:#fff;font-size:12px;font-weight:600;padding:4px 9px;border-radius:999px">1/${i.photos.length}</div><div style="position:absolute;left:0;right:0;bottom:10px;display:flex;justify-content:center;gap:5px">${i.photos.map((_,k)=>`<span class="gdot" style="width:6px;height:6px;border-radius:50%;background:#fff;box-shadow:0 0 2px rgba(0,0,0,.5);opacity:${k?.4:1}"></span>`).join('')}</div></div>`:`<div class="art" style="border-radius:22px;overflow:hidden;aspect-ratio:1;position:relative">${pic(i)}<div class="st">${stBadge(i.status)}</div></div>`}
+ <div class="acts" style="padding:6px 0 0;display:flex;align-items:center;gap:4px"><button class="ib" onclick="shareSheet('${pid}')">${ic('send',1.8)}</button><div class="grow"></div>${!mine?`<button class="ib ${BM[id]?'saved':''}" onclick="bm('${id}')">${ic('bookmark',1.8)}</button>`:`<span class="muted xs">In ${esc(i.folder||'Saved')}${i.owned?' · Owned':''}</span>`}</div>
+ ${i.rarity?`<div class="warn y" style="margin-top:10px"><div><b>${i.rarity==='grail'?'Grail':'Very rare'}</b> · High-value item. Expert authentication recommended.</div></div>`:''}
+ <div class="hl" style="font-size:23px;margin-top:10px;line-height:1.2">${esc(i.title||i.name)}</div>${i.desc?`<div class="small" style="margin-top:8px;white-space:pre-line">${esc(i.desc)}</div>`:''}
+ <div class="namebox" style="margin-top:10px"><span class="cc">${i.flag}</span><div class="grow"><div class="xs muted">Original name</div><div style="font-weight:600">${esc(i.origin)}</div></div><button class="copyb" onclick="copy(${esc(JSON.stringify(i.origin))})">${ic('copy')}</button></div>
+ <div class="card" style="padding:14px;margin-top:12px;display:flex;justify-content:space-between;align-items:center"><div><div class="muted xs">${i.status==='sale'?(i.price?'Asking price':'For sale · price on request'):t('estvalue')}</div><div class="price" style="font-size:26px">${i.status==='sale'&&i.price?money(i.price):range(i.low,i.high)}</div>${i.status==='sale'?`<div class="muted xs">Scan estimate ${range(i.low,i.high)}</div>`:''}</div><span class="badge b-grade">${tierName(i.grade||0)}</span></div>
+ ${i.status==='sale'&&i.orig?`<div class="muted small" style="margin-top:10px">Seller says: <b style="color:var(--text)">${esc(i.orig)}</b></div>`:''}<div class="kv" style="margin-top:12px"><div><b>Maker</b>${esc(i.brand)}</div><div><b>Year</b>${esc(i.year)}</div><div><b>Series</b>${esc(i.series)}</div><div><b>${t('condition')}</b>${tierName(i.grade||0)}</div></div>
+ ${i.history?`<div class="sec" style="padding:16px 0 6px"><h3>${t('history')}</h3></div><div class="card small" style="padding:14px">${esc(i.history)}</div>`:''}
+ ${!mine?`<div class="card row" style="padding:12px;margin-top:14px;cursor:pointer" onclick="openUser('${i.owner}')">${av(i.owner,40)}<div class="grow"><b>${U.name}</b> ${verified(i.owner)}<div class="muted xs">@${U.handle} · ${U.city}</div></div><span class="muted">›</span></div>`:''}
+ ${mine?(i.status==='sale'?`<div class="sec" style="padding:16px 0 6px"><h3>Listing</h3></div><div class="row"><button class="btn out" style="flex:1" onclick="openSell('item','${id}')">Edit listing</button><button class="btn sec2" style="flex:1" onclick="item('${id}').status='saved';buildFeed();render();toast('Removed from For sale')">Stop selling</button></div>`:`<div class="li" style="padding:14px 0;border:0;cursor:pointer" onclick="item('${id}').owned=!item('${id}').owned;render()"><div class="grow"><div style="font-size:14.5px;font-weight:600">I own this</div><div class="muted xs">Counts toward “What I own”</div></div><div class="tog ${i.owned?'on':''}"></div></div><button class="btn pri full" onclick="needAdult(()=>openSell('item','${id}'),'Selling')">${ic('tag',2,'width="18" height="18"')} Sell this toy</button>`):''}
+ </div>
+ ${!mine&&i.status==='sale'?`<div style="position:sticky;bottom:0;padding:12px 16px 16px;background:linear-gradient(transparent,var(--bg) 25%)"><button class="btn pri full" onclick="needAdult(()=>contactFor('${i.owner}','${i.id}'),'Contact')">${ic('mail',2,'width="18" height="18"')} ${t('contact')} ${U.name.split(' ')[0]}</button></div>`:''}`};
+function contactFor(u,itemId){if(!USERS[u].allowContact)return sheet(()=>`<h3>${USERS[u].name.split(' ')[0]} isn’t accepting contact</h3><div class="muted small" style="margin:6px 0 14px">You can still follow and leave a comment.</div><button class="btn pri full" onclick="closeSheet()">OK</button>`);go('contact',{u,item:itemId})}
+
+/* ---------- PROFILE (others) ---------- */
+SCR.profile=({id})=>{const U=USERS[id];const f=S.follow.has(id);const sale=ITEMS.filter(i=>i.owner===id&&i.status==='sale');const al=ALBUMS[id]||[];
+ const locked=U.private&&!f;const tabK=S.profTab==='sale'?'sale':'album';
+ return hdrBack('@'+U.handle,`<button class="ib" onclick="postMenu('u')">${ic('more')}</button>`)+`
+ <div class="pad"><div class="row" style="gap:16px">${av(id,78)}<div class="grow" style="display:flex;justify-content:space-around;text-align:center"><div><div class="hl" style="font-size:18px">${locked?'—':al.length}</div><div class="muted xs">photos</div></div><div><div class="hl" style="font-size:18px">${(U.followers+(f?1:0)).toLocaleString()}</div><div class="muted xs">${t('followers')}</div></div><div><div class="hl" style="font-size:18px">${U.following}</div><div class="muted xs">${t('followingN')}</div></div></div></div>
+ <div style="margin-top:10px;font-weight:700">${U.name} ${verified(id)}</div><div class="muted small row" style="gap:4px">${ic('pin',2,'width="14" height="14"')}${U.city}</div>
+ <div class="small" style="margin-top:6px">${esc(U.bio)}</div>
+ <div style="margin-top:8px">${U.collects.map(c=>`<span class="collect-tag">${esc(c)}</span>`).join('')}</div>
+ <div class="row" style="margin:6px 0 12px"><button class="btn sm ${f?'sec2':'pri'}" style="flex:1" onclick="need(()=>fol('${id}'))">${U.private&&!f?'Request to follow':f?t('followingB'):t('follow')}</button>${U.allowContact?`<button class="btn sm sec2" style="flex:1" onclick="needAdult(()=>go('contact',{u:'${id}'}),'Contact')">${ic('mail',2,'width="16" height="16"')} ${t('contact')}</button>`:''}</div></div>
+ ${locked?`<div class="empty">${ic('lock',1.6,'width="40" height="40"')}<div style="font-weight:600;color:var(--text);margin-top:10px">This profile is private</div><div class="small">Follow to request access.</div></div>`:
+ `<div class="tabs">${[['album','My Collection'],['sale','For sale · '+sale.length]].map(([k,l])=>`<button class="${tabK===k?'on':''}" onclick="S.profTab='${k}';render()">${l}</button>`).join('')}</div>
+ ${tabK==='sale'?(sale.length?`<div class="grid2" style="padding-top:12px">${sale.map(tileHTML).join('')}</div>`:'<div class="empty small">Nothing for sale</div>'):(al.length?albumGrid(id):'<div class="empty small">No photos yet</div>')}`}`};
+
+/* ---------- CONTACT ---------- */
+SCR.contact=({u,item:itemId,sent})=>{const U=USERS[u];const its=ITEMS.filter(i=>i.owner===u&&(i.status==='sale'));const sel=itemId||(its[0]&&its[0].id);const it=sel&&item(sel);
+ if(sent)return `<div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;gap:12px"><div style="width:76px;height:76px;border-radius:50%;background:var(--good);color:#fff;display:grid;place-items:center">${ic('check',3,'width="38" height="38"')}</div><div class="hl" style="font-size:24px">Sent to ${U.name.split(' ')[0]}</div><div class="muted small" style="max-width:280px">We forwarded your message by email. If ${U.name.split(' ')[0]} replies, it goes straight to your inbox — neither of you sees the other’s address until someone replies.</div><div class="muted xs">You can contact ${S.contactsLeft} more collectors today.</div><button class="btn pri" style="margin-top:12px;width:200px" onclick="back()">Done</button><div class="warn b xs" style="margin-top:18px;text-align:left">${ic('info',2,'width="16" height="16" style="flex:none"')}<div>Safety: never pay by wire or gift card. ToyScope isn’t part of the sale. ${legalLink('community','Guidelines')}</div></div></div>`;
+ return `<div class="hdr"><button class="ib" onclick="back()">${ic('x')}</button><h2>${t('contact')} ${U.name.split(' ')[0]}</h2><div style="width:38px"></div></div>
+ <div class="pad" style="padding-bottom:30px">
+ ${it?`<div class="card row" style="padding:10px"><div class="art" style="width:64px;height:64px;border-radius:12px;overflow:hidden;flex:none">${pic(it)}</div><div class="grow"><div style="font-weight:600;font-size:14px" class="ell">${esc(it.name)}</div><div class="muted xs">${stName(it.status)} · ${it.status==='sale'&&it.price?money(it.price):range(it.low,it.high)}</div></div></div>`:''}
+ ${its.length>1?`<div class="chips" style="padding:10px 0 0">${its.map(x=>`<button class="chip ${x.id===sel?'on':''}" onclick="cur().p.item='${x.id}';render()">${esc(x.name.slice(0,22))}</button>`).join('')}</div>`:''}
+ <label class="lbl">Your offer (optional, USD)</label><input id="offer" class="field" inputmode="numeric" placeholder="${it&&it.price?it.price:''}">
+ <label class="lbl">Message</label><textarea id="msg" class="field" rows="5" placeholder="Write your message…">Hi ${U.name.split(' ')[0]}, I’m interested in your ${it?esc(it.title||it.name):'collection'}. Is it still available?</textarea><div class="muted xs" style="margin-top:4px">Tap the message to edit it.</div>
+ <div class="warn b small" style="margin-top:14px">${ic('lock',2,'width="18" height="18" style="flex:none"')}<div><b>Your email stays hidden.</b> We forward this message. Replies come to your inbox. ${U.name.split(' ')[0]}’s email is hidden too.</div></div>
+ <button class="btn pri full" style="margin-top:16px" onclick="sendContact()">${ic('send',2,'width="18" height="18"')} Send</button>
+ <div class="muted xs" style="text-align:center;margin-top:10px">${S.contactsLeft} of 5 contacts left today · New accounts wait 7 days</div></div>`};
+function sendContact(){const m=$('msg').value.trim();if(m.length<10)return toast('Write a short message first');S.contactsLeft--;cur().p.sent=true;render(true)}
+
+/* ---------- HUNT ---------- */
+SCR.hunt=()=>`<div class="hdr"><h1>${t('hunt')} <span class="badge b-v2" style="vertical-align:middle">Coming in v2</span></h1><button class="ib" onclick="toast('Add a search (v2)')">${ic('bolt',1.8)}</button></div>
+ <div class="pad"><div class="card" style="padding:14px;background:linear-gradient(135deg,var(--accentSoft),var(--surface))"><div style="font-weight:700">We watch Japanese auctions for you</div><div class="muted small" style="margin-top:3px">Yahoo!オク and Mercari JP, through proxy services like Buyee. Get a push when something matching your list appears under your price.</div></div></div>
+ <div class="sec"><h3>New matches</h3><span class="muted xs">Preview data</span></div>
+ <div class="pad" style="display:flex;flex-direction:column;gap:10px">${MATCHES.map(m=>`<div class="card row" style="padding:10px;align-items:flex-start"><div class="art" style="width:78px;height:78px;border-radius:12px;overflow:hidden;flex:none">${art(m.art)}</div><div class="grow"><div class="small" style="font-weight:600;line-height:1.3" lang="ja">${esc(m.t)}</div><div class="row" style="margin-top:6px;gap:6px"><span class="badge b-priv">${m.src}</span><span class="muted xs">${m.left}</span></div><div class="row" style="margin-top:4px;justify-content:space-between"><span class="price">¥${m.yen.toLocaleString()} <span class="muted small" style="font-weight:500">≈ ${money(m.usd)}</span></span><button class="link small" onclick="toast('Opens on Buyee (v2)')">View</button></div></div></div>`).join('')}</div>
+ <div class="sec"><h3>My watchlist</h3><span class="link" onclick="toast('Add a search (v2)')">+ Add</span></div>
+ <div class="list">${WATCH.map(w=>`<div class="li"><div class="ic">${ic('search',2)}</div><div class="grow"><div style="font-weight:600;font-size:14px" lang="ja">${esc(w.q)}</div><div class="muted xs">${esc(w.en)} · under ${money(w.max)}</div></div>${w.hits?`<span class="badge b-sale">${w.hits} new</span>`:'<span class="muted xs">No matches</span>'}</div>`).join('')}</div><div style="height:20px"></div>`;
+
+/* ---------- GUIDE ---------- */
+const GUIDE=[
+ {id:'g1',tag:'Buying',title:'Spotting reproductions of vintage robots',art:['tin','#9CA3AF','#475569','#E5E7EB'],body:[
+  'Many classic Japanese robots and die-cast toys have been reissued, sometimes by the original maker and sometimes by others. Reissues are not fakes, but they are worth a fraction of an original, so sellers should say clearly which one it is.',
+  ['Look underneath first','Originals usually carry a maker stamp and often the country of manufacture moulded or printed on the base or feet. Compare the font and position with photos from a trusted reference. Missing, blurry or re-painted stamps are a warning sign.'],
+  ['Check the plastic and paint','Reissue plastic often has a different gloss or colour shade. Paint on newer pieces can look too clean and bright for a 40-year-old toy. Sticker sheets that look freshly printed deserve a closer look.'],
+  ['Ask for more photos','A good seller will happily show the base, the box flaps and any accessories. If they refuse, walk away.']]},
+ {id:'g2',tag:'Value',title:'Loose, boxed or mint: what condition does to price',art:['box','#DC2626','#111827','#FEE2E2'],body:[
+  'Two copies of the same toy can differ in value by ten times or more. Condition is usually the biggest factor after rarity.',
+  ['Loose','The toy alone, no box. Price depends on paint wear, loose joints and how many accessories are still there. A complete loose toy is worth much more than one missing its weapons.'],
+  ['Boxed (opened)','Often called CIB, complete in box. The box itself adds a large share of the value for vintage Japanese toys. Inserts, instructions and unused stickers matter.'],
+  ['Mint in box','Unopened or never played with. This is where the highest prices are, and also where reproductions and resealed boxes appear most often.']]},
+ {id:'g3',tag:'Selling',title:'Photographing toys for a listing',art:['robot','#1E40AF','#E5E7EB','#E0E7FF'],body:[
+  'Good photos sell toys faster and for more money. You do not need a studio.',
+  ['Light','Shoot near a window in daylight. Avoid direct sun and flash, which hide paint detail and create glare on boxes.'],
+  ['Angles','Front, back, both sides, the base with any stamps, close-ups of damage, and every accessory laid out. Buyers trust sellers who show flaws.'],
+  ['Background','Plain white or grey card behind the toy. Clear away clutter so the toy is the only thing in the frame.']]},
+ {id:'g4',tag:'Care',title:'Stopping yellowing and sticky plastic',art:['robot','#F8FAFC','#94A3B8','#F1F5F9'],body:[
+  'White and light-grey plastic can turn yellow over time, and soft vinyl can become sticky. Both are mostly caused by light, heat and trapped air.',
+  ['Keep it cool and dark','Store away from windows and heaters. A stable room temperature helps more than any product.'],
+  ['Let it breathe','Sealed plastic bags can trap chemicals released by old plastic. Acid-free boxes or open shelves are safer for long-term storage.'],
+  ['Be careful with fixes','Online methods to reverse yellowing can damage paint and stickers. Test on something cheap first, or ask an experienced restorer.']]},
+ {id:'g5',tag:'Display',title:'Displaying toys without sun damage',art:['kaiju','#15803D','#BBF7D0','#ECFDF5'],body:[
+  'A glass cabinet looks great, but it can still let in the light that fades paint and boxes.',
+  ['Mind the light','Place cabinets away from windows. LED strips give off very little UV and heat compared with older bulbs.'],
+  ['Dust','A closed cabinet keeps dust off. Clean with a soft brush rather than cloths that snag small parts.'],
+  ['Stands','Use stands for figures with weak ankles or loose joints, so they do not lean and stress the plastic.']]},
+ {id:'g6',tag:'Identify',title:'Reading maker stamps and date codes',art:['car','#7C3AED','#C4B5FD','#F5F3FF'],body:[
+  'Most toys carry small markings that tell you a lot: who made it, where, and roughly when.',
+  ['Where to look','Bottom of the feet, inside the legs, under a car, on the back of a figure, or on the box flaps.'],
+  ['What it tells you','A maker name or logo, a country of manufacture and sometimes a copyright year. The copyright year is often the year the design was registered, not the year that copy was made.'],
+  ['Scan it too','Add a photo of the base when you scan with ToyScope. It helps the AI tell originals and reissues apart.']]},
+];
+const gcard=g=>`<div class="gcard" onclick="go('guide',{id:'${g.id}'})">${art(g.art)}<div class="t"><small>${g.tag}</small>${esc(g.title)}</div></div>`;
+SCR.guide=({id})=>{const g=GUIDE.find(x=>x.id===id);return hdrBack('Collector’s Guide')+`<div class="art" style="aspect-ratio:16/10;margin:0 16px;border-radius:20px;overflow:hidden">${art(g.art)}</div>
+ <div class="pad article" style="padding-top:16px;padding-bottom:40px"><div class="muted xs" style="text-transform:uppercase;letter-spacing:.06em;font-weight:600">${g.tag}</div><div class="hl" style="font-size:24px;line-height:1.2;margin:4px 0 14px">${esc(g.title)}</div>
+ ${g.body.map(x=>typeof x==='string'?`<p>${esc(x)}</p>`:`<h4>${esc(x[0])}</h4><p>${esc(x[1])}</p>`).join('')}
+ <div class="muted xs" style="margin-top:20px">General guidance only. When a toy is valuable, ask an experienced dealer or authenticator.</div></div>`};
+
+/* ---------- LEGAL (DRAFT — lawyer review before launch) ---------- */
+const CO='[Legal business name]',ADDR='[Business mailing address], Vancouver, BC, Canada',PRIV='privacy@toyscope.app',SUP='support@toyscope.app',UPD='November 13, 2026';
+const LEGAL={
+privacy:{t:'Privacy Policy',s:[
+ ['Who we are',`ToyScope is operated by ${CO}, ${ADDR}. Our privacy officer is responsible for how we handle your personal information. Contact: [Privacy officer name], ${PRIV}.`],
+ ['The short version',`We collect only what we need to identify and value your toys and run the app. We do not sell your data. We do not use ad trackers, advertising pixels or session-recording tools. Your saved toys are private unless you choose to share them.`],
+ ['What we collect',`• Account: email address, display name, and your age range (we ask for your birth month and year to confirm you are old enough, then keep only the age range).\n• Profile (optional): photo, city, bio and what you collect. We never show more than your city.\n• Scan photos and results: the photos you take and the AI result, so we can show them back to you in Recent scans and Saved.\n• Saved toys, folders, listings and My Collection photos you add.\n• Contact messages: when you contact a seller, we forward your message by email and keep a copy for 30 days for safety and abuse reports.\n• Purchases: if you subscribe, Apple or Google tells us your subscription status. We never see your card details.\n• Device and app data: basic technical data needed to run the app securely (app version, device type, crash reports).\n• Usage statistics: only if you turn on “Share anonymous usage stats”. It is off by default.`],
+ ['How we use it',`• To identify toys, estimate value and show history and tips.\n• To run your account, Saved folders, listings and the Contact relay.\n• To keep ToyScope safe: prevent fraud, spam and abuse, and review reports.\n• To improve recognition, but only from corrections and feedback you send us, and from scan photos only if you turn on “Help improve recognition” (off by default).\n• To send product news by email only if you opted in. You can unsubscribe in any email or in Settings.`],
+ ['AI processing',`To create a result, your scan photos are sent to a third-party AI service, [Google (Gemini API)], which processes them under a contract that limits how it may use them. We ask for your permission before your first scan. AI results are estimates and can be wrong.`],
+ ['Who we share it with',`We share personal information only with service providers that help us run ToyScope, under contracts that protect it:\n• [Google] — AI processing of scan photos\n• [Supabase] — database, accounts and file storage\n• [Cloudflare] — image storage and delivery\n• [Resend] — sending emails and Contact messages\n• [Apple / Google / RevenueCat] — subscriptions\nWe also share information when the law requires it, to protect people from harm, or as part of a business sale (you would be notified). Anything you make public — your profile, My Collection photos and listings — can be seen by other users.`],
+ ['Where your data is stored',`Our service providers may store and process data in the United States and other countries. When your information is outside Canada it may be accessible to authorities there under local law. We assess these transfers before making them.`],
+ ['How long we keep it',`We keep your account data while your account is open. When you delete your account, we delete your personal information within 30 days, and remove it from backups within 90 days. Contact relay copies are deleted after 30 days. We may keep limited records longer where the law requires it, such as purchase records.`],
+ ['Your rights',`You can access, correct, download or delete your information, and withdraw consent, at any time in Settings or by emailing ${PRIV}. We reply within 30 days. We will not treat you differently for using these rights.\n• Canada: you can complain to the Office of the Privacy Commissioner of Canada, or in Quebec to the Commission d’accès à l’information.\n• United States: depending on your state (for example California), you may have rights to know, delete, correct and opt out of the sale or sharing of personal information. We do not sell or share personal information for advertising.`],
+ ['Children',`ToyScope is not for children under 13. We do not knowingly collect personal information from children under 13; if we learn we have, we delete it. Users aged 13 to 17 cannot sell, use Contact, or have a public profile.`],
+ ['Security',`We use encryption in transit, access controls and other safeguards. No system is perfectly secure. If a breach creates a real risk of significant harm, we will notify you and the regulators as the law requires.`],
+ ['Changes',`We will tell you in the app before important changes take effect.`],
+ ['Contact',`${CO}, ${ADDR}. Privacy officer: ${PRIV}.`]]},
+terms:{t:'Terms of Use',s:[
+ ['Agreement',`These Terms are an agreement between you and ${CO} (“ToyScope”, “we”). By using ToyScope you agree to them and to our Privacy Policy.`],
+ ['Who can use ToyScope',`You must be at least 13. If you are under the age of majority where you live, a parent or guardian must agree to these Terms for you. You must be 18 or older to sell, list items or use Contact.`],
+ ['Your account',`Keep your login secure and your information accurate. You are responsible for activity on your account. One person, one account.`],
+ ['AI estimates are not appraisals',`ToyScope uses AI to suggest what a toy is, its condition and an estimated value. Results can be wrong and are for information only. They are not a professional appraisal, authentication or an offer to buy. Check important details yourself and use an expert for valuable items before buying, selling or insuring.`],
+ ['Your content',`You keep ownership of the photos and text you add. You give ToyScope a non-exclusive, worldwide, royalty-free licence to host, store, display and process your content to run and improve the service as described in the Privacy Policy. You confirm you have the rights to everything you upload. You can delete your content at any time.`],
+ ['Buying and selling between collectors',`ToyScope is not a party to any sale. We do not handle payments, shipping or returns, and we do not check or guarantee items, listings or users. Deals are between buyer and seller. Sellers must describe items honestly, including whether an item is an original, a reissue, a reproduction or custom. Never pay by wire transfer, crypto or gift card.`],
+ ['Things you must not do',`Don’t list or post: counterfeit items presented as genuine, stolen or recalled items, weapons, adult content, or anything illegal; harass others; spam; scrape the app; share someone else’s personal information; misuse the Contact relay; or try to break or reverse-engineer ToyScope.`],
+ ['Reports and moderation',`You can report or block any user or content. We review reports, usually within 24 hours, and may remove content or suspend accounts that break these Terms.`],
+ ['Subscriptions',`ToyScope Pro is billed through the Apple App Store or Google Play. Subscriptions renew automatically until you cancel in your store account settings, at least 24 hours before renewal. Free trials convert to paid unless cancelled. Refunds are handled by Apple or Google under their policies.`],
+ ['Trademarks and brands',`Toy names, characters and brands shown in ToyScope belong to their owners. ToyScope is not affiliated with or endorsed by any toy maker or brand.`],
+ ['Copyright complaints',`If you believe content on ToyScope infringes your copyright, see our Copyright Policy.`],
+ ['Ending your use',`You can delete your account at any time. We may suspend or end accounts that break these Terms or put others at risk.`],
+ ['Disclaimers and liability',`ToyScope is provided “as is”. To the extent the law allows, we are not liable for indirect or consequential losses, or for losses from transactions between users, and our total liability is limited to the amount you paid us in the 12 months before the claim. Nothing in these Terms limits rights you have under consumer protection law that cannot be waived.`],
+ ['Governing law',`These Terms are governed by the laws of British Columbia and the federal laws of Canada that apply there, without taking away any mandatory consumer rights you have where you live.`],
+ ['Changes and contact',`We will notify you in the app before important changes. Questions: ${SUP}.`]]},
+community:{t:'Community & Marketplace Guidelines',s:[
+ ['Be honest',`Describe condition and flaws truthfully. Always say if an item is a reissue, reproduction, custom or has replaced parts.`],
+ ['Use your own photos',`Only post photos you took or have permission to use. Don’t copy photos from other sellers or websites.`],
+ ['Keep personal details private',`Use the Contact button instead of posting emails or phone numbers. Meet in public places or use tracked shipping.`],
+ ['Not allowed',`Counterfeits presented as genuine, stolen or recalled items, weapons, adult content, hate or harassment, spam, and scams.`],
+ ['Report problems',`Tap “Report” on any listing or profile. We review reports, usually within 24 hours.`]]},
+copyright:{t:'Copyright Policy',s:[
+ ['Our approach',`We respect copyright and remove infringing content when properly notified. Accounts that repeatedly infringe are closed.`],
+ ['US notices (DMCA)',`Send a notice to our designated agent: [Agent name], ${ADDR}, copyright@toyscope.app. Include: your signature; the work you say is infringed; the content and where it is in ToyScope; your contact details; a statement that you believe in good faith the use is not authorised; and a statement, under penalty of perjury, that your notice is accurate and you are the owner or authorised to act for the owner.`],
+ ['Counter-notices',`If your content was removed by mistake, you can send a counter-notice with the details the DMCA requires. We may restore the content unless the complainant starts legal action.`],
+ ['Canada',`Under Canada’s notice-and-notice system, we forward valid notices of claimed infringement to the user concerned.`]]}
+};
+SCR.legal=({d})=>{const L=LEGAL[d];return hdrBack(L.t)+`<div class="pad article" style="padding-bottom:40px">
+ <div class="warn y small" style="margin:4px 0 14px"><div><b>Draft</b> — to be reviewed by a lawyer before launch. Text in [brackets] must be filled in.</div></div>
+ <div class="muted xs" style="margin-bottom:10px">Last updated ${UPD}</div>
+ ${L.s.map(([h,b])=>`<h4>${esc(h)}</h4><p style="white-space:pre-line">${esc(b)}</p>`).join('')}
+ <div class="list" style="margin:20px 0 0">${Object.keys(LEGAL).filter(k=>k!==d).map(k=>`<div class="li" onclick="S.stack.pop();go('legal',{d:'${k}'})"><span class="grow">${LEGAL[k].t}</span><span class="muted">›</span></div>`).join('')}</div></div>`};
+const legalLink=(d,txt)=>`<span class="link" style="font-size:inherit" onclick="S.sheet=null;go('legal',{d:'${d}'})">${txt}</span>`;
+/* ---------- AGE GATE ---------- */
+S.age=LS.get('age',null);S.blocked=LS.get('blocked',false);
+const isMinor=()=>S.age==='13-17';
+function needAdult(fn,what){need(()=>{if(isMinor())return sheet(()=>`<h3>Available at 18</h3><div class="muted small" style="margin:6px 0 14px">${what||'This feature'} is only for users 18 and older. You can still scan, save and learn about toys.</div><button class="btn pri full" onclick="closeSheet()">OK</button>`);fn()})}
+function ageSheet(){const yNow=new Date().getFullYear();S._dob=S._dob||{m:'',y:'',news:false};sheet(()=>`<h3>When were you born?</h3><div class="muted small" style="margin-bottom:12px">We use this to keep ToyScope safe. We only keep your age range.</div>
+ <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><select class="field" onchange="S._dob.m=this.value"><option value="">Month</option>${['January','February','March','April','May','June','July','August','September','October','November','December'].map((m,k)=>`<option value="${k+1}" ${String(S._dob.m)===String(k+1)?'selected':''}>${m}</option>`).join('')}</select>
+ <select class="field" onchange="S._dob.y=this.value"><option value="">Year</option>${[...Array(100)].map((_,k)=>yNow-k).map(y=>`<option ${String(S._dob.y)===String(y)?'selected':''}>${y}</option>`).join('')}</select></div>
+ <div class="li" style="padding:14px 0 6px;border:0;align-items:flex-start;cursor:pointer" onclick="S._dob.news=!S._dob.news;render()"><span style="width:22px;height:22px;border-radius:6px;border:2px solid ${S._dob.news?'var(--accent)':'var(--border)'};background:${S._dob.news?'var(--accent)':'transparent'};color:var(--onAccent);display:grid;place-items:center;flex:none">${S._dob.news?ic('check',3,'width="14" height="14"'):''}</span><span class="small">Email me ToyScope news and tips. I can unsubscribe at any time. <span class="muted">(Optional)</span></span></div>
+ <div class="muted xs" style="margin:8px 0 12px">By continuing you agree to the ${legalLink('terms','Terms of Use')} and ${legalLink('privacy','Privacy Policy')}.</div>
+ <button class="btn pri full" onclick="finishAge()">Continue</button>`)}
+function finishAge(){const d=S._dob;if(!d.m||!d.y)return toast('Choose your birth month and year');const now=new Date();let age=now.getFullYear()-(+d.y);if(now.getMonth()+1<+d.m)age--;
+ if(age<13){S.blocked=true;LS.set('blocked',true);S._dob=null;S.after=null;return sheet(()=>`<h3>Sorry, you can’t create an account</h3><div class="muted small" style="margin:6px 0 16px">ToyScope is for people 13 and older. We haven’t saved any of your information.</div><button class="btn pri full" onclick="closeSheet()">OK</button>`)}
+ S.age=age<18?'13-17':'18+';LS.set('age',S.age);S.toggles.emailNews=!!d.news;if(isMinor()){S.toggles.private=true;S.toggles.contact=false;USERS.me.private=true;USERS.me.allowContact=false}LS.set('toggles',S.toggles);S._dob=null;
+ S.signedIn=true;LS.set('signedIn',true);S.sheet=null;const fn=S.after;S.after=null;toast('Account created');S.stack.push({s:'onboard'});render(true);S._afterOnboard=fn}
+/* ---------- DATA RIGHTS ---------- */
+function exportData(){const data={account:{name:USERS.me.name,handle:USERS.me.handle,city:USERS.me.city,bio:USERS.me.bio,age_range:S.age,email_news:S.toggles.emailNews},settings:S.toggles,saved_toys:ITEMS.filter(i=>i.owner==='me').map(i=>({name:i.name,original_name:i.origin,maker:i.brand,series:i.series,year:i.year,folder:i.folder,owned:!!i.owned,status:i.status,price:i.price||null})),bookmarks:BM,recent_scans:S.recent.map(r=>({name:r.name,low:r.low,high:r.high,when:r.when})),my_collection_photos:ALBUMS.me.length};
+ S._export=JSON.stringify(data,null,2);sheet(()=>`<h3>Download my data</h3><div class="muted small" style="margin-bottom:10px">In the real app this downloads a file with everything we hold about you, including your photos.</div><textarea class="field" rows="10" style="font-family:monospace;font-size:11.5px" readonly>${esc(S._export)}</textarea><button class="btn pri full" style="margin-top:12px" onclick="copy(S._export)">Copy</button>`)}
+function deleteAccount(){try{Object.keys(localStorage).filter(k=>k.startsWith('ts_')).forEach(k=>localStorage.removeItem(k))}catch(e){}location.reload()}
+
+/* ---------- SAVED ---------- */
+SCR.saved=()=>{const owned=ITEMS.filter(i=>i.owner==='me'&&i.owned);const val=owned.reduce((a,i)=>a+((i.low||0)+(i.high||i.low||0))/2,0);const fs=folderNames();
+ const cover=f=>{const its=folderItems(f).slice(0,4);return `<div class="fcover ${its.length===1?'one':''}">${its.map(i=>`<div>${pic(i)}</div>`).join('')}</div>`};
+ return `<div class="hdr"><h1>${t('saved')}</h1></div>
+ ${owned.length&&S.toggles.value?`<div class="pad"><div class="card" style="padding:14px;display:flex;justify-content:space-between;align-items:center"><div><div class="muted xs" style="font-weight:600;text-transform:uppercase;letter-spacing:.05em">What I own · only you see this</div><div class="price" style="font-size:28px">${money(val)}</div><div class="muted xs">${owned.length} toys marked “I own this”</div></div><div style="text-align:right"><div class="small" style="color:var(--good);font-weight:600">+4.2%</div><div class="muted xs">30 days</div></div></div></div>`:''}
+ <div class="sec"><h3>Recent scans</h3><span class="muted xs">Kept automatically</span></div>
+ ${S.recent.length?`<div class="hscroll">${S.recent.map((r,k)=>`<div class="rscan" onclick="S.lastResult=S.recent[${k}];go('result')"><div class="a">${r.img?`<img src="${r.img}">`:art(r.art||['giant','#B91C1C','#F8FAFC','#FEF2F2'])}</div><div class="small ell" style="font-weight:600;margin-top:5px">${esc(r.name)}</div><div class="muted xs">${range(r.low,r.high)} · ${esc(r.when||'')}</div></div>`).join('')}</div>`:`<div class="pad muted small">Scans show up here even if you don’t save them.</div>`}
+ ${S.follow.size?`<div class="sec"><h3>Collectors I follow</h3><span class="muted xs">${S.follow.size}</span></div><div class="hscroll">${[...S.follow].map(id=>`<div style="flex:none;width:72px;text-align:center;cursor:pointer" onclick="openUser('${id}')"><div style="display:flex;justify-content:center">${av(id,58)}</div><div class="xs ell" style="margin-top:5px;font-weight:600">${USERS[id].handle}</div><div class="muted xs">${ITEMS.filter(i=>i.owner===id&&i.status==='sale').length} for sale</div></div>`).join('')}</div>`:''}
+ <div class="sec"><h3>Folders</h3><span class="muted xs">${fs.length}</span></div>
+ <div class="fgrid">${fs.map(f=>`<div class="fcard" onclick="go('folder',{f:${esc(JSON.stringify(f))}})">${cover(f)}<div style="font-weight:600;font-size:14px;margin-top:6px" class="ell">${esc(f)}</div><div class="muted xs">${folderItems(f).length} toys</div></div>`).join('')}
+ <div class="fcard" onclick="need(newFolder)"><div class="fnew">${ic('image',1.6,'width="22" height="22"')}New folder</div></div></div>`};
+function folderMenu(){sheet(()=>`<div class="list" style="margin:0"><div class="li" onclick="closeSheet();toast('Rename (prototype)')">${ic('tag',1.8)}<span class="grow">Rename folder</span></div><div class="li" onclick="closeSheet();toast('Delete (prototype)')">${ic('trash',1.8)}<span class="grow">Delete folder</span></div></div><button class="btn sec2 full" style="margin-top:12px" onclick="closeSheet()">Cancel</button>`)}
+function newFolder(){sheet(()=>`<h3>New folder</h3><div class="muted small" style="margin-bottom:10px">For example: Gatchaman, Wishlist, Flea market finds.</div><input id="nf2" class="field" placeholder="Folder name"><button class="btn pri full" style="margin-top:12px" onclick="const v=$('nf2').value.trim();if(!v)return;S.extraFolders=(S.extraFolders||[]).concat(v);closeSheet();toast('Folder created')">Create</button>`)}
+SCR.folder=({f})=>{let its=folderItems(f);const own=its.filter(i=>i.owner==='me'&&i.owned);const sorts={value:(a,b)=>(b.high||0)-(a.high||0),name:(a,b)=>String(a.name).localeCompare(b.name),newest:(a,b)=>b.added-a.added};its=[...its].sort(sorts[S.colSort]||sorts.value);
+ return hdrBack(esc(f),`<button class="ib" onclick="folderMenu()">${ic('more')}</button>`)+`
+ <div class="pad muted small">${its.length} toys${own.length?` · ${own.length} I own · ${money(own.reduce((a,i)=>a+((i.low||0)+(i.high||0))/2,0))}`:''}</div>
+ <div class="pad" style="margin:10px 0 4px"><div class="seg">${[['value','Value'],['name','Name'],['newest','Newest']].map(([k,l])=>`<button class="${(S.colSort||'value')===k?'on':''}" onclick="S.colSort='${k}';render()">${l}</button>`).join('')}</div></div>
+ <div class="grid2" style="padding-top:8px">${its.map(tileHTML).join('')||'<div class="empty" style="grid-column:1/-1">Empty folder</div>'}</div>`};
+
+/* ---------- ME / COLLECTION ---------- */
+function albumGrid(u){const a=ALBUMS[u]||[];return `<div class="grid3" style="margin-top:2px">${a.map(x=>`<div class="art" style="aspect-ratio:1;cursor:pointer" onclick="go('photo',{u:'${u}',id:'${x.id}'})">${x.img?`<img src="${x.img}">`:pic(item(x.shelf[0]))}</div>`).join('')}</div>`}
+SCR.me=()=>{const U=USERS.me;const al=ALBUMS.me;const sale=ITEMS.filter(i=>i.owner==='me'&&i.status==='sale');
+ return `<div class="hdr"><h1>@${U.handle}</h1><button class="ib" onclick="go('settings')">${ic('gear',1.8)}</button></div>
+ <div class="pad"><div class="row" style="gap:16px"><div style="position:relative;cursor:pointer" onclick="photoSheet()">${av('me',78)}<span style="position:absolute;right:-2px;bottom:-2px;width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--onAccent);display:grid;place-items:center;border:3px solid var(--bg)">${ic('image',2.2,'width="14" height="14"')}</span></div><div class="grow" style="display:flex;justify-content:space-around;text-align:center"><div><div class="hl" style="font-size:18px">${al.length}</div><div class="muted xs">photos</div></div><div><div class="hl" style="font-size:18px">${U.followers}</div><div class="muted xs">${t('followers')}</div></div><div><div class="hl" style="font-size:18px">${S.follow.size}</div><div class="muted xs">${t('followingN')}</div></div></div></div>
+ <div style="margin-top:10px;font-weight:700">${U.name}</div><div class="muted small">${U.city}</div><div class="small" style="margin-top:4px">${esc(U.bio)}</div>
+ <div style="margin-top:8px">${U.collects.map(c=>`<span class="collect-tag">${esc(c)}</span>`).join('')}</div>
+ <div class="row" style="margin:6px 0 14px"><button class="btn sm sec2" style="flex:1" onclick="editProfile()">${t('editprofile')}</button><button class="btn sm sec2" style="flex:1" onclick="shareSheet('me')">${t('shareprofile')}</button></div></div>
+ <div class="tabs">${[['album','My Collection'],['sale','For sale · '+sale.length]].map(([k,l])=>`<button class="${(S.meTab==='sale'?'sale':'album')===k?'on':''}" onclick="S.meTab='${k}';render()">${l}</button>`).join('')}</div>
+ ${S.meTab==='sale'?(sale.length?`<div class="grid2" style="padding-top:12px">${sale.map(tileHTML).join('')}</div>`:`<div class="empty">Nothing for sale.<br>Open any saved toy and tap Sell.</div>`)
+ :`<div class="pad row" style="justify-content:space-between;padding-top:10px;padding-bottom:8px"><span class="muted xs">Your best photos. Everyone can see them. ${al.length}/20</span>${al.length<20?`<button class="btn sm pri" onclick="need(()=>$('albumin').click())">${ic('image',2,'width="16" height="16"')} Add photos</button>`:''}</div>${albumGrid('me')}`}`};
+SCR.photo=({u,id})=>{const a=(ALBUMS[u]||[]).find(x=>x.id===id);const U=USERS[u];
+ return hdrBack(u==='me'?'My Collection':'@'+U.handle,u==='me'?`<button class="ib" onclick="ALBUMS.me=ALBUMS.me.filter(x=>x.id!=='${id}');back();toast('Photo removed')">${ic('trash',1.8)}</button>`:'')+`
+ <div class="art" style="aspect-ratio:1">${a.img?`<img src="${a.img}">`:pic(item(a.shelf[0]))}</div>
+ <div class="pad" style="padding-top:12px"><div class="row">${av(u,32)}<div class="grow small"><b>${U.handle}</b> ${esc(a.cap||'')}</div></div><div style="height:30px"></div></div>`};
+function photoSheet(){sheet(()=>`<div style="display:flex;justify-content:center;margin-bottom:12px">${av('me',96)}</div><h3 style="text-align:center">Profile photo</h3><div class="list" style="margin:12px 0 0"><div class="li" onclick="$('avatarin').click()">${ic('image',1.8)}<span class="grow">Choose a photo</span></div>${USERS.me.photo?`<div class="li" onclick="USERS.me.photo=null;LS.set('avatar',null);closeSheet();toast('Photo removed')" style="color:var(--bad)">${ic('trash',1.8)}<span class="grow">Remove photo</span></div>`:''}</div><button class="btn sec2 full" style="margin-top:12px" onclick="closeSheet()">Cancel</button>`)}
+function editProfile(){sheet(()=>`<div style="display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:6px"><div onclick="$('avatarin').click()" style="cursor:pointer">${av('me',84)}</div><button class="link small" onclick="$('avatarin').click()">Change profile photo</button></div><h3>${t('editprofile')}</h3><label class="lbl">Name</label><input class="field" value="${esc(USERS.me.name)}" id="ep_n"><label class="lbl">Bio — what do you collect?</label><textarea class="field" rows="3" id="ep_b">${esc(USERS.me.bio)}</textarea><label class="lbl">City (we never show more than the city)</label><input class="field" value="${esc(USERS.me.city)}" id="ep_c"><button class="btn pri full" style="margin-top:16px" onclick="USERS.me.name=$('ep_n').value;USERS.me.bio=$('ep_b').value;USERS.me.city=$('ep_c').value;closeSheet();toast('Profile updated')">Save</button>`)}
+
+/* ---------- SETTINGS ---------- */
+const tg=(k,label,sub,ico)=>`<div class="li" onclick="flip('${k}')"><div class="ic">${ic(ico,2)}</div><div class="grow"><div style="font-size:14.5px">${label}</div>${sub?`<div class="muted xs">${sub}</div>`:''}</div><div class="tog ${S.toggles[k]?'on':''}"></div></div>`;
+const lk=(label,ico,act,right='')=>`<div class="li" onclick="${act}"><div class="ic">${ic(ico,2)}</div><div class="grow" style="font-size:14.5px">${label}</div>${right}<span class="muted">›</span></div>`;
+function flip(k){S.toggles[k]=!S.toggles[k];LS.set('toggles',S.toggles);USERS.me.allowContact=S.toggles.contact;USERS.me.private=S.toggles.private;const st=$('screen').scrollTop;render();$('screen').scrollTop=st;if(k==='contact'&&S.toggles.contact)toast('Collectors can now email you through ToyScope')}
+SCR.settings=()=>`${hdrBack(t('settings'))}
+ <div class="pad" style="margin-bottom:14px">${S.plan==='pro'?`<div class="card" style="padding:16px"><b>ToyScope Pro</b> <span class="badge b-sale">Active</span><div class="muted small">Unlimited scans · renews Nov 19</div></div>`:`<div class="card" style="padding:16px;background:linear-gradient(135deg,#2E4FE8,#7C3AED);color:#fff;border:0;cursor:pointer" onclick="paywall()"><div class="row"><div class="grow"><div style="font-weight:700;font-size:17px">Go Pro</div><div style="opacity:.85;font-size:13px">Unlimited scans, value ladder, Hunt alerts</div></div><span class="btn sm" style="background:#fff;color:#2E4FE8">Try free</span></div></div>`}</div>
+ <div class="sec"><h3>${t('appearance')}</h3></div><div class="pad"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">${[['light','Light','#F5F6F8','#FFFFFF','#2E4FE8','#12141A'],['dark','Collector','#0B0C0F','#16181D','#E8B341','#F2F3F5'],['retro','Retro','#F2EADB','#FBF6EC','#A63A24','#2A2018']].map(([k,l,bg,sf,ac,tx])=>`<button onclick="setTheme('${k}')" style="border-radius:14px;padding:8px;border:2px solid ${S.theme===k?'var(--accent)':'var(--border)'};background:var(--surface)"><div style="height:58px;border-radius:9px;background:${bg};padding:8px;display:flex;flex-direction:column;gap:5px"><div style="height:8px;width:60%;border-radius:4px;background:${tx};opacity:.85"></div><div style="flex:1;border-radius:6px;background:${sf};border:1px solid rgba(0,0,0,.06)"></div><div style="height:9px;width:45%;border-radius:4px;background:${ac}"></div></div><div style="font-size:13px;font-weight:600;margin-top:6px">${l}</div></button>`).join('')}</div></div>
+ <div class="list" style="margin-top:10px">${tg('auto','Switch to Collector at night','Follows your phone’s dark mode','moon')}</div>
+ <div class="sec"><h3>General</h3></div><div class="list">${lk(t('language'),'globe',"langSheet()",`<span class="muted small">${LANGS.find(l=>l[0]===S.lang)[1]}</span>`)}${lk('My interests','star',"S.stack.push({s:'onboard'});render(true)",`<span class="muted small">${S.interests.size||'None'}</span>`)}${lk('Currency','tag',"toast('USD · CAD · JPY · TWD (later)')",'<span class="muted small">USD</span>')}</div>
+ <div class="sec"><h3>Privacy & safety</h3></div><div class="list">${tg('private','Private profile','Only approved followers see your collection','lock')}${(isMinor()?`<div class="li"><div class="ic">${ic('mail',2)}</div><div class="grow"><div style="font-size:14.5px">Let collectors contact me</div><div class="muted xs">Available at 18</div></div></div>`:tg('contact','Let collectors contact me','Off by default. Messages are forwarded by email — your address stays hidden.','mail'))}${tg('value','Show what I own value','Only you can see it','tag')}${lk('Blocked accounts','block',"toast('No blocked accounts')")}${lk('Safety tips for buying & selling','info',"safetySheet()")}</div>
+ <div class="sec"><h3>Your data</h3></div><div class="list">${tg('analytics','Share anonymous usage stats','Off by default. Helps us fix bugs. No ad trackers.','bolt')}${tg('improve','Help improve recognition','Off by default. Lets us use your scan photos to improve the AI.','image')}${lk('AI processing','globe',"LS.set('aiok',false);toast('You’ll be asked again before your next scan')",'<span class="muted small">Consent given</span>')}${lk('Download my data','upload',"exportData()")}</div>
+ <div class="pad muted xs" style="padding-top:8px">We never sell your data. No ads, no ad trackers, no session recording.</div>
+ <div class="sec"><h3>Notifications</h3></div><div class="list">${tg('pushLikes','Comments & likes','','heart')}${tg('pushFollow','New followers','','users')}${tg('pushHunt','Hunt matches (v2)','','bolt')}${tg('emailNews','Product news by email','','mail')}</div>
+ <div class="sec"><h3>AI engine · prototype only</h3></div><div class="list"><div class="li" onclick="keySheet()"><div class="ic">${ic('key',2)}</div><div class="grow"><div style="font-size:14.5px">Scan engine</div><div class="muted xs">${engineLabel()}</div></div><span class="muted">›</span></div></div>
+ <div class="sec"><h3>Support</h3></div><div class="list">${lk('Contact us','help',"toast('support@toyscope.app')")}${lk('Rate ToyScope','star',"toast('Thanks!')")}${lk('Tell a friend','share',"toast('Link copied')")}${lk('Privacy policy','lock',"go('legal',{d:'privacy'})")}${lk('Terms of use','info',"go('legal',{d:'terms'})")}${lk('Community & marketplace guidelines','users',"go('legal',{d:'community'})")}${lk('Copyright policy','flag',"go('legal',{d:'copyright'})")}${lk('Clear cache','trash',"toast('Cache cleared')")}</div>
+ <div class="sec"><h3>Account</h3></div><div class="list">${lk('Sign out','back',"toast('Signed out (prototype)')")}<div class="li" onclick="delSheet()"><div class="ic" style="color:var(--bad)">${ic('trash',2)}</div><div class="grow" style="color:var(--bad);font-size:14.5px">Delete account</div></div></div>
+ <div class="list" style="margin-top:14px"><div class="li" onclick="resetProto()"><div class="ic">${ic('bolt',2)}</div><div class="grow small">Reset prototype (show onboarding again)</div></div></div>
+ <div class="muted xs" style="text-align:center;padding:18px 0 30px">ToyScope 0.1 prototype · No ads, ever</div>`;
+function setTheme(k){S.theme=k;LS.set('theme',k);const st=$('screen').scrollTop;render();$('screen').scrollTop=st}
+function langSheet(){sheet(()=>`<h3>${t('language')}</h3><div class="muted small" style="margin-bottom:12px">App language. Toy names always also show in their original language.</div><div class="list" style="margin:0">${LANGS.map(([k,l])=>`<div class="li" onclick="S.lang='${k}';LS.set('lang','${k}');closeSheet();${L[k]?'':"toast('Partial translation in prototype')"}"><div class="grow">${l}</div>${S.lang===k?'<span class="ok">✓</span>':''}</div>`).join('')}</div>`)}
+function safetySheet(){sheet(()=>`<h3>Buy & sell safely</h3>${['ToyScope doesn’t handle payments and isn’t part of any sale','Meet in public or use tracked shipping','Never pay by wire transfer, crypto or gift cards','Ask for extra photos of markings and stamps','High-value item? Get it authenticated first','Report anyone who asks for payment outside a safe method'].map(x=>`<div class="acc"><span class="ok">✓</span>${x}</div>`).join('')}<button class="btn pri full" style="margin-top:14px" onclick="closeSheet()">Got it</button>`)}
+function delSheet(){sheet(()=>`<h3>Delete account?</h3><div class="muted small" style="margin:6px 0 16px">Your account, saved toys, listings and photos are deleted within 30 days and removed from backups within 90 days. Download your data first if you want a copy. (Prototype: this resets the app.)</div><button class="btn full" style="background:var(--bad);color:#fff" onclick="deleteAccount()">Delete my account</button><button class="btn sec2 full" style="margin-top:8px" onclick="closeSheet()">Cancel</button>`)}
+function keySheet(){if(window.TS_SERVER)return sheet(()=>`<h3>Scan engine</h3><div class="muted small" style="margin:4px 0 12px">Choose speed or accuracy.</div><div class="seg">${[['accurate','Accurate · Gemini'],['fast','Fast · GPT']].map(([k,l])=>`<button class="${S.eng===k?'on':''}" onclick="S.eng='${k}';LS.set('eng','${k}');LS.set('aiok',false);render()">${l}</button>`).join('')}</div><div class="muted xs" style="margin-top:10px">Accurate is better with rare and Japanese toys but takes 10–30s. Fast takes about 5s. If Accurate fails, we retry with Fast automatically.</div><button class="btn pri full" style="margin-top:16px" onclick="closeSheet()">Done</button>`);sheet(()=>`<h3>Scan engine</h3><div class="muted small" style="margin:4px 0 12px">Built-in Claude (works on your phone)</div><div class="seg" style="margin-bottom:6px">${[['complex','Smart · best accuracy'],['quick','Fast']].map(([k,l])=>`<button class="${S.tier===k?'on':''}" onclick="S.tier='${k}';LS.set('tier','${k}');render()">${l}</button>`).join('')}</div><div class="muted xs" style="margin-bottom:16px">Smart takes longer (about 10–30s) but recognises rare and Japanese toys better.</div><div class="muted small" style="margin:4px 0 12px">Prototype setting. The real app keeps the key on the server.</div>
+ <div class="card" style="padding:12px;margin-bottom:10px"><div class="row"><span class="engine-pill"><i></i>Now: ${engineLabel()}</span></div></div>
+ <label class="lbl">OpenRouter key → GPT-5.4-mini (fastest)</label><input id="k" class="field" type="password" placeholder="sk-or-…" value="${esc(S.key)}" autocomplete="off">
+ <div class="muted xs" style="margin-top:6px">Saved only in this browser on this device. Works when you open the downloaded file in Chrome. Inside the Claude link, outside connections are blocked — leave this empty there and the built-in Claude engine is used.</div>
+ <div class="row" style="margin-top:14px"><button class="btn sec2" style="flex:1" onclick="S.key='';LS.set('key','');closeSheet();toast('Key removed')">Remove key</button><button class="btn pri" style="flex:1" onclick="S.key=$('k').value.trim();LS.set('key',S.key);closeSheet();toast(S.key?'GPT-5.4-mini ready':'No key')">Save</button></div>`)}
+function resetProto(){try{['onboarded','interests','myitems','toggles','signedIn','anon','avatar','bg','tips','aiok','goals','age','blocked'].forEach(k=>localStorage.removeItem('ts_'+k))}catch(e){}location.reload()}
+
+/* ===================== BOOT ===================== */
+if(window.matchMedia)matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>S.toggles.auto&&render());
+S.recent=seedRecent();S.unread=true;ITEMS.forEach(i=>{if(i.owner==='me'&&!i.folder){i.folder=(i.series&&i.series!=='—'?i.series:i.brand)||'Saved';i.owned=true;if(i.status!=='sale')i.status='saved'}});buildFeed();S.liked=new Set(['f_a_r1']);if(!S.onboarded){S.stack=[{s:'welcome'}]}
+render(true);
+(async()=>{try{if(window.claude&&claude.use){const s=await claude.use('sample');if(s){let ok=true;try{const lim=await s.limits();ok=!!(lim&&lim.images)}catch(e){}if(ok){S.sample=s;const c=cur().s;if(['scan','settings'].includes(c))render()}}}}catch(e){}})();
+</script>
+</body>
+</html>
