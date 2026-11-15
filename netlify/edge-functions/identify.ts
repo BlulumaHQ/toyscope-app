@@ -3,9 +3,16 @@ import type { Config, Context } from "@netlify/edge-functions";
 const MODELS: Record<string, string> = {
   accurate: "openai/gpt-6.1-terra",
   fast: "openai/gpt-5.4-mini",
+  t_sol: "openai/gpt-6.1-sol",
+  t_terra: "openai/gpt-6.1-terra",
+  t_sonnet: "anthropic/claude-sonnet-5.5",
+  t_carbon: "google/gemini-4-carbon",
+  t_hydrogen: "google/gemini-4-hydrogen",
+  t_argon: "google/gemini-4-argon",
+  t_opus: "anthropic/claude-opus-5.5",
 };
 const LANGS: Record<string, string> = { en: "English", zh: "Traditional Chinese (Taiwan)", ja: "Japanese", ko: "Korean", fr: "French", es: "Spanish", de: "German" };
-const THINK: Record<string, Record<string, unknown>> = { low: { effort: "low", exclude: true }, minimal: { effort: "minimal", exclude: true } };
+const THINK: Record<string, Record<string, unknown>> = { none: {}, medium: { effort: "medium", exclude: true }, low: { effort: "low", exclude: true }, minimal: { effort: "minimal", exclude: true } };
 const LABELS = ["Front", "Back", "Box", "Accessories"];
 
 const prompt = (labels: string[], langName: string) => `You identify collectible toys from ONE photo for a collector app. Reply with a single JSON object only.
