@@ -64,7 +64,7 @@ export default async (req: Request, context: Context) => {
   const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json", "HTTP-Referer": `https://${host}`, "X-Title": "ToyScope" },
-    body: JSON.stringify({ model, stream: true, max_tokens: 6000, response_format: { type: "json_object" }, messages: [{ role: "user", content }] }),
+    body: JSON.stringify({ model, stream: true, max_tokens: 2500, reasoning: { effort: "low", exclude: true }, response_format: { type: "json_object" }, messages: [{ role: "user", content }] }),
   });
   if (!r.ok || !r.body) {
     const t = await r.text().catch(() => "");
