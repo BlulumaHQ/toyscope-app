@@ -43,6 +43,8 @@ export default async (req: Request, context: Context) => {
   const host = new URL(req.url).host;
   const origin = req.headers.get("origin");
   if (origin && new URL(origin).host !== host) return json({ error: "Forbidden" }, 403);
+  if (req.headers.get("x-toyscope") !== "1" || !(req.headers.get("content-type") || "").includes("application/json"))
+    return json({ error: "Forbidden" }, 403);
   if (Number(req.headers.get("content-length") || 0) > 8_000_000) return json({ error: "Photos are too large." }, 413);
 
   let body: { engine?: string; lang?: string; think?: string; images?: { label?: string; url?: string }[] };
@@ -50,7 +52,7 @@ export default async (req: Request, context: Context) => {
 
   const model = MODELS[body.engine ?? ""] ?? MODELS.fast;
   const images = Array.isArray(body.images) ? body.images.slice(0, 4) : [];
-  if (!images.length || images.some((im) => typeof im?.url !== "string" || !im.url.startsWith("data:image/")))
+  if (!images.length || images.some((im) => typeof im?.url !== "string" || !/^data:image\/(jpeg|png|webp|heic|heif);base64,/.test(im.url) || im.url.length > 3_000_000))
     return json({ error: "Send 1 to 4 photos." }, 400);
   const labels = images.map((im, k) => (LABELS.includes(String(im.label)) ? String(im.label) : k === 0 ? "Front" : "Extra"));
 
@@ -74,4 +76,9 @@ export default async (req: Request, context: Context) => {
   return new Response(r.body, { headers: { "content-type": "text/event-stream", "cache-control": "no-store", "x-model": model } });
 };
 
-export const config: Config = { path: "/api/identify", method: "POST" };
+export const config: Config = {
+  path: "/api/identify",
+  method: "POST",
+  // Max 8 scans per minute per visitor IP, blocked before the function runs.
+  rateLimit: { windowLimit: 8, windowSize: 60, aggregateBy: ["ip", "domain"] },
+};
