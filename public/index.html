@@ -537,20 +537,21 @@ function render(top){
  $('screen').innerHTML=fn(c.p||{});
  const hideNav=['onboard','welcome','scanning','contact','newpost','sell','result','item','post','scan','photo','profile','folder','guide','forsale','legal'].includes(c.s);
  $('navwrap').innerHTML=hideNav?'':nav();
- $('overlay').innerHTML=coachHTML()+(S.sheet?`<div class="sheetbg" onclick="if(event.target===this)closeSheet()"><div class="sheet"><div class="grab"></div>${S.sheet()}</div></div>`:'');placeSpot();
+ $('overlay').innerHTML=coachHTML()+(S.sheet?`<div class="sheetbg" onclick="if(event.target===this)closeSheet()"><div class="sheet"><div class="grab"></div>${S.sheet()}</div></div>`:'');placeSpot();requestAnimationFrame(placeSpot);setTimeout(placeSpot,350);
  if(top)$('screen').scrollTop=0;
  if(c.s==='scan')attachCam();else if(S.camStream)stopCam();
 }
 function themeNow(){if(S.toggles.auto&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)return 'dark';return S.theme==='system'?'light':S.theme}
 function isDark(){return themeNow()==='dark'}
 S.tips=new Set(LS.get('tips',[]));
-const COACH={explore:{pos:'bottom:92px',dir:'down',t:'Tap here to scan any toy',p:'Point your camera at a toy and see what it’s worth. No account needed.'},
+const COACH={explore:{pos:'bottom:calc(112px + env(safe-area-inset-bottom,0px))',dir:'down',t:'Tap here to scan any toy',p:'Point your camera at a toy and see what it’s worth. No account needed.'},
  scan:{pos:'bottom:250px',dir:'down',t:'Add more angles',p:'Front is enough. Back, Box and Accessories make the value more accurate.'},
- result:{pos:'bottom:96px',dir:'down',t:'Save it or sell it',p:'Save puts it in a folder. Sell lets you list it with more photos.'},
+ result:{pos:'bottom:calc(96px + env(safe-area-inset-bottom,0px))',dir:'down',t:'Save it or sell it',p:'Save puts it in a folder. Sell lets you list it with more photos.'},
  saved:{pos:'top:200px',dir:'up',t:'Everything you keep',p:'Recent scans stay here automatically. Folders are yours to organise.'}};
 function coachHTML(){const k=cur().s;const c=COACH[k];if(!c||S.tips.has(k)||S.sheet)return '';if(k==='explore'&&!S.onboarded)return '';
  return `${k==='explore'?`<div class="coachdim" id="cdim" onclick="dismissTip('explore')"></div>`:''}<div class="coach ${c.dir}" style="${c.pos}"><b>${c.t}</b><p>${c.p}</p><button onclick="dismissTip('${k}')">Got it</button></div>`}
-function placeSpot(){const d=$('cdim');const b=document.querySelector('.scanbtn');if(!d||!b)return;const pr=$('phone').getBoundingClientRect(),r=b.getBoundingClientRect();const x=r.left-pr.left+r.width/2,y=r.top-pr.top+r.height/2;d.style.background=`radial-gradient(circle at ${x}px ${y}px, transparent 40px, rgba(0,0,0,.68) 44px)`}
+function placeSpot(){const d=$('cdim');const b=document.querySelector('.scanbtn');if(!d||!b)return;const dr=d.getBoundingClientRect(),r=b.getBoundingClientRect();if(!r.width)return;const x=r.left-dr.left+r.width/2,y=r.top-dr.top+r.height/2,rad=Math.round(Math.max(r.width,r.height)/2)+10;d.style.background=`radial-gradient(circle at ${x}px ${y}px, transparent ${rad}px, rgba(0,0,0,.68) ${rad+4}px)`}
+['resize','orientationchange'].forEach(ev=>addEventListener(ev,()=>setTimeout(placeSpot,120)));
 function dismissTip(k){S.tips.add(k);LS.set('tips',[...S.tips]);render()}
 function sheet(fn){S.sheet=fn;render()}
 function closeSheet(){S.sheet=null;render()}
