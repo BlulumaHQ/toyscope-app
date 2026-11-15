@@ -5,6 +5,7 @@ const MODELS: Record<string, string> = {
   fast: "openai/gpt-5.4-mini",
 };
 const LANGS: Record<string, string> = { en: "English", zh: "Traditional Chinese (Taiwan)", ja: "Japanese", ko: "Korean", fr: "French", es: "Spanish", de: "German" };
+const THINK: Record<string, Record<string, unknown>> = { off: { enabled: false }, budget: { max_tokens: 1024, exclude: true }, low: { effort: "low", exclude: true }, high: { effort: "high", exclude: true } };
 const LABELS = ["Front", "Back", "Box", "Accessories"];
 
 const prompt = (labels: string[], langName: string) => `You identify collectible toys from ONE photo for a collector app. Reply with a single JSON object only.
@@ -44,7 +45,7 @@ export default async (req: Request, context: Context) => {
   if (origin && new URL(origin).host !== host) return json({ error: "Forbidden" }, 403);
   if (Number(req.headers.get("content-length") || 0) > 8_000_000) return json({ error: "Photos are too large." }, 413);
 
-  let body: { engine?: string; lang?: string; images?: { label?: string; url?: string }[] };
+  let body: { engine?: string; lang?: string; think?: string; images?: { label?: string; url?: string }[] };
   try { body = await req.json(); } catch { return json({ error: "Bad request" }, 400); }
 
   const model = MODELS[body.engine ?? ""] ?? MODELS.fast;
@@ -64,7 +65,7 @@ export default async (req: Request, context: Context) => {
   const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json", "HTTP-Referer": `https://${host}`, "X-Title": "ToyScope" },
-    body: JSON.stringify({ model, stream: true, max_tokens: 2500, reasoning: { effort: "low", exclude: true }, response_format: { type: "json_object" }, messages: [{ role: "user", content }] }),
+    body: JSON.stringify({ model, stream: true, max_tokens: 2500, reasoning: THINK[body.think ?? ""] ?? THINK.low, response_format: { type: "json_object" }, messages: [{ role: "user", content }] }),
   });
   if (!r.ok || !r.body) {
     const t = await r.text().catch(() => "");
