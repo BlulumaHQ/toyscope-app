@@ -3,9 +3,14 @@ import type { Config, Context } from "@netlify/edge-functions";
 const MODELS: Record<string, string> = {
   accurate: "google/gemini-omni-1.2-flash",
   fast: "openai/gpt-5.4-mini",
+  t_grok: "x-ai/grok-4.7",
+  t_carbon: "google/gemini-4-carbon",
+  t_terra: "openai/gpt-6.1-terra",
+  t_haiku: "anthropic/claude-haiku-5.5",
+  t_terrapro: "openai/gpt-6.1-terra-pro",
 };
 const LANGS: Record<string, string> = { en: "English", zh: "Traditional Chinese (Taiwan)", ja: "Japanese", ko: "Korean", fr: "French", es: "Spanish", de: "German" };
-const THINK: Record<string, Record<string, unknown>> = { off: { enabled: false }, budget: { max_tokens: 1024, exclude: true }, low: { effort: "low", exclude: true }, high: { effort: "high", exclude: true } };
+const THINK: Record<string, Record<string, unknown>> = { none: {}, off: { enabled: false }, budget: { max_tokens: 1024, exclude: true }, low: { effort: "low", exclude: true }, high: { effort: "high", exclude: true } };
 const LABELS = ["Front", "Back", "Box", "Accessories"];
 
 const prompt = (labels: string[], langName: string) => `You identify collectible toys from ONE photo for a collector app. Reply with a single JSON object only.
@@ -65,7 +70,7 @@ export default async (req: Request, context: Context) => {
   const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json", "HTTP-Referer": `https://${host}`, "X-Title": "ToyScope" },
-    body: JSON.stringify({ model, stream: true, max_tokens: 2500, reasoning: THINK[body.think ?? ""] ?? THINK.low, response_format: { type: "json_object" }, messages: [{ role: "user", content }] }),
+    body: JSON.stringify({ model, stream: true, max_tokens: 2500, ...(Object.keys(THINK[body.think ?? ""] ?? THINK.low).length ? { reasoning: THINK[body.think ?? ""] ?? THINK.low } : {}), response_format: { type: "json_object" }, messages: [{ role: "user", content }] }),
   });
   if (!r.ok || !r.body) {
     const t = await r.text().catch(() => "");
