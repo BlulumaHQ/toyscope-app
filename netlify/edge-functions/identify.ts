@@ -36,7 +36,7 @@ const json = (o: unknown, status = 200) =>
   new Response(JSON.stringify(o), { status, headers: { "content-type": "application/json", "cache-control": "no-store" } });
 
 export default async (req: Request, context: Context) => {
-  const key = Netlify.env.get("OPENROUTER_API_KEY");
+  const key = (Netlify.env.get("OPENROUTER_API_KEY") || "").trim().replace(/^["']|["']$/g, "").replace(/^Bearer\s+/i, "");
   if (!key) return json({ error: "The server has no AI key yet. Add OPENROUTER_API_KEY in Netlify." }, 500);
 
   const host = new URL(req.url).host;
