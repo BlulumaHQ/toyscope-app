@@ -10,7 +10,7 @@ const MODELS: Record<string, string> = {
   t_terrapro: "openai/gpt-6.1-terra-pro",
 };
 const LANGS: Record<string, string> = { en: "English", zh: "Traditional Chinese (Taiwan)", ja: "Japanese", ko: "Korean", fr: "French", es: "Spanish", de: "German" };
-const THINK: Record<string, Record<string, unknown>> = { none: {}, off: { enabled: false }, budget: { max_tokens: 1024, exclude: true }, low: { effort: "low", exclude: true }, high: { effort: "high", exclude: true } };
+const THINK: Record<string, Record<string, unknown>> = { none: {}, off: { enabled: false }, budget: { max_tokens: 1024, exclude: true }, low: { effort: "low", exclude: true }, minimal: { effort: "minimal", exclude: true }, high: { effort: "high", exclude: true } };
 const LABELS = ["Front", "Back", "Box", "Accessories"];
 
 const prompt = (labels: string[], langName: string) => `You identify collectible toys from ONE photo for a collector app. Reply with a single JSON object only.
