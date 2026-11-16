@@ -150,7 +150,7 @@
       const A = S._auth;
       const head = `<div style="text-align:center;padding-top:4px"><div class="logo" style="font-size:26px">Toy<b>Scope</b></div><h3 style="margin-top:8px">${esc(A.title)}</h3></div>`;
       if (A.step === 'code') return head + `<div class="muted small" style="text-align:center;margin:4px 0 14px">We emailed a 6-digit code to <b>${esc(A.email)}</b>. It can take a minute — check spam too.</div>
-        <input id="otp" class="field" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456" style="text-align:center;font-size:22px;letter-spacing:.3em" oninput="if(this.value.replace(/\\D/g,'').length===6)LIVE.verifyCode()">
+        <input id="otp" class="field" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Code" style="text-align:center;font-size:22px;letter-spacing:.3em" oninput="if(this.value.replace(/\\D/g,'').length===(window.OTP_LEN||6))LIVE.verifyCode()">
         <button class="btn pri full" style="margin-top:12px" ${A.busy ? 'disabled' : ''} onclick="LIVE.verifyCode()">${A.busy ? 'Checking…' : 'Continue'}</button>
         <button class="btn full" style="margin-top:6px" onclick="S._auth.step='email';render()">Use a different email</button>`;
       return head + `<div class="muted small" style="text-align:center;margin:4px 0 14px">No password. We email you a one-time code.</div>
@@ -170,7 +170,7 @@
   };
   L.verifyCode = async function () {
     const A = S._auth; if (A.busy) return; const token = ($('otp').value || '').replace(/\D/g, '');
-    if (token.length !== 6) return toast('Enter the 6-digit code');
+    if (token.length < 6 || token.length > 8) return toast('Enter the code from your email');
     A.busy = true; render();
     const { error } = await sb.auth.verifyOtp({ email: A.email, token, type: 'email' });
     A.busy = false;
