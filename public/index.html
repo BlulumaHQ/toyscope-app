@@ -6,6 +6,7 @@
 <title>ToyScope</title>
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/icon-180.png">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -20,7 +21,7 @@
 <style>
 :root{
   --bg:#F5F6F8;--surface:#FFFFFF;--surface2:#EEF0F4;--text:#12141A;--muted:#596070;--border:#E3E6EB;
-  --accent:#2E4FE8;--onAccent:#FFFFFF;--accentSoft:#E8ECFD;--good:#16A34A;--warn:#D97706;--bad:#DC2626;--gold:#B7791F;
+  --accent:#3851A3;--onAccent:#FFFFFF;--accentSoft:#E7EBF6;--good:#16A34A;--warn:#D97706;--bad:#DC2626;--gold:#B7791F;
   --shadow:0 1px 2px rgba(16,24,40,.06),0 4px 16px rgba(16,24,40,.06);
 }
 .retro{
@@ -53,6 +54,7 @@ input,textarea,select{font:inherit;color:var(--text)}
 .hdr h2{font-size:17px;font-weight:600;flex:1;text-align:center}
 .logo{font-family:"Space Grotesk";font-weight:700;font-size:24px;letter-spacing:-.03em;flex:1}
 .logo b{color:var(--accent)}
+.logoimg{display:block;width:auto;flex:none}.dark .logoimg{content:url(brand/toyscope-logo-white.svg)}
 .ib{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;position:relative}
 .ib:active{background:var(--surface2)}
 .ib svg{width:22px;height:22px}
@@ -107,7 +109,7 @@ input,textarea,select{font:inherit;color:var(--text)}
 .retro .b-rare{background:#2A2018;color:#E9C46A}.dark .b-rare{background:#F5C451;color:#1A1408}
 .cc{display:inline-grid;place-items:center;min-width:30px;height:22px;padding:0 6px;border-radius:6px;background:var(--surface);border:1px solid var(--border);font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--muted)}
 .sdot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:1px}
-.d-private{background:#9AA1AD}.d-public{background:#2E4FE8}.d-sale{background:#0F7A4A}
+.d-private{background:#9AA1AD}.d-public{background:#3851A3}.d-sale{background:#0F7A4A}
 .dark .d-public{background:#7C93FF}.retro .d-public{background:#A63A24}
 .ipill{flex:1;min-width:0;display:flex;align-items:center;gap:8px;margin:0 4px;padding:6px 10px;border-radius:12px;background:var(--surface2);cursor:pointer}
 .ipill .n{font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
@@ -342,7 +344,7 @@ html,body{overflow-x:hidden;max-width:100%}
 </style>
 </head>
 <body>
-<div class="stage"><div class="phone" id="phone"><div class="statusbar"><span>9:41</span><span>●●● 􀙇 ▮</span></div><div class="screen" id="screen"><div id="splash" style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;font-family:system-ui,-apple-system,sans-serif"><div style="font-weight:800;font-size:34px;letter-spacing:-.03em;color:#12141A">Toy<span style="color:#2E4FE8">Scope</span></div><div style="width:26px;height:26px;border-radius:50%;border:3px solid #E3E6EB;border-top-color:#2E4FE8;animation:rot .8s linear infinite"></div><div style="font-size:13px;color:#596070">Loading…</div></div></div><div id="navwrap"></div><div id="overlay"></div></div></div>
+<div class="stage"><div class="phone" id="phone"><div class="statusbar"><span>9:41</span><span>●●● 􀙇 ▮</span></div><div class="screen" id="screen"><div id="splash" style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;font-family:system-ui,-apple-system,sans-serif"><img src="brand/toyscope-logo.svg" alt="ToyScope" style="height:44px;width:auto"><div style="width:26px;height:26px;border-radius:50%;border:3px solid #E3E6EB;border-top-color:#3851A3;animation:rot .8s linear infinite"></div><div style="font-size:13px;color:#596070">Loading…</div></div></div><div id="navwrap"></div><div id="overlay"></div></div></div>
 <input type="file" id="filein" accept="image/*" style="display:none"><input type="file" id="postin" accept="image/*" style="display:none"><input type="file" id="sellin" accept="image/*" multiple style="display:none"><input type="file" id="bgin" accept="image/*" style="display:none"><input type="file" id="avatarin" accept="image/*" style="display:none"><input type="file" id="albumin" accept="image/*" multiple style="display:none">
 
 <script>
@@ -417,7 +419,7 @@ const pic=(it)=> it.photos&&it.photos.length?`<img src="${it.photos[0]}" alt="">
 
 /* ===================== FAKE DATA ===================== */
 const USERS={
- me:{id:'me',name:'Sony Lin',handle:'sonykun',city:'Vancouver, BC',color:'#2E4FE8',bio:'Japanese vintage robots & Super Sentai. Mostly Popy and early Bandai. Always hunting boxed Chogokin.',collects:['Chogokin','Super Sentai','Jumbo Machinder','Tin robots'],followers:312,following:184,allowContact:false,private:false},
+ me:{id:'me',name:'Sony Lin',handle:'sonykun',city:'Vancouver, BC',color:'#3851A3',bio:'Japanese vintage robots & Super Sentai. Mostly Popy and early Bandai. Always hunting boxed Chogokin.',collects:['Chogokin','Super Sentai','Jumbo Machinder','Tin robots'],followers:312,following:184,allowContact:false,private:false},
  kenji:{id:'kenji',name:'Kenji Morita',handle:'kaiju_kenji',city:'Osaka, Japan',color:'#16A34A',bio:'Showa soft vinyl kaiju. Bullmark, Marusan, early Popy. Happy to trade with collectors overseas.',collects:['Soft vinyl','Bullmark','Marusan','Kaiju'],followers:5840,following:221,allowContact:true,verified:true},
  rina:{id:'rina',name:'Rina Takahashi',handle:'retro_rina',city:'Tokyo, Japan',color:'#DB2777',bio:'Popy Chogokin and Jumbo Machinder, 1973–1982. Boxes matter.',collects:['Chogokin','Jumbo Machinder','Popy'],followers:9120,following:402,allowContact:true,verified:true},
  joe:{id:'joe',name:'Joe Alvarez',handle:'mint_joe',city:'Los Angeles, CA',color:'#EA580C',bio:'Vintage Kenner Star Wars, 1977–1985. Carded and loose. Looking for clean Palitoy cards.',collects:['Kenner','Star Wars vintage','Carded'],followers:2210,following:610,allowContact:true},
@@ -713,7 +715,7 @@ SCR.welcome=()=>`<div style="min-height:100%;display:flex;flex-direction:column;
   <div style="display:grid;grid-template-columns:repeat(3,84px);gap:10px;transform:rotate(-4deg)">
    ${[ITEMS[0],ITEMS[8],ITEMS[15],ITEMS[13],ITEMS[3],ITEMS[18]].map(i=>`<div class="art" style="border-radius:20px;overflow:hidden;aspect-ratio:1;box-shadow:var(--shadow)">${pic(i)}</div>`).join('')}
   </div>
-  <div class="logo" style="font-size:40px;flex:none;margin-top:16px">Toy<b>Scope</b></div>
+  <img class="logoimg" src="brand/toyscope-logo.svg" alt="ToyScope" style="height:52px;margin-top:16px">
   <div style="font-size:18px;font-weight:600;max-width:280px">Scan any toy. Know what it is, what it’s worth, and where it came from.</div>
   <div class="muted small">Original Japanese names · Condition-based value · Collector community</div>
  </div>
@@ -743,7 +745,7 @@ SCR.home=()=>{
   body=`<div class="pad muted small" style="padding-top:12px">Toys collectors want to sell. Tap one and use Contact to ask or make an offer.</div><div class="grid2" style="padding-top:10px">${its.map(tileHTML).join('')}</div>`}
  else{const list=POSTS.filter(p=>S.follow.has(p.user));
   body=`<div style="height:10px"></div>`+(list.map(postHTML).join('')||`<div class="empty">Follow collectors to see their collections and listings.<br><br><button class="btn pri sm" onclick="tab('discover')">Find collectors</button></div>`)+`<div class="empty small">You’re all caught up</div>`}
- return `<div class="hdr"><div class="logo">Toy<b>Scope</b></div><button class="ib" onclick="go('notifs')">${ic('bell',1.8)}<span class="dot"></span></button></div>
+ return `<div class="hdr"><div class="logo"><img class="logoimg" src="brand/toyscope-logo.svg" alt="ToyScope" style="height:30px"></div><button class="ib" onclick="go('notifs')">${ic('bell',1.8)}<span class="dot"></span></button></div>
  <div class="tabs" style="top:52px">${tb('following',t('following'))}${tb('sale',t('forsale'))}</div>${body}`;
 };
 function postHTML(p){const its=p.items.map(item).filter(Boolean);const it=its[0];const U=USERS[p.user];const L=S.liked.has(p.id);const listing=p.kind==='listing'||p.kind==='shared';const shared=p.kind==='shared';
@@ -792,7 +794,7 @@ function marketHTML(){
  const colRow=k=>`<div style="grid-column:1/-1;margin:6px -16px 4px"><div class="sec" style="padding-top:6px"><h3>Collectors to follow</h3></div><div class="hscroll">${cols.slice(k%cols.length).concat(cols.slice(0,k%cols.length)).map(colCard).join('')}</div></div>`;
  const view=S.view||'grid';const body=[];list.forEach((it,k)=>{if(k>0&&k%12===0)body.push(colRow(k/12));body.push(view==='grid'?tileHTML(it):listRow(it))});
  const sortName={new:'Newest',low:'Lowest price',high:'Highest price',saved:'Most saved'}[sort];
- return `<div class="homebar"><div class="row" style="justify-content:space-between;margin-bottom:10px"><div class="logo" style="font-size:22px">Toy<b>Scope</b></div><span class="muted xs">${ic('pin',2,'width="14" height="14" style="vertical-align:-2px"')} ${esc((USERS.me.city||'').split(',')[0])}</span></div>${homeTabs()}
+ return `<div class="homebar"><div class="row" style="justify-content:space-between;margin-bottom:10px"><img class="logoimg" src="brand/toyscope-logo.svg" alt="ToyScope" style="height:28px"><span class="muted xs">${ic('pin',2,'width="14" height="14" style="vertical-align:-2px"')} ${esc((USERS.me.city||'').split(',')[0])}</span></div>${homeTabs()}
  <div style="position:relative"><span style="position:absolute;left:12px;top:12px;color:var(--muted)">${ic('search',2,'width="20" height="20"')}</span><input id="homeq" class="field" style="padding-left:40px;padding-right:46px" placeholder="Search toys, series, sellers" value="${esc(S.q||'')}" oninput="S.q=this.value;const p=this.selectionStart;render();const f=$('homeq');f.focus();f.setSelectionRange(p,p)"><button onclick="pickScan()" aria-label="Scan to search" style="position:absolute;right:6px;top:5px;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;color:var(--accent)">${ic('scan',2,'width="20" height="20"')}</button></div></div>
  <div class="chips" style="margin-top:2px">${chips.map(c=>`<button class="chip ${S.discChip===c?'on':''}" onclick="S.discChip='${c}';render()">${c}</button>`).join('')}</div>
  <div class="row toolbar"><span class="muted small grow">${list.length} for sale</span>
@@ -808,7 +810,7 @@ function showcaseHTML(){if(!POSTS.length||POSTS[0].kind==='listing'&&!POSTS.some
  const sale=ITEMS.filter(i=>i.status==='sale'&&i.owner!=='me'&&!(USERS[i.owner]||{}).private).sort((a,b)=>(b.saves||0)-(a.saves||0));
  const saleRow=n=>{const its=sale.slice((n*6)%Math.max(sale.length,1)).concat(sale).slice(0,8);return its.length?`<div style="margin:4px 0 14px"><div class="sec" style="padding-top:6px"><h3>For sale now</h3><button class="link small" onclick="setHome('market')">See all ›</button></div><div class="hscroll">${its.map(i=>`<div style="flex:none;width:140px">${tileHTML(i)}</div>`).join('')}</div></div>`:''};
  const body=[];POSTS.forEach((p,k)=>{if(k>0&&k%12===0)body.push(saleRow(k/12));body.push(postHTML(p))});if(POSTS.length<12)body.push(saleRow(0));
- return `<div class="homebar"><div class="row" style="justify-content:space-between;margin-bottom:10px"><div class="logo" style="font-size:22px">Toy<b>Scope</b></div><button class="ib" onclick="pickScan()" aria-label="Scan">${ic('scan',2)}</button></div>${homeTabs()}</div>
+ return `<div class="homebar"><div class="row" style="justify-content:space-between;margin-bottom:10px"><img class="logoimg" src="brand/toyscope-logo.svg" alt="ToyScope" style="height:28px"><button class="ib" onclick="pickScan()" aria-label="Scan">${ic('scan',2)}</button></div>${homeTabs()}</div>
  <div class="pad muted small" style="padding-top:10px;padding-bottom:4px">Collections and finds shared by collectors. Not for sale unless marked.</div>
  ${body.join('')||'<div class="empty">No posts yet. Scan a toy and tap Share to be the first.</div>'}
  <div class="empty small">You’re all caught up · <button class="link small" onclick="setHome('market')">Browse the Marketplace</button></div>`}
@@ -945,7 +947,7 @@ function tryDemo(){if(S.plan!=='pro')return paywall('scan',()=>tryDemo());startS
 S.signedIn=LS.get('signedIn',false);S.anon=LS.get('anon',0);
 function need(fn){if(S.signedIn)return fn();S.after=fn;signup()}
 function signupBlocked(){return sheet(()=>`<h3>Sorry, you can’t create an account</h3><div class="muted small" style="margin:6px 0 16px">ToyScope is for people 13 and older.</div><button class="btn pri full" onclick="closeSheet()">OK</button>`)}
-function signup(title,login){if(S.blocked)return signupBlocked();S._login=!!login;sheet(()=>`<div style="text-align:center;padding-top:4px"><div class="logo" style="font-size:26px">Toy<b>Scope</b></div><h3 style="margin-top:8px">${title||'Create a free account'}</h3><div class="muted small" style="margin:4px 0 16px">Save toys into folders, sell, and follow collectors. Free — no ads, ever.</div></div>
+function signup(title,login){if(S.blocked)return signupBlocked();S._login=!!login;sheet(()=>`<div style="text-align:center;padding-top:4px"><div class="logo" style="font-size:26px"><img class="logoimg" src="brand/toyscope-logo.svg" alt="ToyScope" style="height:34px;margin:0 auto"></div><h3 style="margin-top:8px">${title||'Create a free account'}</h3><div class="muted small" style="margin:4px 0 16px">Save toys into folders, sell, and follow collectors. Free — no ads, ever.</div></div>
  <button class="btn full" style="background:#000;color:#fff" onclick="doSignup()">Continue with Apple</button>
  <button class="btn out full" style="margin-top:8px" onclick="doSignup()">Continue with Google</button>
  <button class="btn sec2 full" style="margin-top:8px" onclick="doSignup()">Continue with email</button>
@@ -1344,8 +1346,8 @@ const tg=(k,label,sub,ico)=>`<div class="li" onclick="flip('${k}')"><div class="
 const lk=(label,ico,act,right='')=>`<div class="li" onclick="${act}"><div class="ic">${ic(ico,2)}</div><div class="grow" style="font-size:14.5px">${label}</div>${right}<span class="muted">›</span></div>`;
 function flip(k){S.toggles[k]=!S.toggles[k];LS.set('toggles',S.toggles);USERS.me.allowContact=S.toggles.contact;USERS.me.private=S.toggles.private;const st=$('screen').scrollTop;render();$('screen').scrollTop=st;if(k==='contact'&&S.toggles.contact)toast('Collectors can now email you through ToyScope')}
 SCR.settings=()=>`${hdrBack(t('settings'))}
- <div class="pad" style="margin-bottom:14px">${S.plan==='pro'?`<div class="card" style="padding:16px"><b>ToyScope Pro</b> <span class="badge b-sale">Active</span><div class="muted small">${S.founderTier==='lifetime'?'Founder #'+S.founderNo+' · free for life':S.founderTier==='founding'?'Founding Collector #'+S.founderNo+' · free until '+new Date(S.proUntil).toLocaleDateString()+', then $19.99/yr':'Scanner and selling unlocked · renews yearly'}</div></div>`:`<div class="card" style="padding:16px;background:linear-gradient(135deg,#2E4FE8,#7C3AED);color:#fff;border:0;cursor:pointer" onclick="paywall()"><div class="row"><div class="grow"><div style="font-weight:700;font-size:17px">Go Pro</div><div style="opacity:.85;font-size:13px">Unlimited scans and selling · 7 days free</div></div><span class="btn sm" style="background:#fff;color:#2E4FE8">Try free</span></div></div>`}</div>
- <div class="sec"><h3>${t('appearance')}</h3></div><div class="pad"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">${[['light','Light','#F5F6F8','#FFFFFF','#2E4FE8','#12141A'],['dark','Collector','#0B0C0F','#16181D','#E8B341','#F2F3F5'],['retro','Retro','#F2EADB','#FBF6EC','#A63A24','#2A2018']].map(([k,l,bg,sf,ac,tx])=>`<button onclick="setTheme('${k}')" style="border-radius:14px;padding:8px;border:2px solid ${S.theme===k?'var(--accent)':'var(--border)'};background:var(--surface)"><div style="height:58px;border-radius:9px;background:${bg};padding:8px;display:flex;flex-direction:column;gap:5px"><div style="height:8px;width:60%;border-radius:4px;background:${tx};opacity:.85"></div><div style="flex:1;border-radius:6px;background:${sf};border:1px solid rgba(0,0,0,.06)"></div><div style="height:9px;width:45%;border-radius:4px;background:${ac}"></div></div><div style="font-size:13px;font-weight:600;margin-top:6px">${l}</div></button>`).join('')}</div></div>
+ <div class="pad" style="margin-bottom:14px">${S.plan==='pro'?`<div class="card" style="padding:16px"><b>ToyScope Pro</b> <span class="badge b-sale">Active</span><div class="muted small">${S.founderTier==='lifetime'?'Founder #'+S.founderNo+' · free for life':S.founderTier==='founding'?'Founding Collector #'+S.founderNo+' · free until '+new Date(S.proUntil).toLocaleDateString()+', then $19.99/yr':'Scanner and selling unlocked · renews yearly'}</div></div>`:`<div class="card" style="padding:16px;background:linear-gradient(135deg,#3851A3,#7C3AED);color:#fff;border:0;cursor:pointer" onclick="paywall()"><div class="row"><div class="grow"><div style="font-weight:700;font-size:17px">Go Pro</div><div style="opacity:.85;font-size:13px">Unlimited scans and selling · 7 days free</div></div><span class="btn sm" style="background:#fff;color:#3851A3">Try free</span></div></div>`}</div>
+ <div class="sec"><h3>${t('appearance')}</h3></div><div class="pad"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">${[['light','Light','#F5F6F8','#FFFFFF','#3851A3','#12141A'],['dark','Collector','#0B0C0F','#16181D','#E8B341','#F2F3F5'],['retro','Retro','#F2EADB','#FBF6EC','#A63A24','#2A2018']].map(([k,l,bg,sf,ac,tx])=>`<button onclick="setTheme('${k}')" style="border-radius:14px;padding:8px;border:2px solid ${S.theme===k?'var(--accent)':'var(--border)'};background:var(--surface)"><div style="height:58px;border-radius:9px;background:${bg};padding:8px;display:flex;flex-direction:column;gap:5px"><div style="height:8px;width:60%;border-radius:4px;background:${tx};opacity:.85"></div><div style="flex:1;border-radius:6px;background:${sf};border:1px solid rgba(0,0,0,.06)"></div><div style="height:9px;width:45%;border-radius:4px;background:${ac}"></div></div><div style="font-size:13px;font-weight:600;margin-top:6px">${l}</div></button>`).join('')}</div></div>
  <div class="list" style="margin-top:10px">${tg('auto','Switch to Collector at night','Follows your phone’s dark mode','moon')}</div>
  <div class="sec"><h3>General</h3></div><div class="list">${lk(t('language'),'globe',"langSheet()",`<span class="muted small">${LANGS.find(l=>l[0]===S.lang)[1]}</span>`)}${lk('My interests','star',"S.stack.push({s:'onboard'});render(true)",`<span class="muted small">${S.interests.size||'None'}</span>`)}${lk('Currency','tag',"toast('USD · CAD · JPY · TWD (later)')",'<span class="muted small">USD</span>')}</div>
  <div class="sec"><h3>Privacy & safety</h3></div><div class="list">${tg('private','Private profile','Only approved followers see your collection','lock')}${(isMinor()?`<div class="li"><div class="ic">${ic('mail',2)}</div><div class="grow"><div style="font-size:14.5px">Let collectors contact me</div><div class="muted xs">Available at 18</div></div></div>`:tg('contact','Let collectors contact me','Off by default. Messages are forwarded by email — your address stays hidden.','mail'))}${tg('value','Show what I own value','Only you can see it','tag')}${lk('Blocked accounts','block',"toast('No blocked accounts')")}${lk('Safety tips for buying & selling','info',"safetySheet()")}</div>
