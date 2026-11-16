@@ -333,6 +333,13 @@
       const d = await res.json(); return d.rating || 'unchecked';
     } catch (e) { return 'unchecked'; }
   };
+  L.translate = async function (title, text, to) {
+    if (!me) return { error: 'Sign in to translate' };
+    try {
+      const res = await fetch('/api/translate', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-ToyScope': '1', Authorization: 'Bearer ' + (window._tok || '') }, body: JSON.stringify({ title, text, to }) });
+      const d = await res.json(); return res.ok ? d : { error: d.error || 'Translation is not available right now.' };
+    } catch (e) { return { error: 'Translation is not available right now.' }; }
+  };
   L.feedback = async function (f) {
     if (!me) return false;
     const { error } = await sb.from('feedback').insert(Object.assign({ user_id: me.id, app_version: 'web-beta' }, f));
