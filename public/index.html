@@ -574,13 +574,13 @@ USERS.me.photo=LS.get('avatar',null);
 const cur=()=>S.stack.length?S.stack[S.stack.length-1]:{s:S.tab};
 function go(s,p){if(s==='scan'&&S.plan!=='pro'){render(true);return paywall('scan',()=>go('scan'))}S.stack.push({s,p});render(true)}
 function back(){S.stack.pop();render(true)}
-function tab(n){S.tab=n;S.stack=[];render(true)}
+function tab(n){const same=S.tab===n&&!S.stack.length;S.tab=n;S.stack=[];render(true);if(same){const sc=$('screen');if(sc)sc.scrollTo({top:0,behavior:'smooth'})}}
 const $=id=>document.getElementById(id);
 function render(top){
  const ph=$('phone');const th=themeNow();ph.classList.toggle('dark',th==='dark');ph.classList.toggle('retro',th==='retro');document.body.classList.toggle('dark-page',isDark());
  const c=cur();const fn=SCR[c.s]||SCR.home;
  $('screen').innerHTML=fn(c.p||{});
- const hideNav=['onboard','welcome','scanning','contact','newpost','sell','result','item','post','scan','photo','profile','folder','guide','forsale','legal'].includes(c.s);
+ const hideNav=['onboard','welcome','scanning','contact','newpost','sell','result','scan'].includes(c.s);
  $('navwrap').innerHTML=hideNav?'':nav();
  $('overlay').innerHTML=coachHTML()+(S.sheet?`<div class="sheetbg" onclick="if(event.target===this)closeSheet()"><div class="sheet"><div class="grab"></div>${S.sheet()}</div></div>`:'');placeSpot();requestAnimationFrame(placeSpot);setTimeout(placeSpot,350);
  if(top)$('screen').scrollTop=0;
@@ -617,7 +617,7 @@ const copy=(txt)=>{try{navigator.clipboard.writeText(txt).then(()=>toast('Copied
 const verified=u=>USERS[u].verified?'<span style="color:var(--accent)">✔︎</span>':'';
 
 function nav(){
- const on=n=>S.tab===n&&!S.stack.length?'on':'';
+ const on=n=>S.tab===n?'on':'';
  return `<div class="nav">
  <button class="${on('explore')}" onclick="tab('explore')">${ic('search',1.8)}Explore</button>
  <button class="${on('saved')}" onclick="tab('saved')">${ic('bookmark',1.8)}${t('saved')}</button>
