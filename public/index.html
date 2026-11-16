@@ -637,8 +637,12 @@ const stName=s=>STATUS[s][S.lang==='zh'?'zh':S.lang==='ja'?'ja':'en'];
 
 /* ===================== STATE ===================== */
 const LS={get(k,d){try{const v=localStorage.getItem('ts_'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('ts_'+k,JSON.stringify(v))}catch(e){}}};
+/* App language: ?lang= from the landing page wins and is remembered; otherwise a saved choice; otherwise the phone's language */
+function pickLang(x){const c=String(x||'').toLowerCase().split(/[-_]/)[0];return c==='zh'?'zh':(L[c]?c:null)}
+(function(){try{const q=new URLSearchParams(location.search).get('lang');const k=q&&(pickLang(q)||(q.toLowerCase()==='en'?'en':null));if(k){LS.set('lang',k);const u=new URL(location.href);u.searchParams.delete('lang');history.replaceState(null,'',u.pathname+u.search+u.hash)}}catch(e){}})();
+function detectLang(){const ls=(navigator.languages&&navigator.languages.length)?navigator.languages:[navigator.language||'en'];for(const x of ls){const k=pickLang(x);if(k)return k;if(String(x).toLowerCase().startsWith('en'))return 'en'}return 'en'}
 const S={
- theme:LS.get('theme','light'),lang:LS.get('lang','en'),onboarded:LS.get('onboarded',false),interests:new Set(LS.get('interests',[])),
+ theme:LS.get('theme','light'),lang:LS.get('lang',detectLang()),onboarded:LS.get('onboarded',false),interests:new Set(LS.get('interests',[])),
  key:LS.get('key',''),tab:'explore',stack:[],feedTab:'following',liked:new Set(['p2']),saved:new Set(),follow:new Set(['kenji','rina','joe','minjun']),
  colFilter:'all',colSort:'value',meTab:'collection',profTab:'posts',discChip:'All',q:'',scanMode:'single',
  toggles:Object.assign({analytics:false,improve:false},LS.get('toggles',{private:false,contact:false,value:true,pushLikes:true,pushFollow:true,pushHunt:true,emailNews:false})),
