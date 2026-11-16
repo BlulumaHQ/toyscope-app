@@ -54,6 +54,7 @@ input,textarea,select{font:inherit;color:var(--text)}
 .hdr h2{font-size:17px;font-weight:600;flex:1;text-align:center}
 .logo{font-family:"Space Grotesk";font-weight:700;font-size:24px;letter-spacing:-.03em;flex:1}
 .logo b{color:var(--accent)}
+.sens{position:relative;width:100%;height:100%;overflow:hidden}.sens img,.sens svg:first-child{filter:blur(18px);transform:scale(1.15)}.sens span{position:absolute;inset:auto 8px 8px 8px;display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(0,0,0,.6);color:#fff;font-size:12px;font-weight:600;border-radius:999px;padding:5px 10px}.sens span svg{width:14px;height:14px;filter:none;transform:none}
 .logoimg{display:block;width:auto;flex:none}.dark .logoimg{content:url(brand/toyscope-logo-white.svg)}
 .ib{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;position:relative}
 .ib:active{background:var(--surface2)}
@@ -350,7 +351,7 @@ html,body{overflow-x:hidden;max-width:100%}
 <script>
 const H=(n,...a)=>{try{return window.LIVE&&LIVE[n]&&LIVE[n](...a)}catch(e){console.error(e)}};const uid=()=>(crypto.randomUUID?crypto.randomUUID():'u'+Date.now()+Math.random().toString(16).slice(2));
 /* ===================== ICONS ===================== */
-const I={sort:'<path d="M7 4v16M3 8l4-4 4 4M17 20V4M13 16l4 4 4-4"/>',
+const I={eye:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',sort:'<path d="M7 4v16M3 8l4-4 4 4M17 20V4M13 16l4 4 4-4"/>',
 filter:'<path d="M4 6h16M7 12h10M10 18h4"/>',
 grid:'<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
 list:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',
@@ -414,8 +415,9 @@ function heroArt(v){const sets=[[['tin','#9CA3AF','#475569'],['kaiju','#15803D',
  const bgs=[['#2A2018','#4A3726'],['#141821','#2B3342'],['#1E2A22','#34483A']];const [a,b]=bgs[v%3];const its=sets[v%3];
  const strip=t=>t.replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'').replace(/<defs>.*?<\/defs>/,'').replace(/<rect width="200" height="200"[^>]*\/>/g,'').replace(/<ellipse[^>]*\/>/,'');
  return `<svg viewBox="0 0 390 300" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="hb${v}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${b}"/><stop offset="1" stop-color="${a}"/></linearGradient><radialGradient id="hl${v}" cx="50%" cy="0%" r="80%"><stop offset="0" stop-color="#FFE7B0" stop-opacity=".45"/><stop offset="1" stop-color="#FFE7B0" stop-opacity="0"/></radialGradient></defs><rect width="390" height="300" fill="url(#hb${v})"/><rect width="390" height="300" fill="url(#hl${v})"/><rect x="20" y="14" width="350" height="5" rx="2" fill="#FFF3D6" opacity=".7"/><rect x="0" y="196" width="390" height="10" fill="#B9C7D0" opacity=".35"/>${its.map((x,k)=>`<svg x="${20+k*120}" y="66" width="120" height="132" viewBox="20 10 160 170">${strip(art([x[0],x[1],x[2],'transparent']))}</svg>`).join('')}</svg>`}
-const postPic=p=>p.img?`<img src="${p.img}" alt="">`:p.album&&p.album.img?`<img src="${p.album.img}" alt="">`:p.album&&p.album.scene?sceneArt(p.user,p.album.scene,p.album.id):p.shelf?shelfArt(p.items):pic(item(p.items[0]));
-const pic=(it)=> it.photos&&it.photos.length?`<img src="${it.photos[0]}" alt="">`:it.img?`<img src="${it.img}" alt="">`:art(it.art);
+const postPic=p=>p.img?`<img src="${p.img}" alt="">`:p.album&&p.album.img?sensImg(p.album,`<img src="${p.album.img}" alt="">`,p.user):p.album&&p.album.scene?sceneArt(p.user,p.album.scene,p.album.id):p.shelf?shelfArt(p.items):pic(item(p.items[0]));
+const pic0=(it)=> it.photos&&it.photos.length?`<img src="${it.photos[0]}" alt="">`:it.img?`<img src="${it.img}" alt="">`:art(it.art);
+const pic=(it)=> isSens(it)&&!(it.owner==='me'||canSeeSens())?`<div class="sens">${pic0(it)}<span>${ic('eye',2)} Sensitive</span></div>`:pic0(it);
 
 /* ===================== FAKE DATA ===================== */
 const USERS={
@@ -586,9 +588,9 @@ const folderItems=f=>[...ITEMS.filter(i=>i.owner==='me'&&i.folder===f),...Object
 function buildFeed(){const out=[];let k=0;const when=k=>k<8?(k+1)+'h':Math.ceil(k/8)+'d';
  const vis=u=>USERS[u]&&(u==='me'||!USERS[u].private);
  // shared toys (not for sale), newest first
- ITEMS.filter(i=>i.status==='public'&&vis(i.owner)).sort((a,b)=>(b.added||0)-(a.added||0)).forEach(i=>{out.push({id:'f_'+i.id,kind:'shared',user:i.owner,items:[i.id],time:i.owner==='me'&&(i.added||0)>Date.now()/1000-3600?'now':when(k),likes:i.owner==='me'?0:40+((k*137)%600),cap:(i.desc||'').split('\n')[0],comments:[]});k++});
+ ITEMS.filter(i=>i.status==='public'&&vis(i.owner)&&!(isMinor()&&isSens(i))).sort((a,b)=>(b.added||0)-(a.added||0)).forEach(i=>{out.push({id:'f_'+i.id,kind:'shared',user:i.owner,items:[i.id],time:i.owner==='me'&&(i.added||0)>Date.now()/1000-3600?'now':when(k),likes:i.owner==='me'?0:40+((k*137)%600),cap:(i.desc||'').split('\n')[0],comments:[]});k++});
  // collection photos, mixed across collectors
- const us=Object.keys(ALBUMS).filter(u=>u!=='me'&&vis(u));for(let r=0;r<6;r++)us.forEach(u=>{const a=(ALBUMS[u]||[])[r];if(!a)return;const old=a.shelf?OLDPOSTS.find(p=>p.user===u&&p.items&&p.items.join()===a.shelf.join()):null;out.push({id:'f_'+a.id,kind:'album',user:u,items:a.shelf||[],shelf:true,album:a,time:when(k),likes:old?old.likes:300+((k*211)%1500),cap:a.cap,comments:old?old.comments:[]});k++});
+ const us=Object.keys(ALBUMS).filter(u=>u!=='me'&&vis(u));for(let r=0;r<6;r++)us.forEach(u=>{const a=(ALBUMS[u]||[])[r];if(!a||(isMinor()&&a.rating==='sensitive'))return;const old=a.shelf?OLDPOSTS.find(p=>p.user===u&&p.items&&p.items.join()===a.shelf.join()):null;out.push({id:'f_'+a.id,kind:'album',user:u,items:a.shelf||[],shelf:true,album:a,time:when(k),likes:old?old.likes:300+((k*211)%1500),cap:a.cap,comments:old?old.comments:[]});k++});
  POSTS.length=0;out.forEach(x=>POSTS.push(x))}
 function tv(t){return t==='now'?0:parseInt(t)*({m:1,h:60,d:1440}[t.slice(-1)]||1)}
 const NOTIFS=[
@@ -792,11 +794,11 @@ function marketHTML(){
  const P=i=>i.price||Math.round(((i.low||0)+(i.high||i.low||0))/2);
  const chipOk=it=>{const c=S.discChip;if(c==='All')return true;const m={Japanese:it.flag==='JP',Chogokin:/chogokin|超合金/i.test(it.series+it.name+it.origin),'Star Wars':it.series.includes('Star Wars'),Barbie:it.series.includes('Barbie'),'Hot Wheels':it.series.includes('Hot Wheels'),Gunpla:it.series==='Gunpla','Soft vinyl':['Bullmark','Marusan'].includes(it.brand),Sentai:it.series==='Super Sentai','Under $50':P(it)<50,Boxed:(it.grade||0)>=4,Loose:(it.grade||0)<4};return !!m[c]};
  const F=S.flt||{};const fltOk=it=>(F.min==null||P(it)>=F.min)&&(F.max==null||P(it)<=F.max)&&(!F.country||it.flag===F.country)&&(!F.cond||(F.cond==='boxed'?(it.grade||0)>=4:(it.grade||0)<4));
- const all=ITEMS.filter(i=>i.status==='sale'&&(i.owner==='me'||!owner(i).private));
+ const all=ITEMS.filter(i=>i.status==='sale'&&(i.owner==='me'||!owner(i).private)&&!(isMinor()&&isSens(i)));
  let list=all.filter(i=>match(i)&&chipOk(i)&&fltOk(i));
  const sort=S.sort||'new';list.sort(sort==='low'?(a,b)=>P(a)-P(b):sort==='high'?(a,b)=>P(b)-P(a):sort==='saved'?(a,b)=>(b.saves||0)-(a.saves||0):(a,b)=>(b.added||0)-(a.added||0));
  const filtering=q||S.discChip!=='All'||Object.keys(F).some(k=>F[k]!=null&&F[k]!=='');
- const trending=all.filter(i=>i.owner!=='me').sort((a,b)=>(b.saves||0)-(a.saves||0)).slice(0,8);
+ const trending=all.filter(i=>i.owner!=='me'&&!isSens(i)).sort((a,b)=>(b.saves||0)-(a.saves||0)).slice(0,8);
  const cols=Object.values(USERS).filter(u=>u.id!=='me');
  const listRow=i=>{const U=owner(i);return `<div class="lrow" onclick="openItem('${i.id}')"><div class="art">${pic(i)}</div><div class="grow" style="min-width:0"><div class="ell" style="font-weight:600;font-size:14px">${esc(i.title||i.name)}</div><div style="font-weight:700;font-size:15px;margin-top:2px">${money(P(i))}</div><div class="muted xs ell">${esc(tierName(i.grade||0))} · ${i.year||''}</div><div class="muted xs ell">${i.owner==='me'?'<b style="color:var(--accent)">Yours</b>':'@'+esc(U.handle||'')} · ${esc((U.city||'').split(',')[0])}</div></div></div>`};
  const colRow=k=>`<div style="grid-column:1/-1;margin:6px -16px 4px"><div class="sec" style="padding-top:6px"><h3>Collectors to follow</h3></div><div class="hscroll">${cols.slice(k%cols.length).concat(cols.slice(0,k%cols.length)).map(colCard).join('')}</div></div>`;
@@ -815,7 +817,7 @@ function marketHTML(){
  <div class="pad muted xs" style="padding:10px 16px 24px;text-align:center">ToyScope is not affiliated with any toy maker or brand.</div>`}
 SCR.explore=()=>S.homeTab==='market'?marketHTML():showcaseHTML();
 function showcaseHTML(){if(!POSTS.length||POSTS[0].kind==='listing'&&!POSTS.some(p=>p.kind==='album'))buildFeed();
- const sale=ITEMS.filter(i=>i.status==='sale'&&i.owner!=='me'&&!(USERS[i.owner]||{}).private).sort((a,b)=>(b.saves||0)-(a.saves||0));
+ const sale=ITEMS.filter(i=>i.status==='sale'&&i.owner!=='me'&&!(USERS[i.owner]||{}).private&&!isSens(i)).sort((a,b)=>(b.saves||0)-(a.saves||0));
  const saleRow=n=>{const its=sale.slice((n*6)%Math.max(sale.length,1)).concat(sale).slice(0,8);return its.length?`<div style="margin:4px 0 14px"><div class="sec" style="padding-top:6px"><h3>For sale now</h3><button class="link small" onclick="setHome('market')">See all ›</button></div><div class="hscroll">${its.map(i=>`<div style="flex:none;width:140px">${tileHTML(i)}</div>`).join('')}</div></div>`:''};
  const body=[];POSTS.forEach((p,k)=>{if(k>0&&k%12===0)body.push(saleRow(k/12));body.push(postHTML(p))});if(POSTS.length<12)body.push(saleRow(0));
  return `<div class="homebar"><div class="row" style="justify-content:space-between;margin-bottom:10px"><img class="logoimg" src="brand/toyscope-logo.svg" alt="ToyScope" style="height:28px"><button class="ib" onclick="pickScan()" aria-label="Scan">${ic('scan',2)}</button></div>${homeTabs()}</div>
@@ -1007,7 +1009,7 @@ function normalize(a){
  return {name:a.name_app||a.name_en||'Unknown toy',name_en:a.name_en,origin:a.name_origin,country:a.origin_country,brand:a.brand,series:a.series,year:a.year,category:a.category,
   collectible:a.is_collectible!==false,repro:!!a.is_reproduction_or_custom,rarity:a.rarity||'common',conf:+a.confidence||0,cands:(a.candidates||[]).filter(c=>c&&c.name),
   grade:gi,reasons:(a.condition_reasons||[]).filter(Boolean),accExp:(a.accessories_expected||[]).filter(Boolean),accVis:(a.accessories_visible||[]).filter(Boolean),
-  low:a.price_low_usd,high:a.price_high_usd,tiers,reproVal:a.reproduction_value_usd,history:a.history,tips:(a.buying_tips||[]).filter(Boolean),reproSigns:(a.reproduction_signs||[]).filter(Boolean),notes:a.notes,category:a.category,itemNo:a.item_number||null,itemSrc:a.item_number_source||null,cd:a.condition_details||null};
+  low:a.price_low_usd,high:a.price_high_usd,tiers,reproVal:a.reproduction_value_usd,history:a.history,tips:(a.buying_tips||[]).filter(Boolean),reproSigns:(a.reproduction_signs||[]).filter(Boolean),notes:a.notes,category:a.category,itemNo:a.item_number||null,itemSrc:a.item_number_source||null,cd:a.condition_details||null,rating:['general','sensitive','prohibited'].includes(a.content_rating)?a.content_rating:'general'};
 }
 function DEMO(){return normalize({name_app:S.lang==='zh'?'蓋特 1 號 巨大機器人（Jumbo Machinder）':'Getter-1 Jumbo Machinder',name_en:'Getter-1 Jumbo Machinder',name_origin:'ゲッター1 ジャンボマシンダー',origin_country:'Japan',brand:'Popy',series:'Getter Robo',year:'1975',category:'Large polyethylene robot',is_collectible:true,rarity:'uncommon',confidence:.86,candidates:[{name:'Getter-1 Jumbo Machinder',confidence:.86},{name:'Getter-1 (later reissue)',confidence:.1}],condition_grade:'loose_good',condition_reasons:['Loose, no box','Light paint wear on chest','Fist launcher missing','Plastic not yellowed'],accessories_expected:['Missile fists ×2','Getter Tomahawk','Instruction sheet'],accessories_visible:['Missile fists ×2'],price_low_usd:380,price_high_usd:520,price_tiers_usd:{broken:[60,110],loose_poor:[180,260],loose_good:[380,520],loose_complete:[520,700],boxed_opened:[800,1100],mint_in_box:[1400,2000]},history:'Popy launched the Jumbo Machinder line in 1973 — 60 cm polyethylene robots that kids could actually play with. Getter-1 came out alongside the 1974–75 Getter Robo TV series and is one of the core early releases.',buying_tips:['Check the shoulder joints for stress cracks','Original fists have a maker stamp inside','Many sellers mix in reissue parts — compare the plastic color'],reproduction_signs:[],notes:'',item_number:null,item_number_source:null,condition_details:{paint:{score:7,note:'Light wear on chest'},structure:{score:8,note:'Joints firm, no cracks'},plastic:{score:8,note:'No yellowing'},stickers:{score:6,note:'Edges slightly lifting'},accessories:{score:5,note:'One fist launcher missing'},packaging:{score:null,note:'No box in photos'}}})}
 
@@ -1060,7 +1062,7 @@ function showOff(src){const it=src==='result'?null:item(src);const name=it?it.na
  <div class="card small" style="padding:12px 14px;margin-bottom:6px">Shows on the Showcase feed and your profile with a <b>Not for sale</b> label. You can stop sharing anytime.</div>
  ${isMinor()?'':`<div class="li" style="padding:12px 0;border:0;cursor:pointer" onclick="S._offers=!S._offers;render()"><div class="grow"><div style="font-size:14.5px;font-weight:600">Open to offers</div><div class="muted xs">Not listed for sale, but collectors can message you with an offer.</div></div><div class="tog ${S._offers?'on':''}"></div></div>`}
  <button class="btn pri full" style="margin-top:10px" onclick="doShowOff('${src}')">Share</button>`)}
-function doShowOff(src){const offers=!!S._offers&&!isMinor();S._offers=null;let it;
+function doShowOff(src){if(src==='result'&&isBlocked(S.lastResult))return blockedSheet();const offers=!!S._offers&&!isMinor();S._offers=null;let it;
  if(src==='result'){it=newItemFromResult(S.lastResult,'public');ITEMS.unshift(it)}else{it=item(src);it.status='public'}
  it.offers=offers;it.added=Date.now()/1000;H(src==='result'?'saveItem':'itemUpdate',src==='result'?it:it.id);buildFeed();S.sheet=null;render();toast(offers?'Shared · open to offers':'Shared to Showcase')}
 function stopShare(id){const it=item(id);it.status='saved';it.offers=false;H('itemUpdate',id);buildFeed();render();toast('Only you can see it now')}
@@ -1079,7 +1081,7 @@ function gaugeCard(r){
 function ladder(r){const any=TIERS.some(x=>r.tiers[x.k]);if(!any)return '';const mx=Math.max(...TIERS.map(x=>r.tiers[x.k]?r.tiers[x.k][1]:0))||1;
  return `<div class="sec" style="padding:18px 0 6px"><h3>${t('ladder')}</h3></div><div class="card ladder" style="padding:6px">${TIERS.map((x,i)=>{const v=r.tiers[x.k];const here=i===r.grade;return `<div class="rung ${here?'here':''}"><div style="width:112px;font-size:13px;font-weight:${here?700:500}">${tierName(i)}${here?`<div class="xs" style="color:var(--accent);font-weight:700">▶ ${t('youhere')}</div>`:''}</div><div class="bar"><i style="width:${v?Math.max(4,v[1]/mx*100):0}%;opacity:${here?1:.45}"></i></div><div class="price small" style="width:86px;text-align:right">${v?range(v[0],v[1]):'—'}</div></div>`}).join('')}</div>`}
 function reportSheet(){return `<h3>What’s wrong?</h3><div class="muted small" style="margin-bottom:12px">Your report helps the AI get better.</div><div class="list" style="margin:0">${['Wrong toy','Wrong condition','Price looks off','Not a toy / inappropriate'].map(x=>`<div class="li" onclick="closeSheet();toast('Thanks — report sent')">${esc(x)}</div>`).join('')}</div><button class="btn pri full" style="margin-top:12px" onclick="editDetails()">Correct the details myself</button>`}
-function saveSheet(src){const r=src==='result'?S.lastResult:null;const it=r?null:item(src);const base=r||it;
+function saveSheet(src){if(src==='result'&&isBlocked(S.lastResult))return blockedSheet();const r=src==='result'?S.lastResult:null;const it=r?null:item(src);const base=r||it;
  const sug=(base.series&&base.series!=='—'?base.series:base.brand)||'Saved';const names=folderNames();
  if(S._sv==null){S._sv={folder:(it&&BM[it.id])||(names.includes(sug)?sug:sug),own:false,newName:''}}
  const all=[...new Set([sug,...names])];
@@ -1111,7 +1113,7 @@ function paywall(why,after){S._proAfter=after||null;const head=why==='sell'?'Sel
  <button class="btn pri full" style="margin-top:12px" onclick="startTrial()">Start 7-day free trial</button><button class="btn full" onclick="S._proAfter=null;closeSheet()">Keep browsing for free</button>
  <div class="muted xs" style="text-align:center;margin-top:8px">Cancel any time before the trial ends and you won’t be charged. Prototype — no payment is taken.</div>`)}
 /* ---------- SELL ---------- */
-function openSell(from,id){if(S.plan!=='pro')return paywall('sell',()=>openSell(from,id));const it=id?item(id):null;const r=S.lastResult;
+function openSell(from,id){if(!id&&isBlocked(S.lastResult))return blockedSheet();if(S.plan!=='pro')return paywall('sell',()=>openSell(from,id));const it=id?item(id):null;const r=S.lastResult;
  const first=it?(it.photos&&it.photos.length?it.photos:[it.img||null]):[r&&r.img||null];
  S.sell={from,id:id||null,base:it||r,photos:first.filter(Boolean),demoArt:!first.filter(Boolean).length?(it?it.art:['giant','#B91C1C','#F8FAFC','#FEF2F2']):null,
   title:it&&it.status==='sale'?(it.title||''):'',price:it&&it.status==='sale'&&it.price?String(it.price):'',cond:it&&it.status==='sale'?String(it.grade):'',desc:it&&it.status==='sale'?(it.desc||''):'',ai:false,busy:false};go('sell')}
@@ -1275,12 +1277,32 @@ terms:{t:'Terms of Use',s:[
  ['Disclaimers and liability',`ToyScope is provided “as is”. To the extent the law allows, we are not liable for indirect or consequential losses, or for losses from transactions between users, and our total liability is limited to the amount you paid us in the 12 months before the claim. Nothing in these Terms limits rights you have under consumer protection law that cannot be waived.`],
  ['Governing law',`These Terms are governed by the laws of British Columbia and the federal laws of Canada that apply there, without taking away any mandatory consumer rights you have where you live.`],
  ['Changes and contact',`We will notify you in the app before important changes. Questions: ${SUP}.`]]},
-community:{t:'Community & Marketplace Guidelines',s:[
- ['Be honest',`Describe condition and flaws truthfully. Always say if an item is a reissue, reproduction, custom or has replaced parts.`],
- ['Use your own photos',`Only post photos you took or have permission to use. Don’t copy photos from other sellers or websites.`],
- ['Keep personal details private',`Use the Contact button instead of posting emails or phone numbers. Meet in public places or use tracked shipping.`],
- ['Not allowed',`Counterfeits presented as genuine, stolen or recalled items, weapons, adult content, hate or harassment, spam, and scams.`],
- ['Report problems',`Tap “Report” on any listing or profile. We review reports, usually within 24 hours.`]]},
+community:{t:'Community Rules',s:[
+ ['Who can use ToyScope',`You must be 13 or older to use ToyScope. Selling, making offers and messaging sellers are for members 18 and older.`],
+ ['Be honest when you sell',`Describe condition and flaws truthfully. Say clearly if an item is a reissue, reproduction, custom, bootleg or has replaced parts. Only list items you own and have in hand. No fake listings, bait prices or listings for items you don’t intend to sell.`],
+ ['Use your own photos',`Post photos you took or have permission to use. Don’t copy photos from other sellers, shops or websites.`],
+ ['Mature figures',`Some collectibles show a lot of skin, such as swimsuit, lingerie or cast-off figures. These are allowed, but ToyScope marks them as sensitive:
+• the photos are blurred until an adult member turns on “Show sensitive content” in Settings
+• members under 18 never see them
+• they are never featured on the home feed, in Trending or in shared previews
+Our automatic check marks most of these for you. Don’t try to get around it, for example by cropping or editing a photo so it isn’t marked.`],
+ ['Never allowed',`• Photos showing genitals or sexual acts, and adult sex toys
+• Any sexual or nude content involving a character or person who looks under 18, including childlike anime characters. We report this to the authorities.
+• Real weapons, weapon parts or ammunition, drugs and drug equipment
+• Stolen, recalled or unsafe items
+• Counterfeits sold as genuine
+• Hate, harassment, threats or bullying
+• Posting someone else’s personal information
+• Spam, scams and misleading links
+Photos in this list are blocked before they are shared.`],
+ ['Trade safely',`ToyScope doesn’t handle payments. Never ask for or accept payment by gift card, crypto or wire transfer. Use the Contact button rather than posting emails or phone numbers in public, meet in public places or use tracked shipping, and report anyone who pressures you to pay outside a safe method.`],
+ ['How we enforce these rules',`Every photo is checked automatically before it is shared, and members can report listings, photos and profiles. We review reports within 24 hours. When a rule is broken:
+• 1st time: the content is removed and you get a warning by email
+• 2nd time: you can’t share or list anything for 7 days
+• 3rd time: your account is suspended
+Scams, threats and anything involving the sexual content of minors lead to immediate suspension.`],
+ ['Appeals',`Think we got it wrong? Email support@toyscope.app within 30 days with your @handle and what happened. A person will review it.`],
+ ['Report problems',`Tap “Report” on any listing, photo or profile, or email support@toyscope.app.`]]},
 copyright:{t:'Copyright Policy',s:[
  ['Our approach',`We respect copyright and remove infringing content when properly notified. Accounts that repeatedly infringe are closed.`],
  ['US notices (DMCA)',`Send a notice to our designated agent: [Agent name], ${ADDR}, copyright@toyscope.app. Include: your signature; the work you say is infringed; the content and where it is in ToyScope; your contact details; a statement that you believe in good faith the use is not authorised; and a statement, under penalty of perjury, that your notice is accurate and you are the owner or authorised to act for the owner.`],
@@ -1296,6 +1318,14 @@ const legalLink=(d,txt)=>`<span class="link" style="font-size:inherit" onclick="
 /* ---------- AGE GATE ---------- */
 S.age=LS.get('age',null);S.blocked=LS.get('blocked',false);
 const isMinor=()=>S.age==='13-17';
+/* ---------- CONTENT RATING ---------- */
+const ratingOf=it=>(it&&(it.rating||(it.ai&&it.ai.rating)||(it.album&&it.album.rating)))||'general';
+const isSens=it=>ratingOf(it)==='sensitive';
+const canSeeSens=()=>S.age==='18+'&&!!S.toggles.sensitive;
+const sensOk=it=>!(isSens(it)&&(isMinor()||it.owner!=='me'&&false));
+function blockedSheet(){sheet(()=>`<h3>This photo can’t be shared</h3><div class="muted small" style="margin:6px 0 14px">Our automatic check found content that isn’t allowed on ToyScope, such as explicit nudity. You can keep scanning, but this item can’t be saved to your collection, shared or listed. If you think this is a mistake, email support@toyscope.app.</div><button class="btn pri full" onclick="closeSheet()">OK</button><button class="btn sec2 full" style="margin-top:6px" onclick="closeSheet();go('legal',{d:'community'})">Read the community rules</button>`)}
+const isBlocked=r=>ratingOf(r)==='prohibited';
+const sensImg=(a,html,u)=>a&&a.rating==='sensitive'&&!(u==='me'||canSeeSens())?`<div class="sens">${html}<span>${ic('eye',2)} Sensitive</span></div>`:html;
 function needAdult(fn,what){need(()=>{if(isMinor())return sheet(()=>`<h3>Available at 18</h3><div class="muted small" style="margin:6px 0 14px">${what||'This feature'} is only for users 18 and older. You can still scan, save and learn about toys.</div><button class="btn pri full" onclick="closeSheet()">OK</button>`);fn()})}
 function ageSheet(){const yNow=new Date().getFullYear();S._dob=S._dob||{m:'',y:'',news:false};sheet(()=>`<h3>When were you born?</h3><div class="muted small" style="margin-bottom:12px">We use this to keep ToyScope safe. We only keep your age range.</div>
  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><select class="field" onchange="S._dob.m=this.value"><option value="">Month</option>${['January','February','March','April','May','June','July','August','September','October','November','December'].map((m,k)=>`<option value="${k+1}" ${String(S._dob.m)===String(k+1)?'selected':''}>${m}</option>`).join('')}</select>
@@ -1332,7 +1362,7 @@ SCR.folder=({f})=>{let its=folderItems(f);const own=its.filter(i=>i.owner==='me'
  <div class="grid2" style="padding-top:8px">${its.map(tileHTML).join('')||'<div class="empty" style="grid-column:1/-1">Empty folder</div>'}</div>`};
 
 /* ---------- ME / COLLECTION ---------- */
-function albumGrid(u){const a=ALBUMS[u]||[];return `<div class="grid3" style="margin-top:2px">${a.map(x=>`<div class="art" style="aspect-ratio:1;cursor:pointer" onclick="go('photo',{u:'${u}',id:'${x.id}'})">${x.img?`<img src="${x.img}">`:x.scene?sceneArt(u,x.scene,x.id):pic(item(x.shelf[0]))}</div>`).join('')}</div>`}
+function albumGrid(u){const a=ALBUMS[u]||[];return `<div class="grid3" style="margin-top:2px">${a.map(x=>`<div class="art" style="aspect-ratio:1;cursor:pointer" onclick="go('photo',{u:'${u}',id:'${x.id}'})">${x.img?sensImg(x,`<img src="${x.img}">`,u):x.scene?sceneArt(u,x.scene,x.id):pic(item(x.shelf[0]))}</div>`).join('')}</div>`}
 SCR.me=()=>{const U=USERS.me;const al=ALBUMS.me;const sale=ITEMS.filter(i=>i.owner==='me'&&i.status==='sale');
  return `<div class="hdr"><h1>@${esc(U.handle)}</h1><button class="ib" onclick="go('settings')">${ic('gear',1.8)}</button></div>
  <div class="pad"><div class="row" style="gap:16px"><div style="position:relative;cursor:pointer" onclick="photoSheet()">${av('me',78)}<span style="position:absolute;right:-2px;bottom:-2px;width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--onAccent);display:grid;place-items:center;border:3px solid var(--bg)">${ic('image',2.2,'width="14" height="14"')}</span></div><div class="grow" style="display:flex;justify-content:space-around;text-align:center"><div><div class="hl" style="font-size:18px">${al.length}</div><div class="muted xs">photos</div></div><div><div class="hl" style="font-size:18px">${U.followers}</div><div class="muted xs">${t('followers')}</div></div><div><div class="hl" style="font-size:18px">${S.follow.size}</div><div class="muted xs">${t('followingN')}</div></div></div></div>
@@ -1344,7 +1374,7 @@ SCR.me=()=>{const U=USERS.me;const al=ALBUMS.me;const sale=ITEMS.filter(i=>i.own
  :`<div class="pad row" style="justify-content:space-between;padding-top:10px;padding-bottom:8px"><span class="muted xs">Your best photos. Everyone can see them. ${al.length}/20</span>${al.length<20?`<button class="btn sm pri" onclick="need(()=>$('albumin').click())">${ic('image',2,'width="16" height="16"')} Add photos</button>`:''}</div>${albumGrid('me')}`}`};
 SCR.photo=({u,id})=>{const a=(ALBUMS[u]||[]).find(x=>x.id===id);const U=USERS[u];
  return hdrBack(u==='me'?'My Collection':'@'+U.handle,u==='me'?`<button class="ib" onclick="ALBUMS.me=ALBUMS.me.filter(x=>x.id!=='${id}');H('albumDelete','${id}');back();toast('Photo removed')">${ic('trash',1.8)}</button>`:'')+`
- <div class="art" style="aspect-ratio:1">${a.img?`<img src="${a.img}">`:a.scene?sceneArt(u,a.scene,a.id):pic(item(a.shelf[0]))}</div>
+ <div class="art" style="aspect-ratio:1">${a.img?sensImg(a,`<img src="${a.img}">`,u):a.scene?sceneArt(u,a.scene,a.id):pic(item(a.shelf[0]))}</div>
  <div class="pad" style="padding-top:12px"><div class="row">${av(u,32)}<div class="grow small"><b>${esc(U.handle)}</b> ${esc(a.cap||'')}</div></div><div style="height:30px"></div></div>`};
 function photoSheet(){sheet(()=>`<div style="display:flex;justify-content:center;margin-bottom:12px">${av('me',96)}</div><h3 style="text-align:center">Profile photo</h3><div class="list" style="margin:12px 0 0"><div class="li" onclick="$('avatarin').click()">${ic('image',1.8)}<span class="grow">Choose a photo</span></div>${USERS.me.photo?`<div class="li" onclick="USERS.me.photo=null;LS.set('avatar',null);closeSheet();toast('Photo removed')" style="color:var(--bad)">${ic('trash',1.8)}<span class="grow">Remove photo</span></div>`:''}</div><button class="btn sec2 full" style="margin-top:12px" onclick="closeSheet()">Cancel</button>`)}
 function editProfile(){sheet(()=>`<div style="display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:6px"><div onclick="$('avatarin').click()" style="cursor:pointer">${av('me',84)}</div><button class="link small" onclick="$('avatarin').click()">Change profile photo</button></div><h3>${t('editprofile')}</h3><label class="lbl">Name</label><input class="field" value="${esc(USERS.me.name)}" id="ep_n"><label class="lbl">Bio — what do you collect?</label><textarea class="field" rows="3" id="ep_b">${esc(USERS.me.bio)}</textarea><label class="lbl">City (we never show more than the city)</label><input class="field" value="${esc(USERS.me.city)}" id="ep_c"><button class="btn pri full" style="margin-top:16px" onclick="USERS.me.name=$('ep_n').value;USERS.me.bio=$('ep_b').value;USERS.me.city=$('ep_c').value;closeSheet();toast('Profile updated')">Save</button>`)}
@@ -1352,18 +1382,18 @@ function editProfile(){sheet(()=>`<div style="display:flex;flex-direction:column
 /* ---------- SETTINGS ---------- */
 const tg=(k,label,sub,ico)=>`<div class="li" onclick="flip('${k}')"><div class="ic">${ic(ico,2)}</div><div class="grow"><div style="font-size:14.5px">${label}</div>${sub?`<div class="muted xs">${sub}</div>`:''}</div><div class="tog ${S.toggles[k]?'on':''}"></div></div>`;
 const lk=(label,ico,act,right='')=>`<div class="li" onclick="${act}"><div class="ic">${ic(ico,2)}</div><div class="grow" style="font-size:14.5px">${label}</div>${right}<span class="muted">›</span></div>`;
-function flip(k){S.toggles[k]=!S.toggles[k];LS.set('toggles',S.toggles);USERS.me.allowContact=S.toggles.contact;USERS.me.private=S.toggles.private;const st=$('screen').scrollTop;render();$('screen').scrollTop=st;if(k==='contact'&&S.toggles.contact)toast('Collectors can now email you through ToyScope')}
+function flip(k){S.toggles[k]=!S.toggles[k];LS.set('toggles',S.toggles);if(k==='sensitive'&&window.L&&L.setSensitive)L.setSensitive(S.toggles.sensitive);USERS.me.allowContact=S.toggles.contact;USERS.me.private=S.toggles.private;const st=$('screen').scrollTop;render();$('screen').scrollTop=st;if(k==='contact'&&S.toggles.contact)toast('Collectors can now email you through ToyScope')}
 SCR.settings=()=>`${hdrBack(t('settings'))}
  <div class="pad" style="margin-bottom:14px">${S.plan==='pro'?`<div class="card" style="padding:16px"><b>ToyScope Pro</b> <span class="badge b-sale">Active</span><div class="muted small">${S.founderTier==='lifetime'?'Founder #'+S.founderNo+' · free for life':S.founderTier==='founding'?'Founding Collector #'+S.founderNo+' · free until '+new Date(S.proUntil).toLocaleDateString()+', then $19.99/yr':'Scanner and selling unlocked · renews yearly'}</div></div>`:`<div class="card" style="padding:16px;background:linear-gradient(135deg,#3851A3,#7C3AED);color:#fff;border:0;cursor:pointer" onclick="paywall()"><div class="row"><div class="grow"><div style="font-weight:700;font-size:17px">Go Pro</div><div style="opacity:.85;font-size:13px">Unlimited scans and selling · 7 days free</div></div><span class="btn sm" style="background:#fff;color:#3851A3">Try free</span></div></div>`}</div>
  <div class="sec"><h3>${t('appearance')}</h3></div><div class="pad"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">${[['light','Light','#F5F6F8','#FFFFFF','#3851A3','#12141A'],['dark','Collector','#0B0C0F','#16181D','#E8B341','#F2F3F5'],['retro','Retro','#F2EADB','#FBF6EC','#A63A24','#2A2018']].map(([k,l,bg,sf,ac,tx])=>`<button onclick="setTheme('${k}')" style="border-radius:14px;padding:8px;border:2px solid ${S.theme===k?'var(--accent)':'var(--border)'};background:var(--surface)"><div style="height:58px;border-radius:9px;background:${bg};padding:8px;display:flex;flex-direction:column;gap:5px"><div style="height:8px;width:60%;border-radius:4px;background:${tx};opacity:.85"></div><div style="flex:1;border-radius:6px;background:${sf};border:1px solid rgba(0,0,0,.06)"></div><div style="height:9px;width:45%;border-radius:4px;background:${ac}"></div></div><div style="font-size:13px;font-weight:600;margin-top:6px">${l}</div></button>`).join('')}</div></div>
  <div class="list" style="margin-top:10px">${tg('auto','Switch to Collector at night','Follows your phone’s dark mode','moon')}</div>
  <div class="sec"><h3>General</h3></div><div class="list">${lk(t('language'),'globe',"langSheet()",`<span class="muted small">${LANGS.find(l=>l[0]===S.lang)[1]}</span>`)}${lk('My interests','star',"S.stack.push({s:'onboard'});render(true)",`<span class="muted small">${S.interests.size||'None'}</span>`)}${lk('Currency','tag',"toast('USD · CAD · JPY · TWD (later)')",'<span class="muted small">USD</span>')}</div>
- <div class="sec"><h3>Privacy & safety</h3></div><div class="list">${tg('private','Private profile','Only approved followers see your collection','lock')}${(isMinor()?`<div class="li"><div class="ic">${ic('mail',2)}</div><div class="grow"><div style="font-size:14.5px">Let collectors contact me</div><div class="muted xs">Available at 18</div></div></div>`:tg('contact','Let collectors contact me','Off by default. Messages are forwarded by email — your address stays hidden.','mail'))}${tg('value','Show what I own value','Only you can see it','tag')}${lk('Blocked accounts','block',"toast('No blocked accounts')")}${lk('Safety tips for buying & selling','info',"safetySheet()")}</div>
+ <div class="sec"><h3>Privacy & safety</h3></div><div class="list">${tg('private','Private profile','Only approved followers see your collection','lock')}${(isMinor()?`<div class="li"><div class="ic">${ic('mail',2)}</div><div class="grow"><div style="font-size:14.5px">Let collectors contact me</div><div class="muted xs">Available at 18</div></div></div>`:tg('contact','Let collectors contact me','Off by default. Messages are forwarded by email — your address stays hidden.','mail'))}${tg('value','Show what I own value','Only you can see it','tag')}${S.age==='18+'?tg('sensitive','Show sensitive content','Shows photos of mature figures without blur. Off by default.','eye'):''}${lk('Blocked accounts','block',"toast('No blocked accounts')")}${lk('Safety tips for buying & selling','info',"safetySheet()")}</div>
  <div class="sec"><h3>Your data</h3></div><div class="list">${tg('analytics','Share anonymous usage stats','Off by default. Helps us fix bugs. No ad trackers.','bolt')}${tg('improve','Help improve recognition','Off by default. Lets us use your scan photos to improve the AI.','image')}${lk('AI processing','globe',"LS.set('aiok',false);toast('You’ll be asked again before your next scan')",'<span class="muted small">Consent given</span>')}${lk('Download my data','upload',"exportData()")}</div>
  <div class="pad muted xs" style="padding-top:8px">We never sell your data. No ads, no ad trackers, no session recording.</div>
  <div class="sec"><h3>Notifications</h3></div><div class="list">${tg('pushLikes','Comments & likes','','heart')}${tg('pushFollow','New followers','','users')}${tg('pushHunt','Hunt matches (v2)','','bolt')}${tg('emailNews','Product news by email','','mail')}</div>
  <div class="sec"><h3>AI engine · prototype only</h3></div><div class="list"><div class="li" onclick="keySheet()"><div class="ic">${ic('key',2)}</div><div class="grow"><div style="font-size:14.5px">Scan engine</div><div class="muted xs">${engineLabel()}</div></div><span class="muted">›</span></div></div>
- <div class="sec"><h3>Support</h3></div><div class="list">${lk('Contact us','help',"toast('support@toyscope.app')")}${lk('Rate ToyScope','star',"toast('Thanks!')")}${lk('Tell a friend','share',"toast('Link copied')")}${lk('Privacy policy','lock',"go('legal',{d:'privacy'})")}${lk('Terms of use','info',"go('legal',{d:'terms'})")}${lk('Community & marketplace guidelines','users',"go('legal',{d:'community'})")}${lk('Copyright policy','flag',"go('legal',{d:'copyright'})")}${lk('Clear cache','trash',"toast('Cache cleared')")}</div>
+ <div class="sec"><h3>Support</h3></div><div class="list">${lk('Contact us','help',"toast('support@toyscope.app')")}${lk('Rate ToyScope','star',"toast('Thanks!')")}${lk('Tell a friend','share',"toast('Link copied')")}${lk('Privacy policy','lock',"go('legal',{d:'privacy'})")}${lk('Terms of use','info',"go('legal',{d:'terms'})")}${lk('Community rules','users',"go('legal',{d:'community'})")}${lk('Copyright policy','flag',"go('legal',{d:'copyright'})")}${lk('Clear cache','trash',"toast('Cache cleared')")}</div>
  <div class="sec"><h3>Account</h3></div><div class="list">${lk('Sign out','back',"window.LIVE&&LIVE.signOut?LIVE.signOut():toast('Signed out (prototype)')")}<div class="li" onclick="delSheet()"><div class="ic" style="color:var(--bad)">${ic('trash',2)}</div><div class="grow" style="color:var(--bad);font-size:14.5px">Delete account</div></div></div>
  <div class="list" style="margin-top:14px"><div class="li" onclick="resetProto()"><div class="ic">${ic('bolt',2)}</div><div class="grow small">Reset prototype (show onboarding again)</div></div></div>
  <div class="muted xs" style="text-align:center;padding:18px 0 30px">ToyScope 0.1 prototype · No ads, ever</div>`;

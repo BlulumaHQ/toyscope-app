@@ -13,7 +13,7 @@
   const isUuid = (x) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(x || ''));
   const COLORS = ['#3851A3', '#16A34A', '#DB2777', '#EA580C', '#C026D3', '#0891B2', '#4F46E5', '#DC2626', '#78716C', '#0F766E'];
   const colorOf = (id) => COLORS[parseInt(String(id).replace(/-/g, '').slice(0, 6), 16) % COLORS.length];
-  const errMsg = (e) => { const m = (e && (e.message || e.error_description)) || 'Something went wrong. Try again.'; return /JWT|token/i.test(m) ? 'Please sign in again.' : m.replace(/^.*?:\s(?=[A-Z])/, ''); };
+  const errMsg = (e) => { const m = (e && (e.message || e.error_description)) || 'Something went wrong. Try again.'; if (/account_suspended/.test(m)) return 'Your account is suspended. Email support@toyscope.app to appeal.'; if (/account_restricted/.test(m)) return 'You can’t share or list for 7 days because of a community rules strike.'; return /JWT|token/i.test(m) ? 'Please sign in again.' : m.replace(/^.*?:\s(?=[A-Z])/, ''); };
   const toBlob = async (dataUrl) => { // no fetch(): the page's security policy blocks data: URLs
     const [head, b64] = String(dataUrl).split(',');
     const mime = (head.match(/data:([^;]+)/) || [])[1] || 'image/jpeg';
@@ -100,7 +100,8 @@
     S.plan = me.plan === 'pro' && (!me.pro_until || Date.parse(me.pro_until) > Date.now()) ? 'pro' : 'free';
     S.founder = me.founder; S.proUntil = me.pro_until; S.founderTier = me.founder_tier; S.founderNo = me.founder_no;
     S.age = me.age_range;
-    S.toggles.private = !!me.is_private; S.toggles.contact = me.allow_contact !== false;
+    S.toggles.private = !!me.is_private; S.toggles.contact = me.allow_contact !== false; S.toggles.sensitive = !!me.show_sensitive && me.age_range === '18+';
+    S.restrictedUntil = me.restricted_until && Date.parse(me.restricted_until) > Date.now() ? me.restricted_until : null; S.suspended = !!me.suspended;
     USERS.me.private = S.toggles.private; USERS.me.allowContact = S.toggles.contact;
     // items owned by me that were mapped under my uuid before I signed in
     ITEMS.forEach((i) => { if (i.owner === me.id) i.owner = 'me'; });
@@ -111,13 +112,13 @@
     if (!me) return;
     const [mine, album, saves, follows, inbox] = await Promise.all([
       sb.from('items').select(ITEM_COLS).eq('owner_id', me.id).order('created_at', { ascending: false }),
-      sb.from('album_photos').select('id,path,caption,created_at').eq('owner_id', me.id).order('created_at', { ascending: false }),
+      sb.from('album_photos').select('id,path,caption,rating,created_at').eq('owner_id', me.id).order('created_at', { ascending: false }),
       sb.from('saves').select('item_id,folder:folders(name)').eq('user_id', me.id),
       sb.from('follows').select('following_id,status').eq('follower_id', me.id),
       sb.from('contacts').select('id', { count: 'exact', head: true }).eq('to_id', me.id).is('read_at', null),
     ]);
     (mine.data || []).forEach(itemFrom);
-    ALBUMS.me = (album.data || []).map((a) => ({ id: a.id, img: pub('albums', a.path), cap: a.caption || '' }));
+    ALBUMS.me = (album.data || []).map((a) => ({ id: a.id, img: pub('albums', a.path), cap: a.caption || '', rating: a.rating || 'general' }));
     (saves.data || []).forEach((s) => { BM[s.item_id] = (s.folder && s.folder.name) || 'Saved'; });
     (follows.data || []).forEach((f) => S.follow.add(f.following_id));
     S.unread = (inbox.count || 0) > 0;
@@ -131,12 +132,12 @@
     if (!isUuid(uuid)) return;
     const [items, album, fr, fg] = await Promise.all([
       sb.from('items').select(ITEM_COLS).eq('owner_id', uuid).in('status', ['public', 'sale']).order('created_at', { ascending: false }),
-      sb.from('album_photos').select('id,path,caption').eq('owner_id', uuid).order('created_at', { ascending: false }),
+      sb.from('album_photos').select('id,path,caption,rating').eq('owner_id', uuid).order('created_at', { ascending: false }),
       sb.from('follows').select('follower_id', { count: 'exact', head: true }).eq('following_id', uuid).eq('status', 'accepted'),
       sb.from('follows').select('following_id', { count: 'exact', head: true }).eq('follower_id', uuid),
     ]);
     (items.data || []).forEach(itemFrom);
-    ALBUMS[uuid] = (album.data || []).map((a) => ({ id: a.id, img: pub('albums', a.path), cap: a.caption || '' }));
+    ALBUMS[uuid] = (album.data || []).map((a) => ({ id: a.id, img: pub('albums', a.path), cap: a.caption || '', rating: a.rating || 'general' }));
     if (USERS[uuid]) { USERS[uuid].followers = fr.count || 0; USERS[uuid].following = fg.count || 0; }
     const c = cur(); if (c.s === 'profile' && c.p && c.p.id === uuid) render();
   }
@@ -315,12 +316,23 @@
     await sb.from('profiles').update({ avatar_url: url }).eq('id', me.id);
     USERS.me.photo = url;
   };
+  // Checks a photo against the community rules before it is shared
+  L.moderate = async function (dataUrl) {
+    try {
+      const res = await fetch('/api/moderate', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-ToyScope': '1', Authorization: 'Bearer ' + (window._tok || '') }, body: JSON.stringify({ image: dataUrl }) });
+      const d = await res.json(); return d.rating || 'unchecked';
+    } catch (e) { return 'unchecked'; }
+  };
+  L.setSensitive = async function (on) { if (me) await sb.from('profiles').update({ show_sensitive: !!on }).eq('id', me.id); };
   L.album = async function (e2) {
     if (!me) return;
+    const rating = /^data:/.test(e2.img || '') ? await L.moderate(e2.img) : 'general';
+    if (rating === 'prohibited') { (ALBUMS.me || []).splice((ALBUMS.me || []).indexOf(e2) >>> 0, 1); render(); return blockedSheet(); }
+    e2.rating = rating === 'sensitive' ? 'sensitive' : 'general';
     const path = `${me.id}/${e2.id}.jpg`;
     const up = await sb.storage.from('albums').upload(path, await toBlob(e2.img), { contentType: 'image/jpeg', upsert: true });
     if (up.error) return toast(errMsg(up.error));
-    const { error } = await sb.from('album_photos').insert({ id: e2.id, owner_id: me.id, path, caption: e2.cap || '' });
+    const { error } = await sb.from('album_photos').insert({ id: e2.id, owner_id: me.id, path, caption: e2.cap || '', rating: e2.rating });
     if (error) return toast(errMsg(error));
     e2.img = pub('albums', path);
   };

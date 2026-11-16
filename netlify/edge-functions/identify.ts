@@ -28,13 +28,19 @@ condition_grade must be one of: broken, loose_poor, loose_good, loose_complete, 
 price_tiers_usd: object with those same 6 keys, each [low, high] in USD for this exact toy.
 price_low_usd/price_high_usd: value of the item in this photo at its condition.
 
+Content rating (for the app's community rules) — judge the photos themselves:
+- "general": normal toys and packaging.
+- "sensitive": a figure or artwork with notable skin exposure or suggestive pose (swimsuit, lingerie, partial nudity, cast-off figures with private parts covered or not detailed), or realistic gore.
+- "prohibited": visible genitals or explicit sexual acts, sexual content involving anyone who looks under 18 (including childlike anime characters in sexual or nude poses), adult sex toys, real weapons or drugs.
+Put it in "content_rating". When unsure between two levels, pick the stricter one.
+
 Write name_app, history, condition_reasons, buying_tips, reproduction_signs and notes in ${langName}.
 
 Item number: only fill item_number when a product/catalog number is printed and readable in the photos (item_number_source "photo"), or when you are highly confident from your own knowledge (item_number_source "ai"). Otherwise null.
 condition_details: score each 1–10 from what you can see; use null for score when you cannot see it (e.g. packaging when there is no box). Keep each note under 6 words.
 
 JSON keys:
-{"name_app":"","name_en":"","name_origin":"","origin_country":"","brand":"","series":"","year":"","category":"","is_collectible":true,"is_reproduction_or_custom":false,"rarity":"","confidence":0.0,"candidates":[{"name":"","confidence":0.0}],"condition_grade":"","condition_reasons":[""],"accessories_expected":[""],"accessories_visible":[""],"price_low_usd":0,"price_high_usd":0,"price_tiers_usd":{"broken":[0,0],"loose_poor":[0,0],"loose_good":[0,0],"loose_complete":[0,0],"boxed_opened":[0,0],"mint_in_box":[0,0]},"reproduction_value_usd":null,"history":"","buying_tips":[""],"reproduction_signs":[""],"notes":"","item_number":null,"item_number_source":null,"condition_details":{"paint":{"score":0,"note":""},"structure":{"score":0,"note":""},"plastic":{"score":0,"note":""},"stickers":{"score":0,"note":""},"accessories":{"score":0,"note":""},"packaging":{"score":null,"note":""}}}`;
+{"content_rating":"general","name_app":"","name_en":"","name_origin":"","origin_country":"","brand":"","series":"","year":"","category":"","is_collectible":true,"is_reproduction_or_custom":false,"rarity":"","confidence":0.0,"candidates":[{"name":"","confidence":0.0}],"condition_grade":"","condition_reasons":[""],"accessories_expected":[""],"accessories_visible":[""],"price_low_usd":0,"price_high_usd":0,"price_tiers_usd":{"broken":[0,0],"loose_poor":[0,0],"loose_good":[0,0],"loose_complete":[0,0],"boxed_opened":[0,0],"mint_in_box":[0,0]},"reproduction_value_usd":null,"history":"","buying_tips":[""],"reproduction_signs":[""],"notes":"","item_number":null,"item_number_source":null,"condition_details":{"paint":{"score":0,"note":""},"structure":{"score":0,"note":""},"plastic":{"score":0,"note":""},"stickers":{"score":0,"note":""},"accessories":{"score":0,"note":""},"packaging":{"score":null,"note":""}}}`;
 
 const json = (o: unknown, status = 200) =>
   new Response(JSON.stringify(o), { status, headers: { "content-type": "application/json", "cache-control": "no-store" } });
