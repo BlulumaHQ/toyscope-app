@@ -39,7 +39,7 @@
     Object.assign(u, {
       id, uuid: p.id, handle: p.handle, name: p.name || p.handle, city: p.city || '', bio: p.bio || '',
       collects: p.collects || [], photo: p.avatar_url || null, private: !!p.is_private,
-      allowContact: p.allow_contact !== false, founder: !!p.founder, color: u.color || colorOf(p.id), demo: false,
+      allowContact: p.allow_contact !== false, founder: !!p.founder, founderNo: p.founder_no || null, founderTier: p.founder_tier || null, color: u.color || colorOf(p.id), demo: false,
     });
     return id;
   }
@@ -55,7 +55,7 @@
       low: ai.low ?? null, high: ai.high ?? null, status: st, price: r.price != null ? +r.price : null,
       title: r.title || '', desc: r.description || '', orig: ai._orig || null, owned: !!r.owned, folder: r.folder,
       photos: (r.item_photos || []).sort((a, b) => a.sort - b.sort).map((p) => pub('items', p.path)),
-      art: ART, added: Date.parse(r.created_at) / 1000, saves: r.saves_count || 0, history: ai.history || '', ai, db: true,
+      art: ART, added: Date.parse(r.created_at) / 1000, saves: r.saves_count || 0, history: ai.history || '', ai, db: true, offers: !!r.open_to_offers,
     };
     const k = ITEMS.findIndex((i) => i.id === x.id);
     if (k >= 0) ITEMS[k] = Object.assign(ITEMS[k], x); else ITEMS.push(x);
@@ -72,13 +72,13 @@
       brand: it.brand && it.brand !== '—' ? it.brand : '', series: it.series && it.series !== '—' ? it.series : '',
       year: parseInt(it.year) || null, country: it.flag || '', grade: Number.isInteger(it.grade) ? it.grade : null,
       price: it.price || null, title: it.title || '', description: it.desc || '', originality: ORIG(it.orig),
-      declared_owner: st === 'sale' ? true : !!it.declared, owned: !!it.owned, folder: it.folder || null, ai,
+      declared_owner: st === 'sale' ? true : !!it.declared, owned: !!it.owned, folder: it.folder || null, ai, open_to_offers: st === 'public' && !!it.offers,
     };
   }
 
   /* ---------- loading ---------- */
-  const PROFILE_COLS = 'id,handle,name,city,bio,collects,avatar_url,is_private,allow_contact,founder';
-  const ITEM_COLS = `id,owner_id,status,name,name_origin,brand,series,year,country,grade,price,title,description,originality,owned,folder,ai,saves_count,created_at,item_photos(path,sort),owner:profiles!items_owner_id_fkey(${PROFILE_COLS})`;
+  const PROFILE_COLS = 'id,handle,name,city,bio,collects,avatar_url,is_private,allow_contact,founder,founder_no,founder_tier';
+  const ITEM_COLS = `id,owner_id,status,name,name_origin,brand,series,year,country,grade,price,title,description,originality,owned,folder,ai,saves_count,created_at,open_to_offers,item_photos(path,sort),owner:profiles!items_owner_id_fkey(${PROFILE_COLS})`;
 
   async function loadMarket() {
     const { data, error } = await sb.from('items').select(ITEM_COLS).in('status', ['sale', 'public']).order('created_at', { ascending: false }).limit(300);
@@ -98,7 +98,7 @@
     userFrom(me);
     S.signedIn = true;
     S.plan = me.plan === 'pro' && (!me.pro_until || Date.parse(me.pro_until) > Date.now()) ? 'pro' : 'free';
-    S.founder = me.founder; S.proUntil = me.pro_until;
+    S.founder = me.founder; S.proUntil = me.pro_until; S.founderTier = me.founder_tier; S.founderNo = me.founder_no;
     S.age = me.age_range;
     S.toggles.private = !!me.is_private; S.toggles.contact = me.allow_contact !== false;
     USERS.me.private = S.toggles.private; USERS.me.allowContact = S.toggles.contact;
@@ -201,7 +201,7 @@
     S._dob = null; await loadMe(); await loadMine();
     if (/^user_[0-9a-f]{10}$/.test(me.handle || '')) { await new Promise((res) => setupProfile(res)); }
     S.sheet = null; const fn = S.after; S.after = null;
-    toast(me.founder ? 'Welcome, founding collector — Pro is on us for 6 months' : 'Account created');
+    toast(me.founder_tier === 'lifetime' ? `Welcome, Founder #${me.founder_no} — Pro is free for life` : me.founder_tier === 'founding' ? `Welcome, Founding Collector #${me.founder_no} — Pro free for 6 months` : 'Account created');
     S.stack.push({ s: 'onboard' }); render(true); S._afterOnboard = fn;
   };
   // First-time profile: pick a username and display name
@@ -227,6 +227,14 @@
     Object.assign(me, upd); userFrom(me);
     const d = S._setupDone; S._setupDone = null; S.sheet = null; if (d) d();
   };
+  window.SPOTS = null;
+  sb.rpc('founding_spots').then(({ data }) => { if (data) { window.SPOTS = data; if (cur().s === 'explore' || S.sheet) render(); } });
+  window.foundingLine = function () {
+    const sp = window.SPOTS;
+    if (sp && sp.lifetime_left > 0) return `First 20 members get <b>Pro free for life</b> — ${sp.lifetime_left} left. Then members #21–200 get Pro free for 6 months.`;
+    if (sp && sp.founding_left > 0) return `Founding Collectors get <b>Pro free for 6 months</b>, then $19.99/yr for life — ${sp.founding_left} spots left.`;
+    return 'Create a free account to browse, save and message sellers.';
+  };
   // Guests: the Pro sheet invites them to join instead of a trial
   const _paywall = window.paywall;
   window.paywall = function (why, after) {
@@ -234,7 +242,7 @@
     const head = why === 'sell' ? 'Sign up to sell' : why === 'scan' ? 'Sign up to scan' : 'Join ToyScope';
     S._proAfter = after || null;
     sheet(() => `<div style="text-align:center;padding-top:4px"><div class="logo" style="font-size:26px">Toy<b>Scope</b></div><h3 style="margin-top:8px">${head}</h3>
-      <div class="muted small" style="margin:6px 0 14px">Create a free account. The first 300 members are <b>Founding Collectors</b> and get Pro free for 6 months: unlimited scans and selling.</div></div>
+      <div class="muted small" style="margin:6px 0 14px">${foundingLine()}</div></div>
       <button class="btn pri full" onclick="const f=S._proAfter;S._proAfter=null;S.sheet=null;need(f||(()=>{}))">Create free account</button>
       <button class="btn full" style="margin-top:6px" onclick="S._proAfter=null;closeSheet()">Keep browsing for free</button>`);
   };
@@ -246,7 +254,7 @@
   window.startTrial = function () {
     const after = S._proAfter; S._proAfter = null;
     const go2 = () => {
-      if (S.plan === 'pro') { closeSheet(); toast(S.founder ? 'Founding collector · Pro is active' : 'Pro is active'); if (after) setTimeout(after, 60); }
+      if (S.plan === 'pro') { closeSheet(); toast(S.founderTier === 'lifetime' ? 'Founder · Pro is free for life' : S.founder ? 'Founding Collector · Pro is active' : 'Pro is active'); if (after) setTimeout(after, 60); }
       else { closeSheet(); toast('Founding spots are full. Paid Pro is coming soon.'); }
     };
     if (!S.signedIn) { S.sheet = null; return need(go2); }
