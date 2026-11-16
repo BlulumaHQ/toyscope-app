@@ -342,6 +342,7 @@ select.field{appearance:none;-webkit-appearance:none;background-image:linear-gra
 /* iOS zooms into any input under 16px and stays zoomed; keep inputs at 16px and never allow sideways scroll */
 input:not(#otp),select,textarea,.field:not(#otp){font-size:16px!important}
 html,body{overflow-x:hidden;max-width:100%}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
 </style>
 </head>
 <body>
@@ -1470,6 +1471,33 @@ function privacySheet(){const on=S.toggles.private;sheet(()=>`<h3>Private profil
  <div class="muted small" style="line-height:1.55;margin-bottom:14px">${on?'Your collection photos are only visible to followers you approve. Items you list for sale are always visible in the Marketplace.':'When private, only followers you approve can see your collection photos and showcase posts. <b>Items you list for sale stay public</b> so buyers can still find them.'}</div>
  <button class="btn ${on?'pri':'out'} full" onclick="closeSheet();flip('private');toast(S.toggles.private?'Profile is now private':'Profile is now public')">${on?'Make my profile public':'Make my profile private'}</button>
  <button class="btn full" style="margin-top:8px" onclick="closeSheet()">Cancel</button>`)}
+/* ---------- INSTALL HELPER: ?install=1 (from the QR code) or first mobile visit ---------- */
+let _bip=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();_bip=e;if(S&&S.sheet&&S._installOpen)render()});
+try{if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{})}catch(e){}
+const isStandalone=()=>window.matchMedia&&matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+const UA=navigator.userAgent||'';
+const isIOS=/iPhone|iPad|iPod/.test(UA)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const isAndroid=/Android/.test(UA);
+const inAppBrowser=/FBAN|FBAV|FB_IAB|Instagram|Line\/|MicroMessenger|WeChat|Messenger|Threads|TikTok|Snapchat|KAKAOTALK/i.test(UA);
+const IS={
+ en:{t:'Add ToyScope to your home screen',s:'It opens full screen, just like an app. Free, no download.',inapp:'You’re inside another app’s browser. Open this page in {b} first:',inapp1:'Tap ••• or the share icon',inapp2:'Choose “Open in {b}”',ios1:'Tap the Share button {i} at the bottom of Safari',ios2:'Scroll down and tap “Add to Home Screen”',ios3:'Tap “Add”',and:'Install ToyScope',and1:'Tap ⋮ at the top right of Chrome',and2:'Tap “Add to Home screen” or “Install app”',later:'Not now',copy:'Copy link'},
+ zh:{t:'把 ToyScope 加到主畫面',s:'開起來就像 App 一樣全螢幕，免費、不用下載。',inapp:'你現在是在其他 App 的瀏覽器裡，請先用 {b} 打開：',inapp1:'點右上角 ••• 或分享圖示',inapp2:'選「用 {b} 開啟」',ios1:'點 Safari 下方的分享按鈕 {i}',ios2:'往下滑，點「加入主畫面」',ios3:'點「加入」',and:'安裝 ToyScope',and1:'點 Chrome 右上角的 ⋮',and2:'點「加到主畫面」或「安裝應用程式」',later:'稍後再說',copy:'複製連結'},
+ 'zh-Hans':{t:'把 ToyScope 添加到主屏幕',s:'打开就像 App 一样全屏，免费、不用下载。',inapp:'你现在在其他 App 的浏览器里，请先用 {b} 打开：',inapp1:'点右上角 ••• 或分享图标',inapp2:'选择“在 {b} 中打开”',ios1:'点 Safari 下方的分享按钮 {i}',ios2:'往下滑，点“添加到主屏幕”',ios3:'点“添加”',and:'安装 ToyScope',and1:'点 Chrome 右上角的 ⋮',and2:'点“添加到主屏幕”或“安装应用”',later:'稍后再说',copy:'复制链接'},
+ ja:{t:'ToyScope をホーム画面に追加',s:'アプリのように全画面で開きます。無料・ダウンロード不要。',inapp:'今は他のアプリ内ブラウザです。まず {b} で開いてください：',inapp1:'••• または共有アイコンをタップ',inapp2:'「{b}で開く」を選択',ios1:'Safari 下部の共有ボタン {i} をタップ',ios2:'下にスクロールして「ホーム画面に追加」をタップ',ios3:'「追加」をタップ',and:'ToyScope をインストール',and1:'Chrome 右上の ⋮ をタップ',and2:'「ホーム画面に追加」または「アプリをインストール」をタップ',later:'あとで',copy:'リンクをコピー'},
+ ko:{t:'ToyScope를 홈 화면에 추가',s:'앱처럼 전체 화면으로 열려요. 무료, 다운로드 필요 없음.',inapp:'다른 앱의 브라우저 안에 있어요. 먼저 {b}에서 열어 주세요:',inapp1:'••• 또는 공유 아이콘을 탭',inapp2:'“{b}에서 열기” 선택',ios1:'Safari 아래쪽 공유 버튼 {i}을 탭',ios2:'아래로 스크롤해 “홈 화면에 추가” 탭',ios3:'“추가” 탭',and:'ToyScope 설치',and1:'Chrome 오른쪽 위 ⋮ 탭',and2:'“홈 화면에 추가” 또는 “앱 설치” 탭',later:'나중에',copy:'링크 복사'},
+ fr:{t:'Ajoutez ToyScope à l’écran d’accueil',s:'Il s’ouvre en plein écran, comme une app. Gratuit, sans téléchargement.',inapp:'Vous êtes dans le navigateur d’une autre app. Ouvrez d’abord cette page dans {b} :',inapp1:'Touchez ••• ou l’icône de partage',inapp2:'Choisissez « Ouvrir dans {b} »',ios1:'Touchez le bouton Partager {i} en bas de Safari',ios2:'Faites défiler et touchez « Sur l’écran d’accueil »',ios3:'Touchez « Ajouter »',and:'Installer ToyScope',and1:'Touchez ⋮ en haut à droite de Chrome',and2:'Touchez « Ajouter à l’écran d’accueil » ou « Installer l’application »',later:'Plus tard',copy:'Copier le lien'},
+ es:{t:'Añade ToyScope a tu pantalla de inicio',s:'Se abre a pantalla completa, como una app. Gratis y sin descargas.',inapp:'Estás en el navegador de otra app. Primero abre esta página en {b}:',inapp1:'Toca ••• o el icono de compartir',inapp2:'Elige “Abrir en {b}”',ios1:'Toca el botón Compartir {i} abajo en Safari',ios2:'Desliza y toca “Añadir a pantalla de inicio”',ios3:'Toca “Añadir”',and:'Instalar ToyScope',and1:'Toca ⋮ arriba a la derecha en Chrome',and2:'Toca “Añadir a pantalla de inicio” o “Instalar app”',later:'Ahora no',copy:'Copiar enlace'}};
+const it_=(k,v)=>{let s=(IS[S.lang]||IS.en)[k]||IS.en[k];Object.entries(v||{}).forEach(([a,b])=>{s=s.split('{'+a+'}').join(b)});return s};
+const SHARE_ICO='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-3px"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>';
+function installSheet(){S._installOpen=true;const br=isIOS?'Safari':'Chrome';const step=(n,txt)=>`<div class="row" style="gap:12px;align-items:flex-start;margin:10px 0"><span style="flex:none;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px">${n}</span><div style="padding-top:3px">${txt}</div></div>`;
+ sheet(()=>`<div style="display:flex;gap:14px;align-items:center;margin-bottom:6px"><img src="/icon-180.png" alt="" style="width:56px;height:56px;border-radius:14px"><div><h3 style="margin:0">${it_('t')}</h3><div class="muted small">${it_('s')}</div></div></div>
+ ${inAppBrowser?`<div class="card" style="padding:12px 14px;margin:12px 0"><div class="small" style="margin-bottom:4px">${it_('inapp',{b:br})}</div>${step(1,it_('inapp1'))}${step(2,it_('inapp2',{b:br}))}</div><button class="btn out full" onclick="try{navigator.clipboard.writeText('https://app.toyscope.app/?install=1');toast('✓')}catch(e){}">${it_('copy')}</button>`
+ :isIOS?`${step(1,it_('ios1',{i:SHARE_ICO}))}${step(2,it_('ios2'))}${step(3,it_('ios3'))}<div style="text-align:center;font-size:28px;margin-top:6px;animation:bob 1.2s ease-in-out infinite">⬇</div>`
+ :_bip?`<button class="btn pri full" style="margin-top:12px" onclick="(async()=>{const p=_bip;_bip=null;await p.prompt();closeSheet()})()">${it_('and')}</button>`
+ :`${step(1,it_('and1'))}${step(2,it_('and2'))}`}
+ <button class="btn full" style="margin-top:8px" onclick="S._installOpen=false;LS.set('installSeen',1);closeSheet()">${it_('later')}</button>`)}
+function maybeInstall(){if(isStandalone())return;const q=new URLSearchParams(location.search).get('install');if(q||((isIOS||isAndroid)&&!LS.get('installSeen',0)))setTimeout(installSheet,q?600:2500)}
 function curSheet(){sheet(()=>`<h3>${t('currency')}</h3><div class="muted small" style="margin-bottom:12px">${t('curNote')}</div><div class="list" style="margin:0">${CURS.map(([k,l])=>`<div class="li" onclick="S.cur='${k}';LS.set('cur','${k}');closeSheet();render()"><div class="grow">${k} · ${l}</div><span class="muted small">${curFmt(1000*(FX[k]||1),k)}</span>${curNow()===k?'<span class="ok" style="margin-left:8px">✓</span>':''}</div>`).join('')}</div>`)}
 function langSheet(){sheet(()=>`<h3>${t('language')}</h3><div class="muted small" style="margin-bottom:12px">App language. Toy names always also show in their original language.</div><div class="list" style="margin:0">${LANGS.map(([k,l])=>`<div class="li" onclick="S.lang='${k}';LS.set('lang','${k}');closeSheet();"><div class="grow">${l}</div>${S.lang===k?'<span class="ok">✓</span>':''}</div>`).join('')}</div>`)}
 function safetySheet(){sheet(()=>`<h3>Buy & sell safely</h3>${['ToyScope doesn’t handle payments and isn’t part of any sale','Meet in public or use tracked shipping','Never pay by wire transfer, crypto or gift cards','Ask for extra photos of markings and stamps','High-value item? Get it authenticated first','Report anyone who asks for payment outside a safe method'].map(x=>`<div class="acc"><span class="ok">✓</span>${x}</div>`).join('')}<button class="btn pri full" style="margin-top:14px" onclick="closeSheet()">Got it</button>`)}
@@ -1484,7 +1512,7 @@ function resetProto(){try{['onboarded','interests','myitems','toggles','signedIn
 /* ===================== BOOT ===================== */
 if(window.matchMedia)matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>S.toggles.auto&&render());
 S.recent=seedRecent();S.unread=true;ITEMS.forEach(i=>{if(i.owner==='me'&&!i.folder){i.folder=(i.series&&i.series!=='—'?i.series:i.brand)||'Saved';i.owned=true;if(i.status!=='sale')i.status='saved'}});buildFeed();S.liked=new Set(['f_a_r1']);if(!S.onboarded){S.stack=[{s:'welcome'}]}
-render(true);
+render(true);maybeInstall();
 (async()=>{try{if(window.claude&&claude.use){const s=await claude.use('sample');if(s){let ok=true;try{const lim=await s.limits();ok=!!(lim&&lim.images)}catch(e){}if(ok){S.sample=s;const c=cur().s;if(['scan','settings'].includes(c))render()}}}}catch(e){}})();
 </script>
 <script src="vendor/supabase.js"></script>
