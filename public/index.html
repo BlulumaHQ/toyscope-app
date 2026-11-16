@@ -217,6 +217,14 @@ select.field{appearance:none;-webkit-appearance:none;background-image:linear-gra
 .shr i svg{width:24px;height:24px}
 .b-v2{background:var(--accentSoft);color:var(--accent)}
 .price{font-family:"Space Grotesk";font-weight:700}
+.homebar{padding:calc(env(safe-area-inset-top,0px)*0 + 12px) 16px 8px}
+.toolbar{padding:6px 16px 6px;gap:6px}
+.tb{display:inline-flex;align-items:center;gap:4px;height:32px;padding:0 10px;border-radius:10px;border:1px solid var(--border);font-size:12.5px;font-weight:600;color:var(--text);background:var(--surface)}
+.tb.ico{width:32px;padding:0;justify-content:center}
+.tb.on{border-color:var(--text);background:var(--text);color:var(--bg)}
+.list1{display:flex;flex-direction:column;gap:8px;padding:4px 16px 16px}
+.lrow{display:flex;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:8px;cursor:pointer}
+.lrow .art{width:84px;height:84px;border-radius:10px;overflow:hidden;flex:none}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:4px 16px 16px}
 .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px}
 .tile{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer}
@@ -331,7 +339,11 @@ select.field{appearance:none;-webkit-appearance:none;background-image:linear-gra
 
 <script>
 /* ===================== ICONS ===================== */
-const I={
+const I={sort:'<path d="M7 4v16M3 8l4-4 4 4M17 20V4M13 16l4 4 4-4"/>',
+filter:'<path d="M4 6h16M7 12h10M10 18h4"/>',
+grid:'<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
+list:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',
+
 home:'<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>',
 search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
 scan:'<path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><circle cx="12" cy="12" r="3.5"/>',
@@ -429,6 +441,41 @@ let ITEMS=[
  {id:'h2',owner:'harper',name:'Beatnik Bandit Redline',origin:'Hot Wheels Beatnik Bandit',flag:'US',brand:'Mattel',series:'Hot Wheels Redline',year:1968,grade:2,low:25,high:45,status:'sale',price:38,art:['car','#0891B2','#A5F3FC','#ECFEFF'],added:1},
  {id:'t1',owner:'tom',name:'Battery space robot',origin:'Blechspielzeug Roboter',flag:'DE',brand:'Unknown',series:'Tin toys',year:1962,grade:2,low:200,high:300,status:'public',art:['tin','#B45309','#78350F','#FFF7ED'],added:0},
 ];
+/* more marketplace listings so the home grid has depth */
+[
+ ['kenji','Ultraman Bullmark vinyl','ブルマァク ウルトラマン ソフビ','Bullmark','Ultraman',1972,2,180,260,220,['kaiju','#DC2626','#E5E7EB','#FEF2F2']],
+ ['kenji','Gamera soft vinyl','マルサン ガメラ ソフビ','Marusan','Gamera',1967,3,420,650,560,['kaiju','#57534E','#FDE68A','#FAFAF9']],
+ ['kenji','Mothra larva vinyl','モスラ 幼虫 ソフビ','Bullmark','Godzilla',1971,2,120,180,150,['kaiju','#A16207','#FEF3C7','#FFFBEB']],
+ ['kenji','King Ghidorah, gold','キングギドラ ソフビ','Bullmark','Godzilla',1970,1,300,450,340,['kaiju','#CA8A04','#FDE047','#FEFCE8']],
+ ['rina','Mazinger Z Chogokin GA-01','マジンガーZ 超合金 GA-01','Popy','Chogokin',1974,3,450,700,620,['robot','#111827','#DC2626','#F3F4F6']],
+ ['rina','Grendizer Jumbo Machinder','グレンダイザー ジャンボマシンダー','Popy','Jumbo Machinder',1976,2,700,1000,880,['giant','#1E3A8A','#EAB308','#EFF6FF']],
+ ['rina','Raideen Chogokin (boxed)','勇者ライディーン 超合金','Popy','Chogokin',1975,5,600,900,840,['box','#1D4ED8','#DC2626','#DBEAFE']],
+ ['rina','Getter-2 Chogokin','ゲッター2 超合金','Popy','Chogokin',1975,2,180,260,210,['robot','#F8FAFC','#1E40AF','#F1F5F9']],
+ ['joe','Luke Skywalker, carded','Luke Skywalker 12-back — Kenner','Kenner','Star Wars vintage',1978,4,450,700,600,['figure','#FDE68A','#78350F','#FFFBEB']],
+ ['joe','Millennium Falcon (boxed)','Millennium Falcon — Kenner','Kenner','Star Wars vintage',1979,4,300,450,390,['ship','#D1D5DB','#374151','#F3F4F6']],
+ ['joe','Stormtrooper, loose','Stormtrooper — Kenner','Kenner','Star Wars vintage',1978,2,20,35,28,['figure','#F8FAFC','#111827','#F9FAFB']],
+ ['joe','Han Solo, large head','Han Solo — Kenner','Kenner','Star Wars vintage',1978,2,30,55,45,['figure','#78350F','#1F2937','#FEF3C7']],
+ ['joe','X-Wing Fighter (boxed)','X-Wing Fighter — Kenner','Kenner','Star Wars vintage',1978,4,180,260,240,['ship','#F8FAFC','#DC2626','#F9FAFB']],
+ ['claire','Bubblecut Barbie, titian','Bubble Cut Barbie #850','Mattel','Vintage Barbie',1962,3,180,300,260,['doll','#B45309','#F43F5E','#FFF1F2']],
+ ['claire','Ken #750, flocked hair','Ken #750','Mattel','Vintage Barbie',1961,3,90,150,120,['doll','#78350F','#2563EB','#EFF6FF']],
+ ['claire','Midge, original swimsuit','Midge #860','Mattel','Vintage Barbie',1963,2,60,110,85,['doll','#EA580C','#22C55E','#F0FDF4']],
+ ['minjun','Sun Vulcan Robo DX','太陽戦隊サンバルカン DX サンバルカンロボ','Popy','Super Sentai',1981,3,220,340,290,['robot','#DC2626','#1D4ED8','#FEF2F2']],
+ ['minjun','Goggle Robo DX (boxed)','大戦隊ゴーグルファイブ DX ゴーグルロボ','Bandai','Super Sentai',1982,5,350,520,480,['box','#16A34A','#DC2626','#F0FDF4']],
+ ['minjun','Dynarobo DX','科学戦隊ダイナマン DX ダイナロボ','Bandai','Super Sentai',1983,2,140,220,170,['robot','#EAB308','#1F2937','#FEFCE8']],
+ ['minjun','Bioman Bio Robo','超電子バイオマン DX バイオロボ','Bandai','Super Sentai',1984,3,160,240,199,['robot','#F8FAFC','#DC2626','#F9FAFB']],
+ ['gwen','1/100 Zaku II, first run','1/100 ザクII 初版','Bandai','Gunpla',1981,5,35,60,48,['box','#16A34A','#F8FAFC','#F0FDF4']],
+ ['gwen','1/144 Char’s Zaku, first run','1/144 シャア専用ザク 初版','Bandai','Gunpla',1980,5,40,70,55,['box','#DC2626','#F8FAFC','#FEF2F2']],
+ ['gwen','1/60 RX-78-2, 1981','1/60 ガンダム','Bandai','Gunpla',1981,5,120,190,150,['box','#1D4ED8','#F8FAFC','#EFF6FF']],
+ ['gwen','1/144 Gouf, unbuilt','1/144 グフ','Bandai','Gunpla',1980,5,30,50,38,['box','#2563EB','#F8FAFC','#EFF6FF']],
+ ['harper','Twin Mill Redline (1969)','Hot Wheels Twin Mill','Mattel','Hot Wheels Redline',1969,3,40,70,55,['car','#0891B2','#A5F3FC','#ECFEFF']],
+ ['harper','Deora Redline, pink','Hot Wheels Deora','Mattel','Hot Wheels Redline',1968,2,120,220,180,['car','#DB2777','#FBCFE8','#FDF2F8']],
+ ['harper','Python Redline (1968)','Hot Wheels Python','Mattel','Hot Wheels Redline',1968,2,25,45,32,['car','#EA580C','#FED7AA','#FFF7ED']],
+ ['harper','Splittin’ Image, blister','Hot Wheels Splittin Image','Mattel','Hot Wheels Redline',1969,5,160,260,210,['car','#16A34A','#BBF7D0','#F0FDF4']],
+ ['gwen','Transformers G1 Optimus Prime','コンボイ（G1）','Takara','Transformers',1984,3,120,200,160,['robot','#DC2626','#1D4ED8','#FEF2F2']],
+ ['joe','Kenner M.A.S.K. Hurricane','M.A.S.K. Hurricane — Kenner','Kenner','M.A.S.K.',1985,3,45,80,62,['car','#15803D','#FDE047','#F0FDF4']],
+].forEach((r,k)=>{const [owner,name,origin,brand,series,year,grade,low,high,price,art]=r;const flag=['Kenner','Mattel'].includes(brand)?'US':'JP';
+ ITEMS.push({id:'x'+k,owner,name,origin,flag,brand,series,year,grade,low,high,status:'sale',price,art,added:30+((k*7)%29),saves:3+((k*37)%61)})});
+
 const POSTS=[
  {id:'p1',user:'kenji',items:['k1'],time:'2h',likes:842,cap:'Finally found the first-color run. The green is noticeably darker than the reissue — check the foot stamp if you are buying one.',comments:[
    {u:'joe',t:'That color is unreal. What would you take for it? email me at joe.alvarez@gmail.com',masked:true},
@@ -563,7 +610,7 @@ const S={
  key:LS.get('key',''),tab:'explore',stack:[],feedTab:'following',liked:new Set(['p2']),saved:new Set(),follow:new Set(['kenji','rina','joe','minjun']),
  colFilter:'all',colSort:'value',meTab:'collection',profTab:'posts',discChip:'All',q:'',scanMode:'single',
  toggles:Object.assign({analytics:false,improve:false},LS.get('toggles',{private:false,contact:false,value:true,pushLikes:true,pushFollow:true,pushHunt:true,emailNews:false})),
- contactsLeft:5,plan:LS.get('plan','free'),scansToday:2,sheet:null,lastResult:null,engine:'demo',sample:null,
+ contactsLeft:5,plan:LS.get('plan','free'),view:LS.get('view','grid'),sort:'new',flt:{},scansToday:2,sheet:null,lastResult:null,engine:'demo',sample:null,
 };
 USERS.me.allowContact=S.toggles.contact;USERS.me.private=S.toggles.private;
 // restore user-added items
@@ -694,31 +741,42 @@ SCR.notifs=()=>{S.unread=false;return `<div class="hdr"><h1>Activity</h1></div><
  <div class="pad muted xs" style="padding-top:14px">Messages from buyers arrive by email. Your address stays hidden.</div>`};
 S.bg=LS.get('bg',0);
 SCR.explore=()=>{
- const q=S.q.toLowerCase();const chips=['All','Japanese','Star Wars','Barbie','Hot Wheels','Gunpla','Soft vinyl','Sentai'];
- const ALIAS={gundam:['gunpla','rx-78','mobile suit','ガンダム','鋼彈'],gunpla:['gundam','rx-78'],transformers:['optimus','convoy','g1','diaclone'],godzilla:['ゴジラ','kaiju','soft vinyl'],chogokin:['超合金','popy'],sentai:['戦隊','power rangers','super sentai'],'power rangers':['sentai','戦隊'],barbie:['mattel'],'hot wheels':['redline','mattel'],'star wars':['kenner','vader','boba']};const qs=[q,...(ALIAS[q]||[])];const match=it=>!q||qs.some(w=>(it.name+' '+(it.title||'')+' '+it.origin+' '+it.brand+' '+it.series+' '+(it.category||'')).toLowerCase().includes(w));
- const chipOk=it=>{const c=S.discChip;if(c==='All')return true;const m={Japanese:it.flag==='JP','Star Wars':it.series.includes('Star Wars'),Barbie:it.series.includes('Barbie'),'Hot Wheels':it.series.includes('Hot Wheels'),Gunpla:it.series==='Gunpla','Soft vinyl':it.brand==='Bullmark'||it.brand==='Marusan',Sentai:it.series==='Super Sentai'};return m[c]};
- const pool=ITEMS.filter(i=>i.owner!=='me'&&!USERS[i.owner].private&&match(i)&&chipOk(i));
- const filtering=q||S.discChip!=='All';
- const mySale=ITEMS.filter(i=>i.owner==='me'&&i.status==='sale'&&match(i)&&chipOk(i)).sort((a,b)=>b.added-a.added);
- const sale=[...mySale.slice(0,2),...pool.filter(i=>i.status==='sale')];
- const rare=pool.filter(i=>i.rarity||(i.high||0)>=600).sort((a,b)=>(b.high||0)-(a.high||0));
- const cols=Object.values(USERS).filter(u=>u.id!=='me'&&(!q||(u.name+u.handle+u.collects.join()).toLowerCase().includes(q)));
- const hTile=i=>`<div style="flex:none;width:150px">${tileHTML(i)}</div>`;
- const mine=ITEMS.filter(i=>i.owner==='me');const owned=mine.filter(i=>i.owned);const val=owned.reduce((a,i)=>a+((i.low||0)+(i.high||i.low||0))/2,0);
- const sec=(t,more)=>`<div class="sec"><h3>${t}</h3>${more||''}</div>`;
- return `<div class="hero"><div class="bg">${typeof S.bg==='string'?`<img src="${S.bg}">`:heroArt(S.bg)}</div><div class="shade"></div>
-  <div class="top"><div class="logo" style="flex:1">Toy<b>Scope</b></div><button class="bgbtn" onclick="bgSheet()" aria-label="Change background">${ic('image',2)}</button></div>
-  <div class="cta"><button class="btn pri full" style="height:52px;font-size:16px" onclick="pickScan()">${ic('scan',2,'width="20" height="20"')} Scan a toy</button></div></div>
- <div class="stats"><div onclick="tab('saved')"><b>${mine.length}</b><span>Saved toys</span></div><div onclick="tab('saved')"><b>${owned.length&&S.toggles.value?money(val):'—'}</b><span>What I own</span></div><div onclick="tab('saved')"><b>${folderNames().length}</b><span>Folders</span></div></div>
- <div class="pad" style="margin-top:12px"><div style="position:relative"><span style="position:absolute;left:12px;top:12px;color:var(--muted)">${ic('search',2,'width="20" height="20"')}</span><input class="field" style="padding-left:40px" placeholder="${t('search')}" value="${esc(S.q)}" oninput="S.q=this.value;const p=this.selectionStart;render();const f=document.querySelector('.field');f.focus();f.setSelectionRange(p,p)"></div></div>
- <div class="chips" style="margin-top:8px">${chips.map(c=>`<button class="chip ${S.discChip===c?'on':''}" onclick="S.discChip='${c}';render()">${c}</button>`).join('')}</div>
- ${filtering?`${sec('Results',`<span class="muted xs">${pool.length} toys</span>`)}<div class="grid2">${pool.sort((a,b)=>(b.status==='sale')-(a.status==='sale')).map(tileHTML).join('')||'<div class="empty" style="grid-column:1/-1">Nothing found</div>'}</div>
- ${cols.length&&q?`${sec('Collectors')}<div class="hscroll">${cols.map(colCard).join('')}</div>`:''}`
- :`${sec('New for sale',`<span class="link small" onclick="go('forsale')">See all ${sale.length}</span>`)}<div class="hscroll">${sale.slice(0,8).map(hTile).join('')}</div>
- ${rare.length?`${sec('Rare & high value')}<div class="hscroll">${rare.map(hTile).join('')}</div>`:''}
- ${sec('Collector’s Guide')}<div class="hscroll">${GUIDE.map(gcard).join('')}</div>
- ${sec('Collectors worth following')}<div class="hscroll">${cols.map(colCard).join('')}</div>
- <div class="pad muted xs" style="padding:10px 16px 24px;text-align:center">ToyScope is not affiliated with any toy maker or brand.</div>`}`};
+ const q=(S.q||'').toLowerCase().trim();
+ const chips=['All','Japanese','Chogokin','Star Wars','Gunpla','Soft vinyl','Sentai','Barbie','Hot Wheels','Under $50','Boxed','Loose'];
+ const ALIAS={gundam:['gunpla','rx-78','mobile suit','ガンダム','鋼彈'],gunpla:['gundam','rx-78'],transformers:['optimus','convoy','g1','diaclone'],godzilla:['ゴジラ','kaiju','soft vinyl'],chogokin:['超合金','popy'],sentai:['戦隊','power rangers','super sentai'],'power rangers':['sentai','戦隊'],barbie:['mattel'],'hot wheels':['redline','mattel'],'star wars':['kenner','vader','boba'],mask:['m.a.s.k'],'m.a.s.k.':['mask']};
+ const qs=q?[q,...(ALIAS[q]||[])]:[];const owner=i=>USERS[i.owner]||{};
+ const match=it=>!q||qs.some(w=>(it.name+' '+(it.title||'')+' '+it.origin+' '+it.brand+' '+it.series+' '+(it.category||'')+' '+(owner(it).handle||'')).toLowerCase().includes(w));
+ const P=i=>i.price||Math.round(((i.low||0)+(i.high||i.low||0))/2);
+ const chipOk=it=>{const c=S.discChip;if(c==='All')return true;const m={Japanese:it.flag==='JP',Chogokin:/chogokin|超合金/i.test(it.series+it.name+it.origin),'Star Wars':it.series.includes('Star Wars'),Barbie:it.series.includes('Barbie'),'Hot Wheels':it.series.includes('Hot Wheels'),Gunpla:it.series==='Gunpla','Soft vinyl':['Bullmark','Marusan'].includes(it.brand),Sentai:it.series==='Super Sentai','Under $50':P(it)<50,Boxed:(it.grade||0)>=4,Loose:(it.grade||0)<4};return !!m[c]};
+ const F=S.flt||{};const fltOk=it=>(F.min==null||P(it)>=F.min)&&(F.max==null||P(it)<=F.max)&&(!F.country||it.flag===F.country)&&(!F.cond||(F.cond==='boxed'?(it.grade||0)>=4:(it.grade||0)<4));
+ const all=ITEMS.filter(i=>i.status==='sale'&&(i.owner==='me'||!owner(i).private));
+ let list=all.filter(i=>match(i)&&chipOk(i)&&fltOk(i));
+ const sort=S.sort||'new';list.sort(sort==='low'?(a,b)=>P(a)-P(b):sort==='high'?(a,b)=>P(b)-P(a):sort==='saved'?(a,b)=>(b.saves||0)-(a.saves||0):(a,b)=>(b.added||0)-(a.added||0));
+ const filtering=q||S.discChip!=='All'||Object.keys(F).some(k=>F[k]!=null&&F[k]!=='');
+ const trending=all.filter(i=>i.owner!=='me').sort((a,b)=>(b.saves||0)-(a.saves||0)).slice(0,8);
+ const cols=Object.values(USERS).filter(u=>u.id!=='me');
+ const listRow=i=>{const U=owner(i);return `<div class="lrow" onclick="openItem('${i.id}')"><div class="art">${pic(i)}</div><div class="grow" style="min-width:0"><div class="ell" style="font-weight:600;font-size:14px">${esc(i.title||i.name)}</div><div style="font-weight:700;font-size:15px;margin-top:2px">${money(P(i))}</div><div class="muted xs ell">${esc(tierName(i.grade||0))} · ${i.year||''}</div><div class="muted xs ell">${i.owner==='me'?'<b style="color:var(--accent)">Yours</b>':'@'+esc(U.handle||'')} · ${esc((U.city||'').split(',')[0])}</div></div></div>`};
+ const colRow=k=>`<div style="grid-column:1/-1;margin:6px -16px 4px"><div class="sec" style="padding-top:6px"><h3>Collectors to follow</h3></div><div class="hscroll">${cols.slice(k%cols.length).concat(cols.slice(0,k%cols.length)).map(colCard).join('')}</div></div>`;
+ const view=S.view||'grid';const body=[];list.forEach((it,k)=>{if(k>0&&k%12===0)body.push(colRow(k/12));body.push(view==='grid'?tileHTML(it):listRow(it))});
+ const sortName={new:'Newest',low:'Lowest price',high:'Highest price',saved:'Most saved'}[sort];
+ return `<div class="homebar"><div class="row" style="justify-content:space-between;margin-bottom:10px"><div class="logo" style="font-size:22px">Toy<b>Scope</b></div><span class="muted xs">${ic('pin',2,'width="14" height="14" style="vertical-align:-2px"')} ${esc((USERS.me.city||'').split(',')[0])}</span></div>
+ <div style="position:relative"><span style="position:absolute;left:12px;top:12px;color:var(--muted)">${ic('search',2,'width="20" height="20"')}</span><input id="homeq" class="field" style="padding-left:40px;padding-right:46px" placeholder="Search toys, series, sellers" value="${esc(S.q||'')}" oninput="S.q=this.value;const p=this.selectionStart;render();const f=$('homeq');f.focus();f.setSelectionRange(p,p)"><button onclick="pickScan()" aria-label="Scan to search" style="position:absolute;right:6px;top:5px;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;color:var(--accent)">${ic('scan',2,'width="20" height="20"')}</button></div></div>
+ <div class="chips" style="margin-top:2px">${chips.map(c=>`<button class="chip ${S.discChip===c?'on':''}" onclick="S.discChip='${c}';render()">${c}</button>`).join('')}</div>
+ <div class="row toolbar"><span class="muted small grow">${list.length} for sale</span>
+  <button class="tb" onclick="sortSheet()">${ic('sort',2,'width="16" height="16"')} ${sortName}</button>
+  <button class="tb ${filtering&&Object.keys(F).length?'on':''}" onclick="filterSheet()">${ic('filter',2,'width="16" height="16"')} Filter</button>
+  <button class="tb ico ${view==='grid'?'on':''}" onclick="S.view='grid';LS.set('view','grid');render()" aria-label="Grid">${ic('grid',2,'width="16" height="16"')}</button>
+  <button class="tb ico ${view==='list'?'on':''}" onclick="S.view='list';LS.set('view','list');render()" aria-label="List">${ic('list',2,'width="16" height="16"')}</button></div>
+ ${!filtering&&trending.length?`<div class="sec" style="padding-top:4px"><h3>Trending this week</h3><span class="muted xs">Most saved</span></div><div class="hscroll">${trending.map(i=>`<div style="flex:none;width:140px">${tileHTML(i)}</div>`).join('')}</div><div class="sec" style="padding-top:4px"><h3>All for sale</h3></div>`:''}
+ <div class="${view==='grid'?'grid2':'list1'}">${body.join('')||`<div class="empty" style="grid-column:1/-1">Nothing matches. Try another search or clear filters.<br><button class="btn sm" style="margin-top:10px" onclick="S.q='';S.discChip='All';S.flt={};render()">Clear all</button></div>`}</div>
+ <div class="pad muted xs" style="padding:10px 16px 24px;text-align:center">ToyScope is not affiliated with any toy maker or brand.</div>`};
+function sortSheet(){sheet(()=>`<h3>Sort by</h3><div class="list" style="margin-top:10px">${[['new','Newest'],['low','Price: low to high'],['high','Price: high to low'],['saved','Most saved']].map(([k,l])=>`<div class="li" onclick="S.sort='${k}';closeSheet();render()"><span class="grow">${l}</span>${(S.sort||'new')===k?ic('check',2.4,'width="18" height="18" style="color:var(--accent)"'):''}</div>`).join('')}</div>`)}
+function filterSheet(){S.flt=S.flt||{};const F=S.flt;const seg=(key,opts)=>`<div class="seg" style="margin-top:6px">${opts.map(([v,l])=>`<button class="${(F[key]||'')===v?'on':''}" onclick="S.flt.${key}=${v?`'${v}'`:'null'};render()">${l}</button>`).join('')}</div>`;
+ sheet(()=>`<h3>Filter</h3><label class="lbl">Price (USD)</label><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><input class="field" inputmode="numeric" placeholder="Min" value="${F.min??''}" onchange="S.flt.min=this.value===''?null:+this.value"><input class="field" inputmode="numeric" placeholder="Max" value="${F.max??''}" onchange="S.flt.max=this.value===''?null:+this.value"></div>
+ <label class="lbl">Made in</label>${seg('country',[['','Any'],['JP','Japan'],['US','USA']])}
+ <label class="lbl">Condition</label>${seg('cond',[['','Any'],['boxed','Boxed'],['loose','Loose']])}
+ <div style="display:grid;grid-template-columns:1fr 2fr;gap:10px;margin-top:16px"><button class="btn" onclick="S.flt={};closeSheet();render()">Clear</button><button class="btn pri" onclick="closeSheet();render()">Show results</button></div>`)}
+
 SCR.forsale=()=>{const mine=ITEMS.filter(i=>i.owner==='me'&&i.status==='sale');const all=[...mine,...ITEMS.filter(i=>i.owner!=='me'&&i.status==='sale'&&!USERS[i.owner].private)];
  return hdrBack('For sale')+`<div class="pad muted small">Tap a toy and use Contact to ask or make an offer.</div><div class="grid2" style="padding-top:10px">${all.map(tileHTML).join('')}</div>`};
 function bgSheet(){sheet(()=>`<h3>Home background</h3><div class="muted small" style="margin-bottom:12px">Only you see this. Use your own photo — your shelf, your favourite piece.</div>
