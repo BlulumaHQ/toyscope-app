@@ -103,11 +103,21 @@
     S.toggles.private = !!me.is_private; S.toggles.contact = me.allow_contact !== false; S.toggles.sensitive = !!me.show_sensitive && me.age_range === '18+';
     S.restrictedUntil = me.restricted_until && Date.parse(me.restricted_until) > Date.now() ? me.restricted_until : null; S.suspended = !!me.suspended;
     USERS.me.private = S.toggles.private; USERS.me.allowContact = S.toggles.contact;
+    loadFp();
     // items owned by me that were mapped under my uuid before I signed in
     ITEMS.forEach((i) => { if (i.owner === me.id) i.owner = 'me'; });
     delete USERS[me.id];
     return true;
   }
+  // Founder activation progress: 10 photos (collection + for sale) within 30 days
+  async function loadFp() {
+    const { data } = await sb.rpc('founder_progress');
+    const was = S.fp && !S.fp.confirmed;
+    S.fp = data || null;
+    if (was && S.fp && S.fp.confirmed) toast(fpText('fp_done', { n: S.fp.no }));
+    render();
+  }
+  L.refreshFp = loadFp;
   async function loadMine() {
     if (!me) return;
     const [mine, album, saves, follows, inbox] = await Promise.all([
@@ -202,7 +212,7 @@
     S._dob = null; await loadMe(); await loadMine();
     if (/^user_[0-9a-f]{10}$/.test(me.handle || '')) { await new Promise((res) => setupProfile(res)); }
     S.sheet = null; const fn = S.after; S.after = null;
-    toast(me.founder_tier === 'lifetime' ? `Welcome, Founder #${me.founder_no} — Pro is free for life` : me.founder_tier === 'founding' ? `Welcome, Founding Collector #${me.founder_no} — Pro free for 6 months` : 'Account created');
+    toast(me.founder_tier ? fpText('fp_welcome', { n: me.founder_no }) : 'Account created');
     S.stack.push({ s: 'onboard' }); render(true); S._afterOnboard = fn;
   };
   // First-time profile: pick a username and display name
@@ -232,8 +242,8 @@
   sb.rpc('founding_spots').then(({ data }) => { if (data) { window.SPOTS = data; if (cur().s === 'explore' || S.sheet) render(); } });
   window.foundingLine = function () {
     const sp = window.SPOTS;
-    if (sp && sp.lifetime_left > 0) return `First 20 members get <b>Pro free for life</b> — ${sp.lifetime_left} left. Then members #21–200 get Pro free for 6 months.`;
-    if (sp && sp.founding_left > 0) return `Founding Collectors get <b>Pro free for 6 months</b>, then $19.99/yr for life — ${sp.founding_left} spots left.`;
+    if (sp && sp.lifetime_left > 0) return fpText('fp_line_life', { n: sp.lifetime_left });
+    if (sp && sp.founding_left > 0) return fpText('fp_line_found', { n: sp.founding_left });
     return 'Create a free account to browse, save and message sellers.';
   };
   // Guests: the Pro sheet invites them to join instead of a trial
@@ -293,7 +303,7 @@
   L.postSale = async function (it) {
     if (!me) return;
     it.declared = true; it.status = 'sale';
-    try { await saveItemRow(it); toast('Your listing is live'); }
+    try { await saveItemRow(it); toast('Your listing is live'); loadFp(); }
     catch (e) {
       console.error(e);
       if (e.stage === 'row') { it.status = 'private'; buildFeed(); render(); toast(errMsg(e)); }
@@ -340,6 +350,7 @@
     const { error } = await sb.from('album_photos').insert({ id: e2.id, owner_id: me.id, path, caption: e2.cap || '', rating: e2.rating });
     if (error) return toast(errMsg(error));
     e2.img = pub('albums', path);
+    loadFp();
   };
   L.albumDelete = async function (id) {
     if (!me || !isUuid(id)) return;
