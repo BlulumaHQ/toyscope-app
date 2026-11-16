@@ -7,7 +7,7 @@ const MODELS: Record<string, string> = {
   accurate: "google/gemini-4-hydrogen",
   fast: "openai/gpt-6.1-terra",
 };
-const LANGS: Record<string, string> = { en: "English", zh: "Traditional Chinese (Taiwan)", ja: "Japanese", ko: "Korean", fr: "French", es: "Spanish", de: "German" };
+const LANGS: Record<string, string> = { en: "English", zh: "Traditional Chinese (Taiwan)", "zh-Hans": "Simplified Chinese (Mainland China)", ja: "Japanese", ko: "Korean", fr: "French", es: "Spanish" };
 const THINK: Record<string, Record<string, unknown>> = { low: { effort: "low", exclude: true } };
 const LABELS = ["Front", "Back", "Box", "Accessories"];
 
