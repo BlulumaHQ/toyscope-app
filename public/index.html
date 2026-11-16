@@ -563,7 +563,7 @@ const S={
  key:LS.get('key',''),tab:'explore',stack:[],feedTab:'following',liked:new Set(['p2']),saved:new Set(),follow:new Set(['kenji','rina','joe','minjun']),
  colFilter:'all',colSort:'value',meTab:'collection',profTab:'posts',discChip:'All',q:'',scanMode:'single',
  toggles:Object.assign({analytics:false,improve:false},LS.get('toggles',{private:false,contact:false,value:true,pushLikes:true,pushFollow:true,pushHunt:true,emailNews:false})),
- contactsLeft:5,plan:'free',scansToday:2,sheet:null,lastResult:null,engine:'demo',sample:null,
+ contactsLeft:5,plan:LS.get('plan','free'),scansToday:2,sheet:null,lastResult:null,engine:'demo',sample:null,
 };
 USERS.me.allowContact=S.toggles.contact;USERS.me.private=S.toggles.private;
 // restore user-added items
@@ -572,7 +572,7 @@ USERS.me.photo=LS.get('avatar',null);
 
 /* ===================== ROUTER ===================== */
 const cur=()=>S.stack.length?S.stack[S.stack.length-1]:{s:S.tab};
-function go(s,p){S.stack.push({s,p});render(true)}
+function go(s,p){if(s==='scan'&&S.plan!=='pro'){render(true);return paywall('scan',()=>go('scan'))}S.stack.push({s,p});render(true)}
 function back(){S.stack.pop();render(true)}
 function tab(n){S.tab=n;S.stack=[];render(true)}
 const $=id=>document.getElementById(id);
@@ -589,7 +589,7 @@ function render(top){
 function themeNow(){if(S.toggles.auto&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)return 'dark';return S.theme==='system'?'light':S.theme}
 function isDark(){return themeNow()==='dark'}
 S.tips=new Set(LS.get('tips',[]));
-const COACH={explore:{pos:'bottom:calc(112px + env(safe-area-inset-bottom,0px))',dir:'down',t:'Tap here to scan any toy',p:'Point your camera at a toy and see what it’s worth. No account needed.'},
+const COACH={explore:{pos:'bottom:calc(112px + env(safe-area-inset-bottom,0px))',dir:'down',t:'Tap here to scan any toy',p:'Point your camera at a toy and see what it’s worth. Free to browse. Scanning is part of Pro.'},
  scan:{pos:'bottom:250px',dir:'down',t:'Add more angles',p:'Front is enough. Back, Box and Accessories make the value more accurate.'},
  result:{pos:'bottom:calc(96px + env(safe-area-inset-bottom,0px))',dir:'down',t:'Save it or sell it',p:'Save puts it in a folder. Sell lets you list it with more photos.'},
  saved:{pos:'top:200px',dir:'up',t:'Everything you keep',p:'Recent scans stay here automatically. Folders are yours to organise.'}};
@@ -640,7 +640,7 @@ SCR.welcome=()=>`<div style="min-height:100%;display:flex;flex-direction:column;
   <div style="font-size:18px;font-weight:600;max-width:280px">Scan any toy. Know what it is, what it’s worth, and where it came from.</div>
   <div class="muted small">Original Japanese names · Condition-based value · Collector community</div>
  </div>
- <button class="btn pri full" onclick="S.onboarded=true;LS.set('onboarded',true);S.stack=[];S.tab='explore';go('scan')">${ic('scan',2,'width="20" height="20"')} Scan a toy — no account needed</button>
+ <button class="btn pri full" onclick="S.onboarded=true;LS.set('onboarded',true);S.stack=[];S.tab='explore';go('scan')">${ic('scan',2,'width="20" height="20"')} Scan a toy</button><button class="btn sec2 full" style="margin-top:6px" onclick="S.onboarded=true;LS.set('onboarded',true);S.stack=[];tab('explore')">Browse toys for sale — free</button>
  <button class="btn full" style="margin-top:6px" onclick="signup('Welcome back',true)">I already have an account</button>
 </div>`;
 
@@ -769,7 +769,7 @@ function consent(fn){if(LS.get('aiok',false))return fn();sheet(()=>`<div class="
  <div class="small" style="margin:8px 0 16px">${legalLink('privacy','Read our Privacy Policy')}</div>
  <button class="btn pri full" onclick="LS.set('aiok',true);S.sheet=null;render();(${fn.toString()})()">Agree & continue</button><button class="btn full" style="margin-top:6px" onclick="closeSheet()">Not now</button>`)}
 function identifyShots(){return consent(()=>identifyShots2())}
-function identifyShots2(){if(!S.signedIn&&S.anon>=3)return signup('You’ve used your 3 free scans');if(S.plan!=='pro'&&S.scansToday>=5)return paywall();
+function identifyShots2(){if(S.plan!=='pro')return paywall('scan');
  const f=S.shots.front;const extra=SLOTS.slice(1).filter(([k])=>S.shots[k]).map(([k,l])=>({label:l,...S.shots[k]}));S._lastShots=S.shots;S.stack.pop();S.shots={};S.slot='front';startScan(f.dataUrl,f.blob,false,extra)}
 function scanHelp(){sheet(()=>`<h3>Get a better result</h3><div class="muted small" style="margin-bottom:12px">The AI only sees what is in the photo.</div>${['One toy per scan','Front is enough — Back, Box and Accessories make it more accurate','Plain background, daylight','Photograph stamps on the base or feet','Unsure results show alternatives'].map(x=>`<div class="acc"><span class="ok">✓</span>${x}</div>`).join('')}<button class="btn pri full" style="margin-top:16px" onclick="closeSheet()">Got it</button>`)}
 function pickPhoto(){$('filein').value='';$('filein').click()}
@@ -839,7 +839,7 @@ async function startScan(dataUrl,blob,demo,extra){extra=extra||[];
  r.ms=performance.now()-t0;r.img=demo?null:dataUrl;r.extra=extra.map(x=>({label:x.label,dataUrl:x.dataUrl}));r.engine=demo?'Demo result':engineLabel();
  S.scansToday++;if(!S.signedIn){S.anon++;LS.set('anon',S.anon)}r.when='Just now';S.recent.unshift(r);S.recent=S.recent.slice(0,20);S.lastResult=r;go('result');
 }
-function tryDemo(){if(!S.signedIn&&S.anon>=3)return signup('You’ve used your 3 free scans');startScan(null,null,true)}
+function tryDemo(){if(S.plan!=='pro')return paywall('scan',()=>tryDemo());startScan(null,null,true)}
 
 /* ---------- ACCOUNT GATE ---------- */
 S.signedIn=LS.get('signedIn',false);S.anon=LS.get('anon',0);
@@ -977,14 +977,19 @@ function saveScan(){const r=S.lastResult;const st=window._st||'private';const as
  const it={id:'u'+Date.now(),owner:'me',name:r.name,origin:r.origin||'',flag:flagOf(r.country),brand:r.brand||'—',series:r.series||'—',year:+r.year||r.year||'',grade:r.grade,low:r.low,high:r.high,status:st,price:ask,img:r.img,art:['giant','#B91C1C','#F8FAFC','#FEF2F2'],added:99,history:r.history};
  ITEMS.unshift(it);try{LS.set('myitems',ITEMS.filter(x=>x.id.startsWith('u')))}catch(e){}
  S.sheet=null;window._st=null;S.stack=[];S.tab='me';S.meTab='collection';render(true);buildFeed();toast(st==='private'?'Saved to your collection (private)':'Saved · visible on your profile')}
-function paywall(){sheet(()=>`<div style="text-align:center"><h3 class="hl" style="font-size:24px">ToyScope Pro</h3><div class="muted small" style="margin-bottom:16px">You’ve used today’s 5 free scans.</div></div>
- ${[['Unlimited scans',1],['Full value-by-condition ladder',1],['Hunt: watch Japanese auctions (v2)',1],['Collection export & insurance report',1],['No ads, ever — free plan too',1]].map(x=>`<div class="acc"><span class="ok">✓</span>${x[0]}</div>`).join('')}
- <div class="plan on" style="margin-top:14px" onclick=""><div class="row"><div class="grow"><b>Yearly</b> <span class="badge b-sale">Save 33%</span><div class="muted small">7-day free trial, then $39.99/yr</div></div><div class="price">$3.33/mo</div></div></div>
- <div class="plan"><div class="row"><div class="grow"><b>Monthly</b><div class="muted small">$4.99/mo</div></div></div></div>
- <button class="btn pri full" onclick="S.plan='pro';closeSheet();toast('Pro unlocked (prototype)')">Start free trial</button><button class="btn full" onclick="closeSheet()">Not now</button>`)}
-
+function startTrial(){const go2=()=>{S.plan='pro';LS.set('plan','pro');closeSheet();toast('Pro trial started · 7 days free');const f=S._proAfter;S._proAfter=null;if(f)setTimeout(f,60)};if(!S.signedIn){S.sheet=null;return need(go2)}go2()}
+function paywall(why,after){S._proAfter=after||null;const head=why==='sell'?'Selling is a Pro feature':why==='scan'?'The scanner is a Pro feature':'ToyScope Pro';
+ const sub=why==='sell'?'List your toys for sale with Pro.':why==='scan'?'Scan any toy to see what it is and what it’s worth.':'Scan and sell with Pro.';
+ sheet(()=>`<div style="text-align:center"><h3 class="hl" style="font-size:24px">${head}</h3><div class="muted small" style="margin-bottom:14px">${sub}</div></div>
+ <div style="font-weight:700;font-size:13px;margin-bottom:4px">Pro</div>
+ ${['Unlimited AI scans — name, origin, value','Sell your toys in the marketplace','Value by condition, from loose to mint in box','Collection export & insurance report'].map(x=>`<div class="acc"><span class="ok">✓</span>${x}</div>`).join('')}
+ <div style="font-weight:700;font-size:13px;margin:12px 0 4px">Free, always</div>
+ ${['Browse the marketplace','Contact sellers and buy toys','Save toys and follow collectors'].map(x=>`<div class="acc"><span class="ok" style="color:var(--muted)">✓</span>${x}</div>`).join('')}
+ <div class="plan on" style="margin-top:14px"><div class="row"><div class="grow"><b>Yearly</b><div class="muted small">7-day free trial, then $39.99/yr</div></div></div></div>
+ <button class="btn pri full" style="margin-top:12px" onclick="startTrial()">Start 7-day free trial</button><button class="btn full" onclick="S._proAfter=null;closeSheet()">Keep browsing for free</button>
+ <div class="muted xs" style="text-align:center;margin-top:8px">Cancel any time before the trial ends and you won’t be charged. Prototype — no payment is taken.</div>`)}
 /* ---------- SELL ---------- */
-function openSell(from,id){const it=id?item(id):null;const r=S.lastResult;
+function openSell(from,id){if(S.plan!=='pro')return paywall('sell',()=>openSell(from,id));const it=id?item(id):null;const r=S.lastResult;
  const first=it?(it.photos&&it.photos.length?it.photos:[it.img||null]):[r&&r.img||null];
  S.sell={from,id:id||null,base:it||r,photos:first.filter(Boolean),demoArt:!first.filter(Boolean).length?(it?it.art:['giant','#B91C1C','#F8FAFC','#FEF2F2']):null,
   title:it&&it.status==='sale'?(it.title||''):'',price:it&&it.status==='sale'&&it.price?String(it.price):'',cond:it&&it.status==='sale'?String(it.grade):'',desc:it&&it.status==='sale'?(it.desc||''):'',ai:false,busy:false};go('sell')}
@@ -1227,7 +1232,7 @@ const tg=(k,label,sub,ico)=>`<div class="li" onclick="flip('${k}')"><div class="
 const lk=(label,ico,act,right='')=>`<div class="li" onclick="${act}"><div class="ic">${ic(ico,2)}</div><div class="grow" style="font-size:14.5px">${label}</div>${right}<span class="muted">›</span></div>`;
 function flip(k){S.toggles[k]=!S.toggles[k];LS.set('toggles',S.toggles);USERS.me.allowContact=S.toggles.contact;USERS.me.private=S.toggles.private;const st=$('screen').scrollTop;render();$('screen').scrollTop=st;if(k==='contact'&&S.toggles.contact)toast('Collectors can now email you through ToyScope')}
 SCR.settings=()=>`${hdrBack(t('settings'))}
- <div class="pad" style="margin-bottom:14px">${S.plan==='pro'?`<div class="card" style="padding:16px"><b>ToyScope Pro</b> <span class="badge b-sale">Active</span><div class="muted small">Unlimited scans · renews Nov 19</div></div>`:`<div class="card" style="padding:16px;background:linear-gradient(135deg,#2E4FE8,#7C3AED);color:#fff;border:0;cursor:pointer" onclick="paywall()"><div class="row"><div class="grow"><div style="font-weight:700;font-size:17px">Go Pro</div><div style="opacity:.85;font-size:13px">Unlimited scans, value ladder, Hunt alerts</div></div><span class="btn sm" style="background:#fff;color:#2E4FE8">Try free</span></div></div>`}</div>
+ <div class="pad" style="margin-bottom:14px">${S.plan==='pro'?`<div class="card" style="padding:16px"><b>ToyScope Pro</b> <span class="badge b-sale">Active</span><div class="muted small">Scanner and selling unlocked · renews yearly</div></div>`:`<div class="card" style="padding:16px;background:linear-gradient(135deg,#2E4FE8,#7C3AED);color:#fff;border:0;cursor:pointer" onclick="paywall()"><div class="row"><div class="grow"><div style="font-weight:700;font-size:17px">Go Pro</div><div style="opacity:.85;font-size:13px">Unlimited scans and selling · 7 days free</div></div><span class="btn sm" style="background:#fff;color:#2E4FE8">Try free</span></div></div>`}</div>
  <div class="sec"><h3>${t('appearance')}</h3></div><div class="pad"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">${[['light','Light','#F5F6F8','#FFFFFF','#2E4FE8','#12141A'],['dark','Collector','#0B0C0F','#16181D','#E8B341','#F2F3F5'],['retro','Retro','#F2EADB','#FBF6EC','#A63A24','#2A2018']].map(([k,l,bg,sf,ac,tx])=>`<button onclick="setTheme('${k}')" style="border-radius:14px;padding:8px;border:2px solid ${S.theme===k?'var(--accent)':'var(--border)'};background:var(--surface)"><div style="height:58px;border-radius:9px;background:${bg};padding:8px;display:flex;flex-direction:column;gap:5px"><div style="height:8px;width:60%;border-radius:4px;background:${tx};opacity:.85"></div><div style="flex:1;border-radius:6px;background:${sf};border:1px solid rgba(0,0,0,.06)"></div><div style="height:9px;width:45%;border-radius:4px;background:${ac}"></div></div><div style="font-size:13px;font-weight:600;margin-top:6px">${l}</div></button>`).join('')}</div></div>
  <div class="list" style="margin-top:10px">${tg('auto','Switch to Collector at night','Follows your phone’s dark mode','moon')}</div>
  <div class="sec"><h3>General</h3></div><div class="list">${lk(t('language'),'globe',"langSheet()",`<span class="muted small">${LANGS.find(l=>l[0]===S.lang)[1]}</span>`)}${lk('My interests','star',"S.stack.push({s:'onboard'});render(true)",`<span class="muted small">${S.interests.size||'None'}</span>`)}${lk('Currency','tag',"toast('USD · CAD · JPY · TWD (later)')",'<span class="muted small">USD</span>')}</div>
