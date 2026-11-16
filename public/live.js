@@ -323,6 +323,11 @@
       const d = await res.json(); return d.rating || 'unchecked';
     } catch (e) { return 'unchecked'; }
   };
+  L.feedback = async function (f) {
+    if (!me) return false;
+    const { error } = await sb.from('feedback').insert(Object.assign({ user_id: me.id, app_version: 'web-beta' }, f));
+    if (error) { toast(errMsg(error)); return false; } return true;
+  };
   L.setSensitive = async function (on) { if (me) await sb.from('profiles').update({ show_sensitive: !!on }).eq('id', me.id); };
   L.album = async function (e2) {
     if (!me) return;
