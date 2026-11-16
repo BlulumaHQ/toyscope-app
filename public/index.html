@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <title>ToyScope</title>
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/icon-180.png">
@@ -332,6 +332,10 @@ select.field{appearance:none;-webkit-appearance:none;background-image:linear-gra
 .hscroll{display:flex;gap:10px;overflow-x:auto;padding:4px 16px 12px;scrollbar-width:none}
 .hscroll::-webkit-scrollbar{display:none}
 .ccard{flex:none;width:150px;padding:14px;text-align:center}
+
+/* iOS zooms into any input under 16px and stays zoomed; keep inputs at 16px and never allow sideways scroll */
+input:not(#otp),select,textarea,.field:not(#otp){font-size:16px!important}
+html,body{overflow-x:hidden;max-width:100%}
 </style>
 </head>
 <body>
