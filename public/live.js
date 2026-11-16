@@ -52,7 +52,7 @@
     const x = {
       id: r.id, owner: ownerKey(r.owner_id), name: r.name, origin: r.name_origin || '', flag: r.country || '',
       brand: r.brand || '—', series: r.series || '—', year: r.year || '', grade: r.grade ?? 0,
-      low: ai.low ?? null, high: ai.high ?? null, status: st, price: r.price != null ? +r.price : null,
+      low: ai.low ?? null, high: ai.high ?? null, status: st, price: r.price != null ? +r.price : null, cur: r.currency || 'USD',
       title: r.title || '', desc: r.description || '', orig: ai._orig || null, owned: !!r.owned, folder: r.folder,
       photos: (r.item_photos || []).sort((a, b) => a.sort - b.sort).map((p) => pub('items', p.path)),
       art: ART, added: Date.parse(r.created_at) / 1000, saves: r.saves_count || 0, history: ai.history || '', ai, db: true, offers: !!r.open_to_offers,
@@ -71,14 +71,14 @@
       id: it.id, owner_id: me.id, status: st, name: String(it.name || 'Untitled').slice(0, 140), name_origin: it.origin || '',
       brand: it.brand && it.brand !== '—' ? it.brand : '', series: it.series && it.series !== '—' ? it.series : '',
       year: parseInt(it.year) || null, country: it.flag || '', grade: Number.isInteger(it.grade) ? it.grade : null,
-      price: it.price || null, title: it.title || '', description: it.desc || '', originality: ORIG(it.orig),
+      price: it.price || null, currency: it.price ? (it.cur || S.cur || 'USD') : null, title: it.title || '', description: it.desc || '', originality: ORIG(it.orig),
       declared_owner: st === 'sale' ? true : !!it.declared, owned: !!it.owned, folder: it.folder || null, ai, open_to_offers: st === 'public' && !!it.offers,
     };
   }
 
   /* ---------- loading ---------- */
   const PROFILE_COLS = 'id,handle,name,city,bio,collects,avatar_url,is_private,allow_contact,founder,founder_no,founder_tier';
-  const ITEM_COLS = `id,owner_id,status,name,name_origin,brand,series,year,country,grade,price,title,description,originality,owned,folder,ai,saves_count,created_at,open_to_offers,item_photos(path,sort),owner:profiles!items_owner_id_fkey(${PROFILE_COLS})`;
+  const ITEM_COLS = `id,owner_id,status,name,name_origin,brand,series,year,country,grade,price,currency,title,description,originality,owned,folder,ai,saves_count,created_at,open_to_offers,item_photos(path,sort),owner:profiles!items_owner_id_fkey(${PROFILE_COLS})`;
 
   async function loadMarket() {
     const { data, error } = await sb.from('items').select(ITEM_COLS).in('status', ['sale', 'public']).order('created_at', { ascending: false }).limit(300);
@@ -416,7 +416,8 @@
     const p = cur().p; const U = USERS[p.u];
     if (!U || U.demo) return toast('This is a sample collector. Contact a real listing.');
     if (isMinor()) return needAdult(() => { }, 'Contact');
-    const offer = parseFloat((($('offer') || {}).value || '').replace(/[^0-9.]/g, '')) || null;
+    const offerRaw = parseFloat((($('offer') || {}).value || '').replace(/[^0-9.]/g, '')) || null;
+    const offer = offerRaw ? Math.round(toUSD(offerRaw, S.cur) * 100) / 100 : null;
     const { error } = await sb.from('contacts').insert({ from_id: me.id, to_id: U.uuid, item_id: isUuid(p.item) ? p.item : null, body: msg, offer });
     if (error) return toast(errMsg(error));
     S._draft = null; S.contactsLeft = Math.max(0, S.contactsLeft - 1); p.sent = true; render(true);
