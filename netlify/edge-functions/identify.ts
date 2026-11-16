@@ -1,5 +1,8 @@
 import type { Config, Context } from "@netlify/edge-functions";
 
+const SB_URL = "https://deknzrajghaatahmdrwn.supabase.co";
+const SB_KEY = "sb_publishable_xOp7aSByxfPuyojXVo6-kg_F-aF4MB0";
+
 const MODELS: Record<string, string> = {
   accurate: "google/gemini-4-hydrogen",
   fast: "openai/gpt-6.1-terra",
@@ -49,6 +52,22 @@ export default async (req: Request, context: Context) => {
 
   let body: { engine?: string; lang?: string; think?: string; images?: { label?: string; url?: string }[] };
   try { body = await req.json(); } catch { return json({ error: "Bad request" }, 400); }
+
+  // Only signed-in Pro accounts can scan; the database counts each scan against a daily limit.
+  const authz = req.headers.get("authorization") || "";
+  if (!authz.startsWith("Bearer ")) return json({ error: "Sign in to scan." }, 401);
+  const gate = await fetch(`${SB_URL}/rest/v1/rpc/begin_scan`, {
+    method: "POST",
+    headers: { apikey: SB_KEY, Authorization: authz, "Content-Type": "application/json" },
+    body: JSON.stringify({ p_engine: String(body.engine ?? "") }),
+  });
+  const g = await gate.json().catch(() => null) as { ok?: boolean; reason?: string; limit?: number } | null;
+  if (!gate.ok || !g?.ok) {
+    const r = g?.reason;
+    if (r === "pro") return json({ error: "The scanner is part of ToyScope Pro." }, 402);
+    if (r === "limit") return json({ error: `You’ve used today’s ${g?.limit ?? 30} scans. Try again tomorrow.` }, 429);
+    return json({ error: "Sign in to scan." }, 401);
+  }
 
   const model = MODELS[body.engine ?? ""] ?? MODELS.fast;
   const images = Array.isArray(body.images) ? body.images.slice(0, 4) : [];
