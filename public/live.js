@@ -221,7 +221,7 @@
   async function saveItemRow(it) {
     const row = rowFrom(it);
     const { error } = await sb.from('items').upsert(row);
-    if (error) throw error;
+    if (error) { error.stage = 'row'; throw error; }
     // photos: upload any local ones, then rewrite the photo list
     const srcs = (it.photos && it.photos.length ? it.photos : it.img ? [it.img] : []).slice(0, 12);
     const urls = [];
@@ -247,11 +247,12 @@
   };
   L.postSale = async function (it) {
     if (!me) return;
-    it.declared = true;
+    it.declared = true; it.status = 'sale';
     try { await saveItemRow(it); toast('Your listing is live'); }
     catch (e) {
-      console.error(e); it.status = 'private'; buildFeed(); render();
-      toast(errMsg(e));
+      console.error(e);
+      if (e.stage === 'row') { it.status = 'private'; buildFeed(); render(); toast(errMsg(e)); }
+      else toast('Listing is live, but a photo didn’t upload. Edit the listing to try again.');
     }
   };
   L.itemUpdate = async function (id) {
