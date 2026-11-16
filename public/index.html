@@ -14,6 +14,7 @@
 <meta name="theme-color" content="#F5F6F8">
 <meta name="robots" content="noindex">
 <script>window.TS_SERVER=true</script>
+<script src="real.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Noto+Sans+JP:wght@400;600&family=Noto+Sans+TC:wght@400;600&display=swap"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Noto+Sans+JP:wght@400;600&family=Noto+Sans+TC:wght@400;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'"><noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Noto+Sans+JP:wght@400;600&family=Noto+Sans+TC:wght@400;600&display=swap" rel="stylesheet"></noscript>
 <style>
@@ -404,7 +405,7 @@ function heroArt(v){const sets=[[['tin','#9CA3AF','#475569'],['kaiju','#15803D',
  const bgs=[['#2A2018','#4A3726'],['#141821','#2B3342'],['#1E2A22','#34483A']];const [a,b]=bgs[v%3];const its=sets[v%3];
  const strip=t=>t.replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'').replace(/<defs>.*?<\/defs>/,'').replace(/<rect width="200" height="200"[^>]*\/>/g,'').replace(/<ellipse[^>]*\/>/,'');
  return `<svg viewBox="0 0 390 300" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="hb${v}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${b}"/><stop offset="1" stop-color="${a}"/></linearGradient><radialGradient id="hl${v}" cx="50%" cy="0%" r="80%"><stop offset="0" stop-color="#FFE7B0" stop-opacity=".45"/><stop offset="1" stop-color="#FFE7B0" stop-opacity="0"/></radialGradient></defs><rect width="390" height="300" fill="url(#hb${v})"/><rect width="390" height="300" fill="url(#hl${v})"/><rect x="20" y="14" width="350" height="5" rx="2" fill="#FFF3D6" opacity=".7"/><rect x="0" y="196" width="390" height="10" fill="#B9C7D0" opacity=".35"/>${its.map((x,k)=>`<svg x="${20+k*120}" y="66" width="120" height="132" viewBox="20 10 160 170">${strip(art([x[0],x[1],x[2],'transparent']))}</svg>`).join('')}</svg>`}
-const postPic=p=>p.img?`<img src="${p.img}" alt="">`:p.album&&p.album.scene?sceneArt(p.user,p.album.scene,p.album.id):p.shelf?shelfArt(p.items):pic(item(p.items[0]));
+const postPic=p=>p.img?`<img src="${p.img}" alt="">`:p.album&&p.album.img?`<img src="${p.album.img}" alt="">`:p.album&&p.album.scene?sceneArt(p.user,p.album.scene,p.album.id):p.shelf?shelfArt(p.items):pic(item(p.items[0]));
 const pic=(it)=> it.photos&&it.photos.length?`<img src="${it.photos[0]}" alt="">`:it.img?`<img src="${it.img}" alt="">`:art(it.art);
 
 /* ===================== FAKE DATA ===================== */
@@ -550,13 +551,31 @@ const SCENECAP={
  harper:['Redline shelf','Display case — Spectraflame only','Swap meet lot','Blister packs still sealed','The card wall','Line-up of 1968 Sweet 16'],
  tom:['Tin shelf','Wind-up cabinet','Flea market box','Boxed battery robots','Hanging wall','All the robots out at once']};
 Object.keys(ALBUMS).concat(['tom']).forEach(u=>{const old=(ALBUMS[u]||[]).filter(x=>x.img);const own=ITEMS.filter(i=>i.owner===u).map(i=>i.id);ALBUMS[u]=SCENES.map((sc,k)=>({id:'sc_'+u+k,scene:sc,shelf:own.length?own:['i1'],cap:(SCENECAP[u]||SCENECAP.me)[k]})).concat(old)});
-function itemToResult(i){const mid=((i.low||0)+(i.high||0))/2;const base=mid/(TIERS[i.grade||0].m||1);const tiers={};TIERS.forEach(x=>{tiers[x.k]=[Math.round(base*x.m*.85/5)*5,Math.round(base*x.m*1.15/5)*5]});
+/* ---------- REAL DATA: real photos + real scan results replace the sample listings and collection art ---------- */
+(function(){const R=window.REAL;if(!R)return;
+ const mk=(u,r,k,sale)=>({id:'r_'+u+'_'+k,owner:u,name:r.name,origin:r.origin,flag:r.flag||'JP',brand:r.brand,series:r.series,year:r.year,grade:r.grade,low:r.low,high:r.high,
+  price:sale?Math.round((r.low+r.high)/2*1.1):undefined,status:sale?'sale':'saved',photos:[r.img],desc:r.desc||'',history:r.history||'',rarity:r.rarity||null,res:r.res||null,real:true,
+  art:['box','#CBD5E1','#64748B','#F1F5F9'],added:40-((k*7)%37),saves:2+((k*37+u.length*11)%58)});
+ const mine=(R.me||[]).map((r,k)=>Object.assign(mk('me',r,k,false),{owned:true,folder:(r.series||r.brand||'Saved').replace(/\s*\(.*\)$/,'')}));
+ const sale=[];Object.entries(R.others||{}).forEach(([u,arr])=>{if(USERS[u])arr.forEach((r,k)=>sale.push(mk(u,r,k,true)))});
+ // interleave owners so the marketplace isn't one seller at a time
+ sale.sort((a,b)=>b.added-a.added||a.owner.localeCompare(b.owner));
+ // old sample items stay only as hidden references (old scan history, posts), never listed
+ const old=ITEMS.filter(i=>!i.real);old.forEach(i=>{i.status='archived'});
+ ITEMS.length=0;[...mine,...sale,...old.filter(i=>i.owner!=='me')].forEach(i=>ITEMS.push(i));
+ // bookmarks -> real listings
+ Object.keys(BM).forEach(k=>delete BM[k]);sale.slice(3,7).forEach((i,k)=>{BM[i.id]=['Wishlist','Wishlist','Maybe later','Wishlist'][k]});
+ // collection photos: real cabinet photos first, then the collector's own item photos, up to 6+
+ const al={};(R.albums||[]).forEach(([f,u,cap],k)=>{(al[u]=al[u]||[]).push({id:'rc_'+k,img:'img/c/'+f,cap:cap||''})});
+ Object.keys(USERS).forEach(u=>{const own=ITEMS.filter(i=>i.owner===u&&i.real);const fill=own.slice(0,Math.max(0,6-(al[u]||[]).length)).map(i=>({id:'ri_'+i.id,img:i.photos[0],cap:i.name}));ALBUMS[u]=[...(al[u]||[]),...fill]});
+})();
+function itemToResult(i){if(i.res)return Object.assign({},i.res,{img:i.photos&&i.photos[0],ms:3400,engine:'Earlier scan'});const mid=((i.low||0)+(i.high||0))/2;const base=mid/(TIERS[i.grade||0].m||1);const tiers={};TIERS.forEach(x=>{tiers[x.k]=[Math.round(base*x.m*.85/5)*5,Math.round(base*x.m*1.15/5)*5]});
  return {name:i.name,name_en:i.name,origin:i.origin,country:{JP:'Japan',US:'United States',DE:'Germany'}[i.flag]||'',brand:i.brand,series:i.series,year:String(i.year),collectible:true,repro:false,rarity:i.rarity||'common',conf:.88,cands:[],grade:i.grade||0,reasons:[],accExp:[],accVis:[],low:i.low,high:i.high,tiers,history:i.history||'',tips:[],reproSigns:[],art:i.art,ms:3400,engine:'Earlier scan'}}
-const seedRecent=()=>[['k2','Sat · flea market'],['j1','Sat · flea market'],['h2','Fri']].map(([id,when])=>Object.assign(itemToResult(item(id)),{when}));
+const seedRecent=()=>ITEMS.filter(i=>i.real&&i.owner!=='me').slice(0,3).map((i,k)=>Object.assign(itemToResult(i),{when:['Sat · flea market','Sat · flea market','Fri'][k]}));
 const folderNames=()=>{const f=['Favorites'];ITEMS.filter(i=>i.owner==='me'&&i.folder).forEach(i=>f.includes(i.folder)||f.push(i.folder));Object.values(BM).forEach(x=>f.includes(x)||f.push(x));(S.extraFolders||[]).forEach(x=>f.includes(x)||f.push(x));return f};
 const folderItems=f=>[...ITEMS.filter(i=>i.owner==='me'&&i.folder===f),...Object.entries(BM).filter(([,v])=>v===f).map(([k])=>item(k)).filter(Boolean)];
 function buildFeed(){const out=[];let k=0;
- Object.entries(ALBUMS).forEach(([u,arr])=>{if(u==='me'||USERS[u].private)return;arr.slice(0,2).forEach(a=>{const old=OLDPOSTS.find(p=>p.user===u&&p.items&&p.items.join()===a.shelf.join());out.push({id:'f_'+a.id,kind:'album',user:u,items:a.shelf,shelf:true,album:a,time:['2h','5h','8h','1d','2d','3d'][k%6],likes:old?old.likes:300+((k*211)%1500),cap:a.cap,comments:old?old.comments:[]});k++})});
+ Object.entries(ALBUMS).forEach(([u,arr])=>{if(u==='me'||USERS[u].private)return;arr.slice(0,2).forEach(a=>{const old=a.shelf?OLDPOSTS.find(p=>p.user===u&&p.items&&p.items.join()===a.shelf.join()):null;out.push({id:'f_'+a.id,kind:'album',user:u,items:a.shelf||[],shelf:true,album:a,time:['2h','5h','8h','1d','2d','3d'][k%6],likes:old?old.likes:300+((k*211)%1500),cap:a.cap,comments:old?old.comments:[]});k++})});
  ITEMS.filter(i=>i.status==='sale'&&i.owner!=='me'&&!USERS[i.owner].private).forEach(i=>{const old=OLDPOSTS.find(p=>p.items&&p.items.length===1&&p.items[0]===i.id);out.push({id:'f_'+i.id,kind:'listing',user:i.owner,items:[i.id],time:old?old.time:['3h','6h','1d','2d'][k%4],likes:old?old.likes:120+((k*137)%600),cap:i.desc?i.desc.split('\n')[0]:old?old.cap:'',comments:old?old.comments:[]});k++});
  out.sort((a,b)=>tv(a.time)-tv(b.time));POSTS.length=0;out.forEach(x=>POSTS.push(x))}
 function tv(t){return t==='now'?0:parseInt(t)*({m:1,h:60,d:1440}[t.slice(-1)]||1)}

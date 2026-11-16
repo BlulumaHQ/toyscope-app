@@ -485,5 +485,8 @@
     if (session && (await loadMe())) await loadMine();
     await loadMarket();
     buildFeed(); render();
+    // signed in but never finished setup (e.g. signed up on an older version)
+    if (me && !me.age_range) ageSheet();
+    else if (me && /^user_[0-9a-f]{10}$/.test(me.handle || '')) setupProfile(() => { render(); toast('Profile saved'); });
   })();
 })();
