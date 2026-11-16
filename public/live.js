@@ -162,7 +162,7 @@
   L.sendCode = async function () {
     const A = S._auth; const email = ($('em').value || '').trim().toLowerCase();
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return toast('Enter a valid email');
-    A.email = email; A.busy = true; render();
+    A.email = email; S._lastEmail = email; A.busy = true; render();
     const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
     A.busy = false;
     if (error) { render(); return toast(/rate|limit|seconds/i.test(error.message) ? 'Please wait a minute before asking for another code' : errMsg(error)); }
@@ -181,6 +181,7 @@
   async function afterSignIn() {
     if (!(await loadMe())) return toast('Could not load your account. Try again.');
     if (!me.age_range) return ageSheet();
+    if (/^user_[0-9a-f]{10}$/.test(me.handle || '')) return setupProfile(() => afterSignIn());
     S.sheet = null; S.onboarded = true; LS.set('onboarded', true);
     await loadMine(); buildFeed();
     const fn = S.after; S.after = null; render(true);
@@ -198,9 +199,44 @@
     if (d.news) sb.from('consents').insert({ user_id: me.id, kind: 'marketing', version: '2026-11' });
     sb.from('consents').insert([{ user_id: me.id, kind: 'terms', version: '2026-11-13' }, { user_id: me.id, kind: 'privacy', version: '2026-11-13' }]);
     S._dob = null; await loadMe(); await loadMine();
+    if (/^user_[0-9a-f]{10}$/.test(me.handle || '')) { await new Promise((res) => setupProfile(res)); }
     S.sheet = null; const fn = S.after; S.after = null;
     toast(me.founder ? 'Welcome, founding collector — Pro is on us for 6 months' : 'Account created');
     S.stack.push({ s: 'onboard' }); render(true); S._afterOnboard = fn;
+  };
+  // First-time profile: pick a username and display name
+  function setupProfile(done) {
+    S._setupDone = done;
+    const email = (S._lastEmail || '').split('@')[0].replace(/\+.*/, '').replace(/[^a-zA-Z0-9_]/g, '_').slice(0, 20);
+    const sug = email.length >= 3 ? email : '';
+    sheet(() => `<div style="text-align:center"><h3>Set up your profile</h3><div class="muted small" style="margin:4px 0 14px">This is how other collectors see you. You can change it later.</div></div>
+      <label class="lbl">Username</label><input class="field" id="sp_h" value="${esc(sug)}" autocapitalize="none" autocorrect="off" placeholder="e.g. sentai_sony">
+      <div class="muted xs" style="margin:4px 0 0">3–24 letters, numbers or _</div>
+      <label class="lbl">Name</label><input class="field" id="sp_n" placeholder="Your name or nickname">
+      <label class="lbl">City (optional)</label><input class="field" id="sp_c" placeholder="e.g. Vancouver, BC">
+      <button class="btn pri full" style="margin-top:16px" onclick="LIVE.finishSetup()">Continue</button>`);
+  }
+  L.finishSetup = async function () {
+    const handle = $('sp_h').value.trim().replace(/^@/, '');
+    if (!/^[a-zA-Z0-9_]{3,24}$/.test(handle)) return toast('Username: 3–24 letters, numbers or _');
+    const name = $('sp_n').value.trim().slice(0, 60);
+    if (!name) return toast('Add your name or a nickname');
+    const upd = { handle, name, city: $('sp_c').value.trim().slice(0, 60) };
+    const { error } = await sb.from('profiles').update(upd).eq('id', me.id);
+    if (error) return toast(/duplicate|unique/i.test(error.message) ? 'That username is taken — try another' : errMsg(error));
+    Object.assign(me, upd); userFrom(me);
+    const d = S._setupDone; S._setupDone = null; S.sheet = null; if (d) d();
+  };
+  // Guests: the Pro sheet invites them to join instead of a trial
+  const _paywall = window.paywall;
+  window.paywall = function (why, after) {
+    if (S.signedIn) return _paywall(why, after);
+    const head = why === 'sell' ? 'Sign up to sell' : why === 'scan' ? 'Sign up to scan' : 'Join ToyScope';
+    S._proAfter = after || null;
+    sheet(() => `<div style="text-align:center;padding-top:4px"><div class="logo" style="font-size:26px">Toy<b>Scope</b></div><h3 style="margin-top:8px">${head}</h3>
+      <div class="muted small" style="margin:6px 0 14px">Create a free account. The first 300 members are <b>Founding Collectors</b> and get Pro free for 6 months: unlimited scans and selling.</div></div>
+      <button class="btn pri full" onclick="const f=S._proAfter;S._proAfter=null;S.sheet=null;need(f||(()=>{}))">Create free account</button>
+      <button class="btn full" style="margin-top:6px" onclick="S._proAfter=null;closeSheet()">Keep browsing for free</button>`);
   };
   L.signOut = async function () {
     await sb.auth.signOut();
