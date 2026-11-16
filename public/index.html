@@ -231,7 +231,7 @@ select.field{appearance:none;-webkit-appearance:none;background-image:linear-gra
 .sheet h3{font-size:19px;font-weight:700;margin-bottom:4px}
 @keyframes up{from{transform:translateY(100%)}to{transform:none}}
 @keyframes fade{from{opacity:0}to{opacity:1}}
-.toast{position:absolute;left:50%;bottom:96px;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:13.5px;font-weight:500;z-index:60;white-space:nowrap;animation:fade .2s}
+.toast{position:absolute;left:50%;bottom:calc(104px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:13.5px;font-weight:500;z-index:60;width:max-content;max-width:86%;text-align:center;animation:fade .2s}
 .field{width:100%;border:1px solid var(--border);background:var(--surface);border-radius:12px;padding:12px 14px;outline:none}
 .field:focus{border-color:var(--accent)}
 .lbl{font-size:13px;font-weight:600;margin:14px 0 6px;display:block}
@@ -550,6 +550,11 @@ const COACH={explore:{pos:'bottom:calc(112px + env(safe-area-inset-bottom,0px))'
  saved:{pos:'top:200px',dir:'up',t:'Everything you keep',p:'Recent scans stay here automatically. Folders are yours to organise.'}};
 function coachHTML(){const k=cur().s;const c=COACH[k];if(!c||S.tips.has(k)||S.sheet)return '';if(k==='explore'&&!S.onboarded)return '';
  return `${k==='explore'?`<div class="coachdim" id="cdim" onclick="dismissTip('explore')"></div>`:''}<div class="coach ${c.dir}" style="${c.pos}"><b>${c.t}</b><p>${c.p}</p><button onclick="dismissTip('${k}')">Got it</button></div>`}
+
+/* coach tips get out of the way: dismiss on scroll or on any tap outside the tip */
+function autoDismissTip(){const b=document.querySelector('.coach button[onclick^="dismissTip"]');if(b)b.click()}
+document.addEventListener('DOMContentLoaded',()=>{const sc=$('screen');if(sc)sc.addEventListener('scroll',()=>{if(sc.scrollTop>40)autoDismissTip()},{passive:true})});
+document.addEventListener('pointerdown',e=>{if(!document.querySelector('.coach'))return;if(e.target.closest('.coach'))return;if(e.target.closest('button,[onclick]'))setTimeout(autoDismissTip,0)},true);
 function placeSpot(){const d=$('cdim');const b=document.querySelector('.scanbtn');if(!d||!b)return;const dr=d.getBoundingClientRect(),r=b.getBoundingClientRect();if(!r.width)return;const x=r.left-dr.left+r.width/2,y=r.top-dr.top+r.height/2,rad=Math.round(Math.max(r.width,r.height)/2)+10;d.style.background=`radial-gradient(circle at ${x}px ${y}px, transparent ${rad}px, rgba(0,0,0,.68) ${rad+4}px)`}
 ['resize','orientationchange'].forEach(ev=>addEventListener(ev,()=>setTimeout(placeSpot,120)));
 function dismissTip(k){S.tips.add(k);LS.set('tips',[...S.tips]);render()}
@@ -591,7 +596,7 @@ SCR.welcome=()=>`<div style="min-height:100%;display:flex;flex-direction:column;
   <div class="muted small">Original Japanese names · Condition-based value · Collector community</div>
  </div>
  <button class="btn pri full" onclick="S.onboarded=true;LS.set('onboarded',true);S.stack=[];S.tab='explore';go('scan')">${ic('scan',2,'width="20" height="20"')} Scan a toy — no account needed</button>
- <button class="btn full" style="margin-top:6px" onclick="signup('Welcome back')">I already have an account</button>
+ <button class="btn full" style="margin-top:6px" onclick="signup('Welcome back',true)">I already have an account</button>
 </div>`;
 
 S.obStep=1;S.goals=new Set(LS.get('goals',[]));
@@ -645,7 +650,7 @@ SCR.notifs=()=>{S.unread=false;return `<div class="hdr"><h1>Activity</h1></div><
 S.bg=LS.get('bg',0);
 SCR.explore=()=>{
  const q=S.q.toLowerCase();const chips=['All','Japanese','Star Wars','Barbie','Hot Wheels','Gunpla','Soft vinyl','Sentai'];
- const match=it=>!q||(it.name+(it.title||'')+it.origin+it.brand+it.series).toLowerCase().includes(q);
+ const ALIAS={gundam:['gunpla','rx-78','mobile suit','ガンダム','鋼彈'],gunpla:['gundam','rx-78'],transformers:['optimus','convoy','g1','diaclone'],godzilla:['ゴジラ','kaiju','soft vinyl'],chogokin:['超合金','popy'],sentai:['戦隊','power rangers','super sentai'],'power rangers':['sentai','戦隊'],barbie:['mattel'],'hot wheels':['redline','mattel'],'star wars':['kenner','vader','boba']};const qs=[q,...(ALIAS[q]||[])];const match=it=>!q||qs.some(w=>(it.name+' '+(it.title||'')+' '+it.origin+' '+it.brand+' '+it.series+' '+(it.category||'')).toLowerCase().includes(w));
  const chipOk=it=>{const c=S.discChip;if(c==='All')return true;const m={Japanese:it.flag==='JP','Star Wars':it.series.includes('Star Wars'),Barbie:it.series.includes('Barbie'),'Hot Wheels':it.series.includes('Hot Wheels'),Gunpla:it.series==='Gunpla','Soft vinyl':it.brand==='Bullmark'||it.brand==='Marusan',Sentai:it.series==='Super Sentai'};return m[c]};
  const pool=ITEMS.filter(i=>i.owner!=='me'&&!USERS[i.owner].private&&match(i)&&chipOk(i));
  const filtering=q||S.discChip!=='All';
@@ -720,7 +725,7 @@ function consent(fn){if(LS.get('aiok',false))return fn();sheet(()=>`<div class="
  <button class="btn pri full" onclick="LS.set('aiok',true);S.sheet=null;render();(${fn.toString()})()">Agree & continue</button><button class="btn full" style="margin-top:6px" onclick="closeSheet()">Not now</button>`)}
 function identifyShots(){return consent(()=>identifyShots2())}
 function identifyShots2(){if(!S.signedIn&&S.anon>=3)return signup('You’ve used your 3 free scans');if(S.plan!=='pro'&&S.scansToday>=5)return paywall();
- const f=S.shots.front;const extra=SLOTS.slice(1).filter(([k])=>S.shots[k]).map(([k,l])=>({label:l,...S.shots[k]}));S.stack.pop();S.shots={};S.slot='front';startScan(f.dataUrl,f.blob,false,extra)}
+ const f=S.shots.front;const extra=SLOTS.slice(1).filter(([k])=>S.shots[k]).map(([k,l])=>({label:l,...S.shots[k]}));S._lastShots=S.shots;S.stack.pop();S.shots={};S.slot='front';startScan(f.dataUrl,f.blob,false,extra)}
 function scanHelp(){sheet(()=>`<h3>Get a better result</h3><div class="muted small" style="margin-bottom:12px">The AI only sees what is in the photo.</div>${['One toy per scan','Front is enough — Back, Box and Accessories make it more accurate','Plain background, daylight','Photograph stamps on the base or feet','Unsure results show alternatives'].map(x=>`<div class="acc"><span class="ok">✓</span>${x}</div>`).join('')}<button class="btn pri full" style="margin-top:16px" onclick="closeSheet()">Got it</button>`)}
 function pickPhoto(){$('filein').value='';$('filein').click()}
 $('filein').addEventListener('change',async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;try{const {dataUrl,blob}=await resize(f,1024);S.shots[S.slot]={dataUrl,blob};const nx=SLOTS.find(([k])=>!S.shots[k]);if(nx)S.slot=nx[0];render();toast(S.shots.front&&Object.keys(S.shots).length===1?'Front added · add more angles or tap Identify':'Photo added')}catch(err){toast('Could not read that photo — try another');}});
@@ -785,7 +790,7 @@ async function startScan(dataUrl,blob,demo,extra){extra=extra||[];
  clearInterval(scanTimer);stopPlay();
  if(cur().s!=='scanning')return;
  S.stack.pop();
- if(err){render();return sheet(()=>`<h3>Scan didn’t finish</h3><div class="muted small" style="margin:6px 0 14px">${esc(err.message||err)}</div><button class="btn pri full" onclick="closeSheet()">OK</button>`)}
+ if(err){if(!demo&&S._lastShots&&S._lastShots.front){S.shots=S._lastShots;S.stack.push({s:'scan'})}render();return sheet(()=>`<h3>Scan didn’t finish</h3><div class="muted small" style="margin:6px 0 14px">${esc(err.message||err)} Your photos are still here.</div>${S.shots.front?`<button class="btn pri full" onclick="closeSheet();identifyShots()">Try again</button><button class="btn full" style="margin-top:8px" onclick="closeSheet()">Retake photos</button>`:`<button class="btn pri full" onclick="closeSheet()">OK</button>`}`)}
  r.ms=performance.now()-t0;r.img=demo?null:dataUrl;r.extra=extra.map(x=>({label:x.label,dataUrl:x.dataUrl}));r.engine=demo?'Demo result':engineLabel();
  S.scansToday++;if(!S.signedIn){S.anon++;LS.set('anon',S.anon)}r.when='Just now';S.recent.unshift(r);S.recent=S.recent.slice(0,20);S.lastResult=r;go('result');
 }
@@ -795,12 +800,12 @@ function tryDemo(){if(!S.signedIn&&S.anon>=3)return signup('You’ve used your 3
 S.signedIn=LS.get('signedIn',false);S.anon=LS.get('anon',0);
 function need(fn){if(S.signedIn)return fn();S.after=fn;signup()}
 function signupBlocked(){return sheet(()=>`<h3>Sorry, you can’t create an account</h3><div class="muted small" style="margin:6px 0 16px">ToyScope is for people 13 and older.</div><button class="btn pri full" onclick="closeSheet()">OK</button>`)}
-function signup(title){if(S.blocked)return signupBlocked();sheet(()=>`<div style="text-align:center;padding-top:4px"><div class="logo" style="font-size:26px">Toy<b>Scope</b></div><h3 style="margin-top:8px">${title||'Create a free account'}</h3><div class="muted small" style="margin:4px 0 16px">Save toys into folders, sell, and follow collectors. Free — no ads, ever.</div></div>
+function signup(title,login){if(S.blocked)return signupBlocked();S._login=!!login;sheet(()=>`<div style="text-align:center;padding-top:4px"><div class="logo" style="font-size:26px">Toy<b>Scope</b></div><h3 style="margin-top:8px">${title||'Create a free account'}</h3><div class="muted small" style="margin:4px 0 16px">Save toys into folders, sell, and follow collectors. Free — no ads, ever.</div></div>
  <button class="btn full" style="background:#000;color:#fff" onclick="doSignup()">Continue with Apple</button>
  <button class="btn out full" style="margin-top:8px" onclick="doSignup()">Continue with Google</button>
  <button class="btn sec2 full" style="margin-top:8px" onclick="doSignup()">Continue with email</button>
  <div class="muted xs" style="text-align:center;margin-top:12px">You must be 13 or older. ${legalLink('terms','Terms')} · ${legalLink('privacy','Privacy')}</div>`)}
-function doSignup(){ageSheet()}
+function doSignup(){if(S._login){S._login=false;S.signedIn=true;LS.set('signedIn',true);if(!S.age){S.age='18+';LS.set('age',S.age)}S.onboarded=true;LS.set('onboarded',true);S.sheet=null;S.stack=[];S.tab='explore';render(true);toast('Welcome back');return}ageSheet()}
 const _fo=finishOnboard;finishOnboard=function(skip){_fo(skip);if(S._afterOnboard){const f=S._afterOnboard;S._afterOnboard=null;setTimeout(f,50)}};
 
 /* ---------- AI ENGINE ---------- */
@@ -961,7 +966,7 @@ async function aiFill(){const f=S.sell,b=f.base||{};f.busy=true;keepScroll();awa
  const miss=(b.accExp||[]).filter(x=>!(b.accVis||[]).map(y=>y.toLowerCase()).includes(x.toLowerCase()));
  f.title=[b.brand&&b.brand!=='—'?b.brand:'',b.name,b.year?'('+b.year+')':''].filter(Boolean).join(' ');
  f.price=mid?String(mid):'';f.cond=String(b.grade??'');
- f.desc=[`${esc(b.name)}${b.origin?' — '+esc(b.origin):''}.`,b.year||b.brand?`Original ${b.brand&&b.brand!=='—'?esc(b.brand)+' ':''}release${b.year?', '+esc(b.year):''}.`:'',
+ f.desc=[`${b.name}${b.origin&&b.origin.trim().toLowerCase()!==String(b.name).trim().toLowerCase()?' — '+b.origin:''}.`,b.year||(b.brand&&b.brand!=='—')?`${[b.brand&&b.brand!=='—'?b.brand:'',b.year].filter(Boolean).join(', ')}.`:'',
   `Condition: ${tierName(b.grade||0)}.${b.reasons&&b.reasons.length?' '+b.reasons.join('. ')+'.':''}`,
   miss.length?`Not included: ${miss.join(', ')}.`:'',
   'More photos on request. Pickup or tracked shipping.'].filter(Boolean).join('\n');
