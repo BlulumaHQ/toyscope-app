@@ -98,7 +98,7 @@
     userFrom(me);
     S.signedIn = true;
     S.plan = me.plan === 'pro' && (!me.pro_until || Date.parse(me.pro_until) > Date.now()) ? 'pro' : 'free';
-    S.founder = me.founder; S.proUntil = me.pro_until; S.founderTier = me.founder_tier; S.founderNo = me.founder_no;
+    S.founder = me.founder; S.proUntil = me.pro_until; S.memberSince = me.created_at; S.founderTier = me.founder_tier; S.founderNo = me.founder_no;
     S.age = me.age_range;
     S.toggles.private = !!me.is_private; S.toggles.contact = me.allow_contact !== false; S.toggles.sensitive = !!me.show_sensitive && me.age_range === '18+';
     S.restrictedUntil = me.restricted_until && Date.parse(me.restricted_until) > Date.now() ? me.restricted_until : null; S.suspended = !!me.suspended;
