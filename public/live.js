@@ -14,7 +14,13 @@
   const COLORS = ['#2E4FE8', '#16A34A', '#DB2777', '#EA580C', '#C026D3', '#0891B2', '#4F46E5', '#DC2626', '#78716C', '#0F766E'];
   const colorOf = (id) => COLORS[parseInt(String(id).replace(/-/g, '').slice(0, 6), 16) % COLORS.length];
   const errMsg = (e) => { const m = (e && (e.message || e.error_description)) || 'Something went wrong. Try again.'; return /JWT|token/i.test(m) ? 'Please sign in again.' : m.replace(/^.*?:\s(?=[A-Z])/, ''); };
-  const toBlob = async (dataUrl) => (await fetch(dataUrl)).blob();
+  const toBlob = async (dataUrl) => { // no fetch(): the page's security policy blocks data: URLs
+    const [head, b64] = String(dataUrl).split(',');
+    const mime = (head.match(/data:([^;]+)/) || [])[1] || 'image/jpeg';
+    const bin = atob(b64); const u8 = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    return new Blob([u8], { type: mime });
+  };
   const ART = ['giant', '#475569', '#E5E7EB', '#F1F5F9'];
 
   /* ---------- start: everything bundled with the prototype is sample data ---------- */
@@ -223,7 +229,8 @@
       const p = srcs[k];
       if (/^https?:/.test(p)) { urls.push(p); continue; }
       const path = `${me.id}/${it.id}/${Date.now()}_${k}.jpg`;
-      const up = await sb.storage.from('items').upload(path, await toBlob(p), { contentType: 'image/jpeg', upsert: true });
+      const bl = await toBlob(p);
+      const up = await sb.storage.from('items').upload(path, bl, { contentType: bl.type, upsert: true });
       if (up.error) throw up.error;
       urls.push(pub('items', path));
     }
