@@ -154,11 +154,12 @@ input,textarea,select{font:inherit;color:var(--text)}
 .coach b{display:block;font-size:15px;margin-bottom:3px}.coach p{font-size:13px;opacity:.85;margin-bottom:10px}
 .coach button{background:var(--bg);color:var(--text);font-weight:600;font-size:13px;padding:7px 14px;border-radius:10px}
 .article p{margin:0 0 14px;font-size:15.5px;line-height:1.6}.article h4{font-size:16px;margin:18px 0 6px}
-.rhero{position:relative;aspect-ratio:1/1;background:#0d0f14;overflow:hidden}
-.rhero>img,.rhero>svg{width:100%;height:100%;object-fit:cover;display:block}
+.rhero{position:relative;aspect-ratio:4/5;background:#0d0f14;overflow:hidden}
+.rhero>img,.rhero>svg{position:relative;width:100%;height:100%;object-fit:contain;display:block}
+.rhero>.blur{position:absolute;inset:-20px;width:calc(100% + 40px);height:calc(100% + 40px);object-fit:cover;filter:blur(22px) brightness(.55);transform:scale(1.05)}
 .rhero .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,0) 22%,rgba(0,0,0,0) 50%,rgba(0,0,0,.8))}
-.rhero .bar{position:absolute;left:8px;right:8px;top:8px;display:flex;justify-content:space-between}
-.rhero .bar .ib{background:rgba(0,0,0,.45);color:#fff;border-radius:50%}
+.rhero .hbar{position:absolute;left:8px;right:8px;top:8px;display:flex;justify-content:space-between}
+.rhero .hbar .ib{background:rgba(0,0,0,.45);color:#fff;border-radius:50%}
 .rhero .ttl{position:absolute;left:16px;right:16px;bottom:14px;color:#fff}
 .rhero .ttl .hl{font-size:28px;line-height:1.1;color:#fff}
 .mcards{display:flex;gap:10px;overflow-x:auto;padding:4px 16px 8px;margin:0 -16px;scroll-snap-type:x mandatory;scrollbar-width:none}
@@ -1078,8 +1079,8 @@ SCR.result=()=>{const r=S.lastResult;if(!r)return SCR.home();
  const exp=r.accExp;const vis=new Set(r.accVis.map(x=>x.toLowerCase()));const ci=confIdx(r.conf);
  const segs=n=>`<div class="segs">${[...Array(10)].map((_,k)=>`<i class="${n!=null&&k<n?'on':''}"></i>`).join('')}</div>`;
  const det=[['Name',r.name],['Original name',r.origin],['Maker',r.brand],['Series',r.series],['Year',r.year],['Item no.',r.itemNo?`${esc(r.itemNo)}<span class="src ${r.itemSrc==='photo'?'p':'a'}">${r.itemSrc==='photo'?'From photo':'AI · verify'}</span>`:'<span class="muted" style="font-weight:500">Not visible</span>',true],['Condition',tierName(r.grade)],['Rarity',(r.rarity||'common').replace('_',' ')],['Category',r.category]].filter(x=>x[1]);
- return `<div class="rhero">${r.img?`<img src="${r.img}">`:art(r.art||['giant','#B91C1C','#F8FAFC','#FEF2F2'])}<div class="shade"></div>
-  <div class="bar"><button class="ib" onclick="back()">${ic('x')}</button><button class="ib" onclick="sheet(reportSheet)">${ic('flag',1.8)}</button></div>
+ return `<div class="rhero">${r.img?`<img class="blur" src="${r.img}" alt=""><img src="${r.img}">`:art(r.art||['giant','#B91C1C','#F8FAFC','#FEF2F2'])}<div class="shade"></div>
+  <div class="hbar"><button class="ib" onclick="back()">${ic('x')}</button><button class="ib" onclick="sheet(reportSheet)">${ic('flag',1.8)}</button></div>
   <div class="ttl"><span class="engine-pill" style="background:rgba(0,0,0,.5);color:#fff;margin-bottom:8px"><i></i>${(r.ms/1000).toFixed(1)}s · ${esc(r.engine)}</span><div class="hl">${esc(r.name)}</div><div style="opacity:.85;font-size:14px;margin-top:4px">${[r.series,r.brand,r.year].filter(Boolean).map(esc).join(' · ')}</div></div></div>
  <div class="pad" style="padding-top:12px;padding-bottom:120px">
  ${r.extra&&r.extra.length?`<div class="thumbs" style="margin-bottom:8px">${r.extra.map(x=>`<div class="t" style="width:56px;height:56px"><img src="${x.dataUrl}"></div>`).join('')}<div class="muted xs" style="align-self:center">+${r.extra.length} angle${r.extra.length>1?'s':''} used</div></div>`:''}
