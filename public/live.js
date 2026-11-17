@@ -132,6 +132,12 @@
     (saves.data || []).forEach((s) => { BM[s.item_id] = (s.folder && s.folder.name) || 'Saved'; });
     (follows.data || []).forEach((f) => S.follow.add(f.following_id));
     S.unread = (inbox.count || 0) > 0;
+    L.supportUnread();
+    if (!L._supT) L._supT = setInterval(() => {
+      if (document.hidden) return;
+      L.supportUnread();
+      if (typeof cur === 'function' && cur().s === 'support' && document.activeElement?.id !== 'supta') { S.sup.loaded = false; loadSupport(); }
+    }, 30000);
     const counts = await Promise.all([
       sb.from('follows').select('follower_id', { count: 'exact', head: true }).eq('following_id', me.id).eq('status', 'accepted'),
       sb.from('follows').select('following_id', { count: 'exact', head: true }).eq('follower_id', me.id),
@@ -339,6 +345,38 @@
       const res = await fetch('/api/translate', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-ToyScope': '1', Authorization: 'Bearer ' + (window._tok || '') }, body: JSON.stringify({ title, text, to }) });
       const d = await res.json(); return res.ok ? d : { error: d.error || 'Translation is not available right now.' };
     } catch (e) { return { error: 'Translation is not available right now.' }; }
+  };
+  L.supportLoad = async function () {
+    if (!me) return null;
+    const { data, error } = await sb.from('support_messages').select('id,sender,body,image_path,created_at').eq('user_id', me.id).order('created_at');
+    if (error) return null;
+    sb.rpc('support_mark_read').then(() => {}, () => {});
+    return data || [];
+  };
+  L.supportImg = async function (path) {
+    const { data } = await sb.storage.from('support').createSignedUrl(path, 3600);
+    return data ? data.signedUrl : null;
+  };
+  L.supportSend = async function (body, img, meta) {
+    if (!me) return { error: 'Sign in first' };
+    let image = null;
+    try {
+      if (img) {
+        image = me.id + '/' + Date.now() + '.jpg';
+        const up = await sb.storage.from('support').upload(image, await toBlob(img), { contentType: 'image/jpeg' });
+        if (up.error) return { error: errMsg(up.error) };
+      }
+      const res = await fetch('/api/support', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-ToyScope': '1', Authorization: 'Bearer ' + (window._tok || '') }, body: JSON.stringify({ body, image, meta }) });
+      const d = await res.json().catch(() => ({}));
+      return res.ok ? { ok: true } : { error: d.error };
+    } catch (e) { return { error: null }; }
+  };
+  L.supportUnread = async function () {
+    if (!me) return;
+    const { data } = await sb.from('support_threads').select('user_unread').eq('user_id', me.id).maybeSingle();
+    const was = S.supUnread; S.supUnread = !!(data && data.user_unread > 0);
+    if (S.supUnread && !was && typeof sp === 'function') toast(sp('reply'));
+    if (S.supUnread !== was) render();
   };
   L.feedback = async function (f) {
     if (!me) return false;

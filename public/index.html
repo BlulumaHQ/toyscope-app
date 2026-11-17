@@ -59,6 +59,14 @@ input,textarea,select{font:inherit;color:var(--text)}
 .ib{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;position:relative}
 .ib:active{background:var(--surface2)}
 .ib svg{width:22px;height:22px}
+.supwrap{display:flex;flex-direction:column;justify-content:flex-end;gap:10px;padding:12px 16px 16px;min-height:calc(100% - 52px - 76px);box-sizing:border-box}
+.sb{max-width:82%;align-self:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:16px 16px 16px 4px;padding:10px 12px;font-size:14.5px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
+.sb.me{align-self:flex-end;background:var(--accent);color:var(--onAccent);border-color:var(--accent);border-radius:16px 16px 4px 16px}
+.sb img{display:block;max-width:100%;max-height:260px;border-radius:10px;margin-bottom:6px;cursor:pointer}
+.sb .t{font-size:11px;opacity:.65;margin-top:4px;text-align:right}
+.supbar{position:sticky;bottom:0;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid var(--border);z-index:3}
+.supprev{position:relative;display:inline-block;margin-bottom:8px}.supprev img{height:72px;border-radius:10px;display:block}.supprev .ib{position:absolute;top:-10px;right:-10px;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:28px;height:28px}
+.supatt{width:44px;height:44px;border:1px solid var(--border);background:var(--surface);cursor:pointer}
 .dot{position:absolute;top:7px;right:7px;width:8px;height:8px;border-radius:50%;background:var(--bad);border:2px solid var(--bg)}
 .nav{position:relative;z-index:20;flex:none;display:flex;justify-content:space-around;align-items:center;height:76px;padding-bottom:14px;background:var(--surface);border-top:1px solid var(--border)}
 @media (max-width:520px){.nav{padding-bottom:calc(8px + env(safe-area-inset-bottom,0px));height:auto;padding-top:8px}}
@@ -697,7 +705,7 @@ function render(top){
  const ph=$('phone');const th=themeNow();ph.classList.toggle('dark',th==='dark');ph.classList.toggle('retro',th==='retro');document.body.classList.toggle('dark-page',isDark());
  const c=cur();const fn=SCR[c.s]||SCR.home;
  $('screen').innerHTML=fn(c.p||{});
- const hideNav=['onboard','welcome','scanning','contact','newpost','sell','result','scan'].includes(c.s);
+ const hideNav=['onboard','welcome','scanning','contact','newpost','sell','result','scan','support'].includes(c.s);
  $('navwrap').innerHTML=hideNav?'':nav();
  $('overlay').innerHTML=coachHTML()+(S.sheet?`<div class="sheetbg" onclick="if(event.target===this)closeSheet()"><div class="sheet"><div class="grab"></div>${S.sheet()}</div></div>`:'');placeSpot();requestAnimationFrame(placeSpot);setTimeout(placeSpot,350);
  if(top)$('screen').scrollTop=0;
@@ -770,7 +778,7 @@ function nav(){
  <button class="${on('saved')}" onclick="tab('saved')">${ic('bookmark',1.8)}${t('saved')}</button>
  <button onclick="pickScan()" aria-label="Scan"><span class="scanbtn">${ic('scan',2.2)}</span></button>
  <button class="${on('notifs')}" onclick="tab('notifs')" style="position:relative">${ic('bell',1.8)}Activity${S.unread?'<span class="dot" style="top:0;right:16px"></span>':''}</button>
- <button class="${on('me')}" onclick="tab('me')">${ic('me',1.8)}${t('me')}</button></div>`;
+ <button class="${on('me')}" onclick="tab('me')">${ic('me',1.8)}${t('me')}${S.supUnread?'<span class="dot" style="top:0;right:16px"></span>':''}</button></div>`;
 }
 function pickScan(){if(!S.tips.has('explore')){S.tips.add('explore');LS.set('tips',[...S.tips])}go('scan')}
 const hdrBack=(title,right='')=>`<div class="hdr"><button class="ib" onclick="back()">${ic('back')}</button><h2>${title}</h2><div style="width:38px;display:flex;justify-content:flex-end">${right}</div></div>`;
@@ -1383,6 +1391,25 @@ const ratingOf=it=>(it&&(it.rating||(it.ai&&it.ai.rating)||(it.album&&it.album.r
 const isSens=it=>ratingOf(it)==='sensitive';
 const canSeeSens=()=>S.age==='18+'&&!!S.toggles.sensitive;
 const sensOk=it=>!(isSens(it)&&(isMinor()||it.owner!=='me'&&false));
+const SUPT={en:{title:'Contact support',intro:'Hi, I’m Sony, the maker of ToyScope 👋 Tell me about a bug, a wrong ID or an idea. I read every message and usually reply within a day.',ph:'Write a message…',send:'Send',sent:'Sent. I’ll reply right here.',shot:'Add a screenshot',team:'Sony · ToyScope',you:'You',empty:'Write a few words or add a screenshot.',err:'Couldn’t send. Please try again.',reply:'Sony replied to your support message'},
+zh:{title:'聯絡我們',intro:'嗨，我是 ToyScope 的開發者 Sony 👋 遇到 bug、辨識錯誤，或有什麼想法，都可以直接跟我說。每則訊息我都會看，通常一天內回覆。',ph:'輸入訊息…',send:'送出',sent:'已送出，我會在這裡回覆你。',shot:'附上截圖',team:'Sony · ToyScope',you:'你',empty:'請輸入文字或附上截圖。',err:'送出失敗，請再試一次。',reply:'Sony 回覆了你的客服訊息'},
+'zh-Hans':{title:'联系我们',intro:'嗨，我是 ToyScope 的开发者 Sony 👋 遇到 bug、识别错误，或有什么想法，都可以直接跟我说。每条消息我都会看，通常一天内回复。',ph:'输入消息…',send:'发送',sent:'已发送，我会在这里回复你。',shot:'附上截图',team:'Sony · ToyScope',you:'你',empty:'请输入文字或附上截图。',err:'发送失败，请再试一次。',reply:'Sony 回复了你的客服消息'},
+ja:{title:'お問い合わせ',intro:'こんにちは、ToyScope を作っている Sony です 👋 不具合、識別の間違い、アイデアなど、なんでも送ってください。すべて目を通して、たいてい1日以内に返信します。',ph:'メッセージを入力…',send:'送信',sent:'送信しました。ここで返信します。',shot:'スクリーンショットを添付',team:'Sony · ToyScope',you:'あなた',empty:'文字を入力するか、スクリーンショットを添付してください。',err:'送信できませんでした。もう一度お試しください。',reply:'Sony がお問い合わせに返信しました'},
+ko:{title:'문의하기',intro:'안녕하세요, ToyScope를 만든 Sony예요 👋 버그, 잘못된 인식, 아이디어 무엇이든 알려 주세요. 모든 메시지를 읽고 보통 하루 안에 답장해요.',ph:'메시지 입력…',send:'보내기',sent:'보냈어요. 여기에서 답장할게요.',shot:'스크린샷 첨부',team:'Sony · ToyScope',you:'나',empty:'내용을 입력하거나 스크린샷을 첨부해 주세요.',err:'보내지 못했어요. 다시 시도해 주세요.',reply:'Sony가 문의에 답장했어요'},
+fr:{title:'Contacter le support',intro:'Bonjour, je suis Sony, le créateur de ToyScope 👋 Un bug, une mauvaise identification ou une idée ? Écrivez-moi. Je lis chaque message et réponds en général sous 24 h.',ph:'Écrire un message…',send:'Envoyer',sent:'Envoyé. Je réponds ici même.',shot:'Ajouter une capture',team:'Sony · ToyScope',you:'Vous',empty:'Écrivez quelques mots ou ajoutez une capture.',err:'Envoi impossible. Réessayez.',reply:'Sony a répondu à votre message'},
+es:{title:'Contactar con soporte',intro:'Hola, soy Sony, el creador de ToyScope 👋 Cuéntame un error, una identificación incorrecta o una idea. Leo todos los mensajes y suelo responder en un día.',ph:'Escribe un mensaje…',send:'Enviar',sent:'Enviado. Te respondo aquí mismo.',shot:'Añadir captura',team:'Sony · ToyScope',you:'Tú',empty:'Escribe algo o añade una captura.',err:'No se pudo enviar. Inténtalo de nuevo.',reply:'Sony respondió a tu mensaje'}};
+const sp=k=>(SUPT[S.lang]||SUPT.en)[k]||SUPT.en[k];
+S.sup={msgs:[],draft:'',img:null,busy:false,urls:{}};
+SCR.support=()=>{if(!S.sup.loaded)loadSupport();const b=(m)=>{const mine=m.sender==='user';const url=m.image_path?S.sup.urls[m.image_path]:null;return `<div class="sb ${mine?'me':''}">${!mine?`<div class="muted xs" style="margin-bottom:3px">${sp('team')}</div>`:''}${m.image_path?(url?`<img src="${url}" alt="" onclick="window.open('${url}','_blank')">`:'<div class="muted xs">📷 …</div>'):''}${m.body?`<div>${esc(m.body)}</div>`:''}<div class="t">${new Date(m.created_at).toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</div></div>`};
+ return hdrBack(sp('title'))+`<div class="supwrap" id="supwrap"><div class="sb"><div class="muted xs" style="margin-bottom:3px">${sp('team')}</div><div>${sp('intro')}</div></div>${S.sup.msgs.map(b).join('')}</div>
+ <div class="supbar">${S.sup.img?`<div class="supprev"><img src="${S.sup.img}" alt=""><button class="ib" aria-label="Remove" onclick="S.sup.img=null;render()">${ic('x')}</button></div>`:''}<div class="row" style="gap:8px;align-items:flex-end"><label class="ib supatt" aria-label="${sp('shot')}">${ic('image',1.8)}<input type="file" accept="image/*" style="display:none" onchange="supPick(this)"></label><textarea id="supta" class="field" rows="1" maxlength="4000" placeholder="${sp('ph')}" oninput="S.sup.draft=this.value;this.style.height='auto';this.style.height=Math.min(this.scrollHeight,140)+'px'" style="flex:1;resize:none;min-height:44px">${esc(S.sup.draft)}</textarea><button class="btn pri" style="min-height:44px;padding:0 16px" ${S.sup.busy?'disabled':''} onclick="supSend()">${sp('send')}</button></div></div>`};
+async function loadSupport(){S.sup.loaded=true;if(!window.LIVE||!LIVE.supportLoad)return;const m=await LIVE.supportLoad();if(!m)return;const changed=m.length!==S.sup.msgs.length;S.sup.msgs=m;S.supUnread=false;for(const x of m)if(x.image_path&&!S.sup.urls[x.image_path])S.sup.urls[x.image_path]=await LIVE.supportImg(x.image_path);if(cur().s==='support'&&(changed||S.supUnread!==false)){render();supScroll()}}
+function supScroll(){setTimeout(()=>{const sc=$('screen');if(sc)sc.scrollTop=sc.scrollHeight},30)}
+async function supPick(el){const f=el.files&&el.files[0];if(!f)return;try{const r=await resize(f,1600);S.sup.img=r.dataUrl;render();supScroll()}catch(e){toast(sp('err'))}}
+async function supSend(){const ta=$('supta');if(ta)S.sup.draft=ta.value;const body=(S.sup.draft||'').trim();if(!body&&!S.sup.img)return toast(sp('empty'));if(!S.signedIn)return signup();if(S.sup.busy)return;
+ S.sup.busy=true;render();const meta={device:navigator.userAgent.slice(0,160),lang:S.lang,screen:innerWidth+'x'+innerHeight,app:'web-beta',from:(S.stack[S.stack.length-2]||{}).s||S.tab};
+ const res=window.LIVE&&LIVE.supportSend?await LIVE.supportSend(body,S.sup.img,meta):{error:sp('err')};S.sup.busy=false;
+ if(res&&res.ok){S.sup.draft='';S.sup.img=null;S.sup.loaded=false;toast(sp('sent'));await loadSupport();render();supScroll()}else{toast((res&&res.error)||sp('err'));render()}}
 function feedbackSheet(){S._fb=S._fb||{kind:'bug',body:''};sheet(()=>`<h3>Report a problem or idea</h3><div class="muted small" style="margin:4px 0 12px">Tell us what happened or what you’d like. We read every message.</div>
  <div class="seg" style="margin-bottom:10px">${[['bug','Problem'],['idea','Idea']].map(([k,l])=>`<button class="${S._fb.kind===k?'on':''}" onclick="S._fb.kind='${k}';render()">${l}</button>`).join('')}</div>
  <textarea class="field" rows="5" maxlength="4000" placeholder="${S._fb.kind==='bug'?'What did you tap, and what went wrong?':'What would make ToyScope better?'}" oninput="S._fb.body=this.value" style="width:100%">${esc(S._fb.body)}</textarea>
@@ -1431,7 +1458,7 @@ SCR.folder=({f})=>{let its=folderItems(f);const own=its.filter(i=>i.owner==='me'
 /* ---------- ME / COLLECTION ---------- */
 function albumGrid(u){const a=ALBUMS[u]||[];return `<div class="grid3" style="margin-top:2px">${a.map(x=>`<div class="art" style="aspect-ratio:1;cursor:pointer" onclick="go('photo',{u:'${u}',id:'${x.id}'})">${x.img?sensImg(x,`<img src="${x.img}">`,u):x.scene?sceneArt(u,x.scene,x.id):pic(item(x.shelf[0]))}</div>`).join('')}</div>`}
 SCR.me=()=>{const U=USERS.me;const al=ALBUMS.me;const sale=ITEMS.filter(i=>i.owner==='me'&&i.status==='sale');
- return `<div class="hdr"><h1>@${esc(U.handle)}</h1><button class="ib" onclick="go('settings')">${ic('gear',1.8)}</button></div>
+ return `<div class="hdr"><h1>@${esc(U.handle)}</h1><button class="ib" aria-label="Settings" onclick="go('settings')" style="position:relative">${ic('gear',1.8)}${S.supUnread?'<span class="dot"></span>':''}</button></div>
  <div class="pad"><div class="row" style="gap:16px"><div style="position:relative;cursor:pointer" onclick="photoSheet()">${av('me',78)}<span style="position:absolute;right:-2px;bottom:-2px;width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--onAccent);display:grid;place-items:center;border:3px solid var(--bg)">${ic('image',2.2,'width="14" height="14"')}</span></div><div class="grow" style="display:flex;justify-content:space-around;text-align:center"><div><div class="hl" style="font-size:18px">${al.length}</div><div class="muted xs">photos</div></div><div><div class="hl" style="font-size:18px">${U.followers}</div><div class="muted xs">${t('followers')}</div></div><div><div class="hl" style="font-size:18px">${S.follow.size}</div><div class="muted xs">${t('followingN')}</div></div></div></div>
  <div style="margin-top:10px;font-weight:700">${esc(U.name)}</div><div class="muted small">${U.city}</div><div class="small" style="margin-top:4px">${esc(U.bio)}</div>
  ${badgeRow('me')}<div style="margin-top:8px">${U.collects.map(c=>`<span class="collect-tag">${esc(c)}</span>`).join('')}</div>
@@ -1462,7 +1489,7 @@ SCR.settings=()=>`${hdrBack(t('settings'))}
  <div class="pad muted xs" style="padding-top:8px">We never sell your data. No ads, no ad trackers, no session recording.</div>
  <div class="sec"><h3>Notifications</h3></div><div class="list">${tg('pushLikes','Comments & likes','','heart')}${tg('pushFollow','New followers','','users')}${tg('pushHunt','Hunt matches (v2)','','bolt')}${tg('emailNews','Product news by email','','mail')}</div>
  <div class="sec"><h3>AI engine · prototype only</h3></div><div class="list"><div class="li" onclick="keySheet()"><div class="ic">${ic('key',2)}</div><div class="grow"><div style="font-size:14.5px">Scan engine</div><div class="muted xs">${engineLabel()}</div></div><span class="muted">›</span></div></div>
- <div class="sec"><h3>Support</h3></div><div class="list">${lk('Report a problem or idea','help',"feedbackSheet()")}${lk('Email support','mail',"location.href='mailto:support@toyscope.app'")}${lk('Rate ToyScope','star',"toast('Thanks!')")}${lk('Tell a friend','share',"toast('Link copied')")}${lk('Privacy policy','lock',"go('legal',{d:'privacy'})")}${lk('Terms of use','info',"go('legal',{d:'terms'})")}${lk('Community rules','users',"go('legal',{d:'community'})")}${lk('Copyright policy','flag',"go('legal',{d:'copyright'})")}${lk('Clear cache','trash',"toast('Cache cleared')")}</div>
+ <div class="sec"><h3>Support</h3></div><div class="list">${lk(sp('title'),'mail',"go('support')",S.supUnread?'<span class="badge" style="background:var(--bad);color:#fff;margin-right:6px">1</span>':'')}${lk('Rate ToyScope','star',"toast('Thanks!')")}${lk('Tell a friend','share',"toast('Link copied')")}${lk('Privacy policy','lock',"go('legal',{d:'privacy'})")}${lk('Terms of use','info',"go('legal',{d:'terms'})")}${lk('Community rules','users',"go('legal',{d:'community'})")}${lk('Copyright policy','flag',"go('legal',{d:'copyright'})")}${lk('Clear cache','trash',"toast('Cache cleared')")}</div>
  <div class="sec"><h3>Account</h3></div><div class="list">${lk('Sign out','back',"window.LIVE&&LIVE.signOut?LIVE.signOut():toast('Signed out (prototype)')")}<div class="li" onclick="delSheet()"><div class="ic" style="color:var(--bad)">${ic('trash',2)}</div><div class="grow" style="color:var(--bad);font-size:14.5px">Delete account</div></div></div>
  <div class="list" style="margin-top:14px"><div class="li" onclick="resetProto()"><div class="ic">${ic('bolt',2)}</div><div class="grow small">Reset prototype (show onboarding again)</div></div></div>
  <div class="muted xs" style="text-align:center;padding:18px 0 30px">ToyScope 0.1 prototype · No ads, ever</div>`;
@@ -1485,7 +1512,7 @@ function membershipSheet(){const f=S.fp||{};const d=x=>x?fpDate(x)+(new Date(x).
  <div style="font-weight:700;margin-bottom:6px"><span style="color:#DC2626">*</span> ${ms('notices')}</div>
  <ol class="muted small" style="padding-left:20px;margin:0 0 16px;line-height:1.55">${['n1','n2','n3','n4'].map(k=>`<li style="margin-bottom:6px">${ms(k)}</li>`).join('')}</ol>
  <button class="btn pri full" onclick="closeSheet()">${ms('keep')}</button>
- <a class="btn out full" style="margin-top:10px;text-align:center;text-decoration:none;color:inherit" href="mailto:support@toyscope.app?subject=Membership">${ms('help')}</a>`)}
+ <button class="btn out full" style="margin-top:10px" onclick="closeSheet();S.sup.draft=S.sup.draft||'Membership: ';go('support')">${ms('help')}</button>`)}
 function privacySheet(){const on=S.toggles.private;sheet(()=>`<h3>Private profile</h3>
  <div class="muted small" style="line-height:1.55;margin-bottom:14px">${on?'Your collection photos are only visible to followers you approve. Items you list for sale are always visible in the Marketplace.':'When private, only followers you approve can see your collection photos and showcase posts. <b>Items you list for sale stay public</b> so buyers can still find them.'}</div>
  <button class="btn ${on?'pri':'out'} full" onclick="closeSheet();flip('private');toast(S.toggles.private?'Profile is now private':'Profile is now public')">${on?'Make my profile public':'Make my profile private'}</button>
