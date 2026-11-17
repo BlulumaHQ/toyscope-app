@@ -39,7 +39,7 @@
     Object.assign(u, {
       id, uuid: p.id, handle: p.handle, name: p.name || p.handle, city: p.city || '', bio: p.bio || '',
       collects: p.collects || [], photo: p.avatar_url || null, private: !!p.is_private,
-      allowContact: p.allow_contact !== false, founder: !!p.founder, founderNo: p.founder_no || null, founderTier: p.founder_tier || null, color: u.color || colorOf(p.id), demo: false,
+      allowContact: p.allow_contact !== false, founder: !!p.founder, founderNo: p.founder_no || null, founderTier: p.founder_tier || null, badges: p.badges || [], color: u.color || colorOf(p.id), demo: false,
     });
     return id;
   }
@@ -77,7 +77,7 @@
   }
 
   /* ---------- loading ---------- */
-  const PROFILE_COLS = 'id,handle,name,city,bio,collects,avatar_url,is_private,allow_contact,founder,founder_no,founder_tier';
+  const PROFILE_COLS = 'id,handle,name,city,bio,collects,avatar_url,is_private,allow_contact,founder,founder_no,founder_tier,badges';
   const ITEM_COLS = `id,owner_id,status,name,name_origin,brand,series,year,country,grade,price,currency,title,description,originality,owned,folder,ai,saves_count,created_at,open_to_offers,item_photos(path,sort),owner:profiles!items_owner_id_fkey(${PROFILE_COLS})`;
 
   async function loadMarket() {

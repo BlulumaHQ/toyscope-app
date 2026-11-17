@@ -344,6 +344,7 @@ input:not(#otp),select,textarea,.field:not(#otp){font-size:16px!important}
 html,body{overflow-x:hidden;max-width:100%}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
 .trbtn{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:6px 12px;border-radius:99px;border:1px solid var(--border);background:var(--card);color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;min-height:32px}.trbtn[disabled]{opacity:.6}
+.bico{margin-left:3px;font-size:13px}.brow{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.bchip{border:1px solid var(--border);background:var(--card);border-radius:99px;padding:4px 10px;font-size:12.5px;font-weight:600;color:var(--text);cursor:pointer;min-height:28px}
 </style>
 </head>
 <body>
@@ -744,7 +745,20 @@ const item=id=>ITEMS.find(x=>x.id===id);
 const stBadge=(s,i)=>s==='sale'?`<span class="badge b-sale">${stName('sale')}</span>`:s==='public'&&i&&i.owner!=='me'||s==='public'&&i&&cur().s!=='folder'?(i.offers?'<span class="badge b-offer">Open to offers</span>':'<span class="badge b-show">Not for sale</span>'):'';
 const priceOf=i=>i.status==='sale'?(i.price?money(i.price,i.cur):'For sale'):range(i.low,i.high);
 const copy=(txt)=>{try{navigator.clipboard.writeText(txt).then(()=>toast('Copied · paste it into Yahoo!オク or Mercari'),()=>toast('Copied'))}catch(e){toast('Copied')}};
-const verified=u=>{const U=USERS[u]||{};return (U.verified?'<span style="color:var(--accent)">✔︎</span>':'')+(U.founderNo?` <span class="fbadge ${U.founderTier==='lifetime'?'life':''}">${U.founderTier==='lifetime'?'Founder':'Founding'} #${U.founderNo}</span>`:'')};
+/* ---------- COMMUNITY BADGES (computed hourly on the server) ---------- */
+const BADGES={top_contributor:'🏆',most_saved:'❤️',active_seller:'🏷️',streak:'🔥',beta_tester:'🧪'};
+const BADGE_T={
+ en:{top_contributor:['Top Contributor','One of the 3 members who posted the most photos in the last 30 days'],most_saved:['Most Saved','Their listings were saved the most by other collectors this month'],active_seller:['Active Seller','10 or more items for sale right now. This counts listings, not completed sales.'],streak:['On a Streak','Posted every week for the last 3 weeks'],beta_tester:['Beta Tester','Helped test ToyScope by sending feedback']},
+ zh:{top_contributor:['熱心收藏家','最近 30 天發最多照片的前 3 名'],most_saved:['人氣收藏','這個月刊登被其他收藏家收藏最多'],active_seller:['活躍賣家','目前有 10 件以上在賣。只計算刊登數量，不代表成交紀錄。'],streak:['連續發文','最近 3 週每週都有發文'],beta_tester:['測試先鋒','有回報問題或建議，幫忙測試 ToyScope']},
+ 'zh-Hans':{top_contributor:['热心收藏家','最近 30 天发最多照片的前 3 名'],most_saved:['人气收藏','这个月刊登被其他收藏家收藏最多'],active_seller:['活跃卖家','目前有 10 件以上在卖。只计算刊登数量，不代表成交记录。'],streak:['连续发文','最近 3 周每周都有发文'],beta_tester:['测试先锋','有反馈问题或建议，帮忙测试 ToyScope']},
+ ja:{top_contributor:['トップ投稿者','過去30日で写真を最も多く投稿した上位3名'],most_saved:['人気コレクター','今月、出品が他のコレクターに最も保存された'],active_seller:['アクティブ出品者','現在10点以上を出品中。出品数のみで、取引実績ではありません。'],streak:['連続投稿','直近3週間、毎週投稿'],beta_tester:['ベータテスター','フィードバックを送って ToyScope のテストに協力']},
+ ko:{top_contributor:['톱 기여자','최근 30일간 사진을 가장 많이 올린 상위 3명'],most_saved:['인기 컬렉터','이번 달 판매글이 가장 많이 저장됨'],active_seller:['활발한 판매자','현재 10개 이상 판매 중. 판매글 수만 세며 거래 실적은 아닙니다.'],streak:['연속 게시','최근 3주 동안 매주 게시'],beta_tester:['베타 테스터','피드백을 보내 ToyScope 테스트에 도움']},
+ fr:{top_contributor:['Top contributeur','Parmi les 3 membres ayant publié le plus de photos ces 30 derniers jours'],most_saved:['Coup de cœur','Ses annonces ont été les plus enregistrées ce mois-ci'],active_seller:['Vendeur actif','10 articles ou plus en vente. Compte les annonces, pas les ventes conclues.'],streak:['En série','A publié chaque semaine ces 3 dernières semaines'],beta_tester:['Bêta-testeur','A aidé à tester ToyScope en envoyant des retours']},
+ es:{top_contributor:['Gran colaborador','Uno de los 3 miembros que más fotos publicaron en los últimos 30 días'],most_saved:['Favorito','Sus anuncios fueron los más guardados este mes'],active_seller:['Vendedor activo','10 o más artículos en venta. Cuenta anuncios, no ventas cerradas.'],streak:['En racha','Publicó cada semana durante las últimas 3 semanas'],beta_tester:['Beta tester','Ayudó a probar ToyScope enviando comentarios']}};
+const bdg=k=>(BADGE_T[S.lang]||BADGE_T.en)[k]||BADGE_T.en[k];
+const badgeIcons=u=>((USERS[u]||{}).badges||[]).filter(k=>BADGES[k]).map(k=>`<span class="bico" title="${esc(bdg(k)[0])}">${BADGES[k]}</span>`).join('');
+const badgeRow=u=>{const b=((USERS[u]||{}).badges||[]).filter(k=>BADGES[k]);return b.length?`<div class="brow">${b.map(k=>`<button class="bchip" onclick="toast('${BADGES[k]} ${esc(bdg(k)[0]).replace(/'/g,'’')} · ${esc(bdg(k)[1]).replace(/'/g,'’')}')">${BADGES[k]} ${esc(bdg(k)[0])}</button>`).join('')}</div>`:''};
+const verified=u=>{const U=USERS[u]||{};return (U.verified?'<span style="color:var(--accent)">✔︎</span>':'')+badgeIcons(u)+(U.founderNo?` <span class="fbadge ${U.founderTier==='lifetime'?'life':''}">${U.founderTier==='lifetime'?'Founder':'Founding'} #${U.founderNo}</span>`:'')};
 
 function nav(){
  const on=n=>S.tab===n?'on':'';
@@ -1219,7 +1233,7 @@ SCR.profile=({id})=>{const U=USERS[id];const f=S.follow.has(id);const sale=ITEMS
  <div class="pad"><div class="row" style="gap:16px">${av(id,78)}<div class="grow" style="display:flex;justify-content:space-around;text-align:center"><div><div class="hl" style="font-size:18px">${locked?'—':al.length}</div><div class="muted xs">photos</div></div><div><div class="hl" style="font-size:18px">${(U.followers+(f?1:0)).toLocaleString()}</div><div class="muted xs">${t('followers')}</div></div><div><div class="hl" style="font-size:18px">${U.following}</div><div class="muted xs">${t('followingN')}</div></div></div></div>
  <div style="margin-top:10px;font-weight:700">${esc(U.name)} ${verified(id)}</div><div class="muted small row" style="gap:4px">${ic('pin',2,'width="14" height="14"')}${U.city}</div>
  <div class="small" style="margin-top:6px">${esc(U.bio)}</div>
- <div style="margin-top:8px">${U.collects.map(c=>`<span class="collect-tag">${esc(c)}</span>`).join('')}</div>
+ ${badgeRow(id)}<div style="margin-top:8px">${U.collects.map(c=>`<span class="collect-tag">${esc(c)}</span>`).join('')}</div>
  <div class="row" style="margin:6px 0 12px"><button class="btn sm ${f?'sec2':'pri'}" style="flex:1" onclick="need(()=>fol('${id}'))">${U.private&&!f?'Request to follow':f?t('followingB'):t('follow')}</button>${U.allowContact?`<button class="btn sm sec2" style="flex:1" onclick="contactFor('${id}')">${ic('mail',2,'width="16" height="16"')} ${t('contact')}</button>`:''}</div></div>
  ${locked?`<div class="pad"><div class="card row" style="padding:12px 14px;gap:10px">${ic('lock',2,'width="18" height="18"')}<div class="small"><b>Collection is private.</b> Follow to request access. Items for sale are always shown.</div></div></div><div class="tabs"><button class="on">For sale · ${sale.length}</button></div>${sale.length?`<div class="grid2" style="padding-top:12px">${sale.map(tileHTML).join('')}</div>`:'<div class="empty small">Nothing for sale</div>'}`:
  `<div class="tabs">${[['album','My Collection'],['sale','For sale · '+sale.length]].map(([k,l])=>`<button class="${tabK===k?'on':''}" onclick="S.profTab='${k}';render()">${l}</button>`).join('')}</div>
@@ -1417,7 +1431,7 @@ SCR.me=()=>{const U=USERS.me;const al=ALBUMS.me;const sale=ITEMS.filter(i=>i.own
  return `<div class="hdr"><h1>@${esc(U.handle)}</h1><button class="ib" onclick="go('settings')">${ic('gear',1.8)}</button></div>
  <div class="pad"><div class="row" style="gap:16px"><div style="position:relative;cursor:pointer" onclick="photoSheet()">${av('me',78)}<span style="position:absolute;right:-2px;bottom:-2px;width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--onAccent);display:grid;place-items:center;border:3px solid var(--bg)">${ic('image',2.2,'width="14" height="14"')}</span></div><div class="grow" style="display:flex;justify-content:space-around;text-align:center"><div><div class="hl" style="font-size:18px">${al.length}</div><div class="muted xs">photos</div></div><div><div class="hl" style="font-size:18px">${U.followers}</div><div class="muted xs">${t('followers')}</div></div><div><div class="hl" style="font-size:18px">${S.follow.size}</div><div class="muted xs">${t('followingN')}</div></div></div></div>
  <div style="margin-top:10px;font-weight:700">${esc(U.name)}</div><div class="muted small">${U.city}</div><div class="small" style="margin-top:4px">${esc(U.bio)}</div>
- <div style="margin-top:8px">${U.collects.map(c=>`<span class="collect-tag">${esc(c)}</span>`).join('')}</div>
+ ${badgeRow('me')}<div style="margin-top:8px">${U.collects.map(c=>`<span class="collect-tag">${esc(c)}</span>`).join('')}</div>
  <div class="row" style="margin:6px 0 14px"><button class="btn sm sec2" style="flex:1" onclick="editProfile()">${t('editprofile')}</button><button class="btn sm sec2" style="flex:1" onclick="shareSheet('me')">${t('shareprofile')}</button></div></div>
  ${founderCard()}
  <div class="tabs">${[['album','My Collection'],['sale','For sale · '+sale.length]].map(([k,l])=>`<button class="${(S.meTab==='sale'?'sale':'album')===k?'on':''}" onclick="S.meTab='${k}';render()">${l}</button>`).join('')}</div>
