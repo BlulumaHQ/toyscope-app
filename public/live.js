@@ -29,7 +29,7 @@
   for (let k = ITEMS.length - 1; k >= 0; k--) if (ITEMS[k].owner === 'me') ITEMS.splice(k, 1);
   ALBUMS.me = [];
   Object.keys(BM).forEach((k) => delete BM[k]);
-  S.recent = []; S.signedIn = false; S.plan = 'free'; S.age = null; S.unread = false; S.inbox = [];
+  S.recent = []; S.signedIn = false; S.plan = (typeof BETA!=='undefined'&&BETA) ? 'pro' : 'free'; S.age = null; S.unread = false; S.inbox = [];
   Object.assign(USERS.me, { name: 'You', handle: 'guest', city: '', bio: '', collects: [], photo: null, followers: 0, following: 0, demo: false, uuid: null });
 
   function userFrom(p) {
@@ -97,7 +97,7 @@
     USERS.me.uuid = me.id;
     userFrom(me);
     S.signedIn = true;
-    S.plan = me.plan === 'pro' && (!me.pro_until || Date.parse(me.pro_until) > Date.now()) ? 'pro' : 'free';
+    S.plan = (typeof BETA!=='undefined'&&BETA) || me.plan === 'pro' && (!me.pro_until || Date.parse(me.pro_until) > Date.now()) ? 'pro' : 'free';
     S.founder = me.founder; S.proUntil = me.pro_until; S.memberSince = me.created_at; S.founderTier = me.founder_tier; S.founderNo = me.founder_no;
     S.age = me.age_range;
     S.toggles.private = !!me.is_private; S.toggles.contact = me.allow_contact !== false; S.toggles.sensitive = !!me.show_sensitive && me.age_range === '18+';
