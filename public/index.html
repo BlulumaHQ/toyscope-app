@@ -1208,7 +1208,7 @@ function paywall(why,after){S._proAfter=after||null;const head=why==='sell'?'Sel
  <div style="font-weight:700;font-size:13px;margin-bottom:4px">Pro</div>
  ${['Unlimited AI scans — name, origin, value','Sell your toys in the marketplace','Value by condition, from loose to mint in box','Collection export & insurance report'].map(x=>`<div class="acc"><span class="ok">✓</span>${x}</div>`).join('')}
  <div style="font-weight:700;font-size:13px;margin:12px 0 4px">Free, always</div>
- ${['Browse the marketplace','Contact sellers and buy toys','Save toys and follow collectors'].map(x=>`<div class="acc"><span class="ok" style="color:var(--muted)">✓</span>${x}</div>`).join('')}
+ ${['Browse the marketplace','Contact sellers and buy toys','Save toys and follow collectors','Upload your photos and share to Showcase'].map(x=>`<div class="acc"><span class="ok" style="color:var(--muted)">✓</span>${x}</div>`).join('')}
  <div class="plan on" style="margin-top:14px"><div class="row"><div class="grow"><b>Yearly</b><div class="muted small">7-day free trial, then ${S.founderTier==='founding'?'CA$24.99/yr (Founding half price)':'CA$49.99/yr'}${curNow()!=='CAD'?' · '+money(S.founderTier==='founding'?24.99:49.99,'CAD')+'/yr':''}</div></div></div></div>
  <button class="btn pri full" style="margin-top:12px" onclick="startTrial()">Start 7-day free trial</button><button class="btn full" onclick="S._proAfter=null;closeSheet()">Keep browsing for free</button>
  <div class="muted xs" style="text-align:center;margin-top:8px">Cancel any time before the trial ends and you won’t be charged. Prototype — no payment is taken.</div>`)}
