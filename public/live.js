@@ -158,7 +158,7 @@
     const c = cur(); if (c.s === 'profile' && c.p && c.p.id === uuid) render();
   }
 
-  const OAUTH = { google: false }; // flip on once the provider is enabled in Supabase
+  const OAUTH = { google: true }; // flip on once the provider is enabled in Supabase
   /* ---------- sign in with a one-time email code ---------- */
   const _signupBlocked = window.signupBlocked;
   window.signup = function (title) {
