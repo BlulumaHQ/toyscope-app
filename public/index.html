@@ -716,7 +716,7 @@ function render(top){
 function themeNow(){if(S.toggles.auto&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)return 'dark';return S.theme==='system'?'light':S.theme}
 function isDark(){return themeNow()==='dark'}
 S.tips=new Set(LS.get('tips',[]));
-const COACH={explore:{pos:'bottom:calc(112px + env(safe-area-inset-bottom,0px))',dir:'down',t:'Tap here to scan any toy',p:'Point your camera at a toy and see what it’s worth. Free to browse. Scanning is part of Pro.'},
+const COACH={explore:{pos:'bottom:calc(112px + env(safe-area-inset-bottom,0px))',dir:'down',t:'Tap here to scan any toy',p:'Point your camera at a toy and see what it’s worth. Free during the beta.'},
  scan:{pos:'bottom:250px',dir:'down',t:'Add more angles',p:'Front is enough. Back, Box and Accessories make the value more accurate.'},
  result:{pos:'bottom:calc(96px + env(safe-area-inset-bottom,0px))',dir:'down',t:'Save it or sell it',p:'Save puts it in a folder. Sell lets you list it with more photos.'},
  saved:{pos:'top:200px',dir:'up',t:'Everything you keep',p:'Recent scans stay here automatically. Folders are yours to organise.'}};
