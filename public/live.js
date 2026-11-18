@@ -132,13 +132,13 @@
     if (!me) return;
     const [mine, album, saves, follows, inbox] = await Promise.all([
       sb.from('items').select(ITEM_COLS).eq('owner_id', me.id).order('created_at', { ascending: false }),
-      sb.from('album_photos').select('id,path,caption,rating,created_at').eq('owner_id', me.id).order('created_at', { ascending: false }),
+      sb.from('album_photos').select('id,path,caption,rating,hidden,created_at').eq('owner_id', me.id).order('created_at', { ascending: false }),
       sb.from('saves').select('item_id,folder:folders(name)').eq('user_id', me.id),
       sb.from('follows').select('following_id,status').eq('follower_id', me.id),
       sb.from('contacts').select('id', { count: 'exact', head: true }).eq('to_id', me.id).is('read_at', null),
     ]);
     (mine.data || []).forEach(itemFrom);
-    ALBUMS.me = (album.data || []).map((a) => ({ id: a.id, img: pub('albums', a.path), cap: a.caption || '', rating: a.rating || 'general' }));
+    ALBUMS.me = (album.data || []).map((a) => ({ id: a.id, img: pub('albums', a.path), cap: a.caption || '', rating: a.rating || 'general', hidden: !!a.hidden }));
     (saves.data || []).forEach((s) => { BM[s.item_id] = (s.folder && s.folder.name) || 'Saved'; });
     (follows.data || []).forEach((f) => S.follow.add(f.following_id));
     S.unread = (inbox.count || 0) > 0;
@@ -429,6 +429,14 @@
     if (error) { sb.storage.from('albums').remove([path]); return drop(error); }
     e2.img = pub('albums', path);
     loadFp();
+  };
+  L.albumHide = async function (ids, hidden) {
+    if (!me) return false;
+    const ok = ids.filter(isUuid);
+    if (!ok.length) return true;
+    const { error } = await sb.from('album_photos').update({ hidden: !!hidden }).in('id', ok).eq('owner_id', me.id);
+    if (error) { toast(errMsg(error)); return false; }
+    return true;
   };
   L.albumDelete = async function (id) {
     if (!me || !isUuid(id)) return;
