@@ -4,7 +4,7 @@
   if (!window.supabase || !window.TS_SERVER) return;
   const SB_URL = 'https://deknzrajghaatahmdrwn.supabase.co';
   const SB_KEY = 'sb_publishable_xOp7aSByxfPuyojXVo6-kg_F-aF4MB0';
-  const sb = supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, storageKey: 'ts_auth' } });
+  const sb = supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce', storageKey: 'ts_auth' } });
   const L = (window.LIVE = {});
   window.sb = sb;
   let me = null; // my profile row
@@ -581,6 +581,7 @@
     window._tok = session ? session.access_token : null;
     if (session && (await loadMe())) await loadMine();
     if (me && LS.get('oauthAfter', 0)) { LS.set('oauthAfter', 0); S.sheet = null; }
+    if (/[?&]code=|access_token=/.test(location.href)) history.replaceState(null, '', location.pathname);
     await loadMarket();
     buildFeed(); render();
     // signed in but never finished setup (e.g. signed up on an older version)
