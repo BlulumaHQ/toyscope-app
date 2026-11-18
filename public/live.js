@@ -413,9 +413,10 @@
     e2.rating = rating === 'sensitive' ? 'sensitive' : 'general';
     const path = `${me.id}/${e2.id}.jpg`;
     const up = await sb.storage.from('albums').upload(path, await toBlob(e2.img), { contentType: 'image/jpeg', upsert: true });
-    if (up.error) return toast(errMsg(up.error));
+    const drop = (err) => { const A = ALBUMS.me || []; const k = A.indexOf(e2); if (k >= 0) A.splice(k, 1); render(); toast('Photo not saved: ' + errMsg(err) + ' — please try again'); };
+    if (up.error) return drop(up.error);
     const { error } = await sb.from('album_photos').insert({ id: e2.id, owner_id: me.id, path, caption: e2.cap || '', rating: e2.rating });
-    if (error) return toast(errMsg(error));
+    if (error) { sb.storage.from('albums').remove([path]); return drop(error); }
     e2.img = pub('albums', path);
     loadFp();
   };
