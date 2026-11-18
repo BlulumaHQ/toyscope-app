@@ -612,9 +612,8 @@ function itemToResult(i){if(i.res)return Object.assign({},i.res,{img:i.photos&&i
 const seedRecent=()=>ITEMS.filter(i=>i.real&&i.owner!=='me').slice(0,3).map((i,k)=>Object.assign(itemToResult(i),{when:['Sat · flea market','Sat · flea market','Fri'][k]}));
 const folderNames=()=>{const f=['Favorites'];ITEMS.filter(i=>i.owner==='me'&&i.folder).forEach(i=>f.includes(i.folder)||f.push(i.folder));Object.values(BM).forEach(x=>f.includes(x)||f.push(x));(S.extraFolders||[]).forEach(x=>f.includes(x)||f.push(x));return f};
 const folderItems=f=>[...ITEMS.filter(i=>i.owner==='me'&&i.folder===f),...Object.entries(BM).filter(([,v])=>v===f).map(([k])=>item(k)).filter(Boolean)];
-S.likeCount=S.likeCount||{};
 const agoT=t=>{const m=Math.max(0,(Date.now()-t)/60000);return m<1?'now':m<60?Math.floor(m)+'m':m<1440?Math.floor(m/60)+'h':Math.floor(m/1440)+'d'};
-const realLikes=(tid,pid)=>Math.max(0,(S.likeCount[tid]||0)-(S.liked.has(pid)?1:0));
+const realLikes=(tid,pid)=>Math.max(0,((S.likeCount||{})[tid]||0)-(S.liked.has(pid)?1:0));
 function buildFeed(){const out=[];let k=0;const when=k=>k<8?(k+1)+'h':Math.ceil(k/8)+'d';
  const vis=u=>USERS[u]&&(u==='me'||!USERS[u].private);
  // shared toys (not for sale), newest first
