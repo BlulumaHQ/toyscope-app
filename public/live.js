@@ -94,12 +94,34 @@
       al.data.forEach((a) => { if (me && a.owner_id === me.id) return; (by[a.owner_id] = by[a.owner_id] || []).push({ id: a.id, img: pub('albums', a.path), cap: a.caption || '', rating: a.rating || 'general', at: a.created_at }); });
       Object.keys(by).forEach((u) => { if (USERS[u] && !USERS[u].private) ALBUMS[u] = by[u]; });
     }
+    await loadLikes();
     const real = ITEMS.filter((i) => i.db && i.status === 'sale').length;
     if (real >= 20) { // enough real listings: drop the samples
       for (let k = ITEMS.length - 1; k >= 0; k--) if (ITEMS[k].demo) ITEMS.splice(k, 1);
       Object.keys(USERS).forEach((k) => { if (USERS[k].demo) delete USERS[k]; });
     }
   }
+  // Real likes for real posts (shared toys + collection photos)
+  async function loadLikes() {
+    const ids = [...ITEMS.filter((i) => i.db && i.status === 'public').map((i) => i.id)];
+    Object.keys(ALBUMS).forEach((u) => { if (USERS[u] && !USERS[u].demo) (ALBUMS[u] || []).forEach((a) => ids.push(a.id)); });
+    const ok = ids.filter(isUuid); S.likeCount = {};
+    for (let k = 0; k < ok.length; k += 150) {
+      const { data } = await sb.from('post_likes').select('target_id,user_id').in('target_id', ok.slice(k, k + 150));
+      (data || []).forEach((l) => { S.likeCount[l.target_id] = (S.likeCount[l.target_id] || 0) + 1; if (me && l.user_id === me.id) S.liked.add('f_' + l.target_id); });
+    }
+  }
+  const _like = window.like;
+  window.like = function (id, only) {
+    const tid = String(id).replace(/^f_/, '');
+    if (!isUuid(tid)) return _like(id, only);
+    if (!me) return need(() => {});
+    if (only && S.liked.has(id)) return;
+    const on = !S.liked.has(id);
+    S.likeCount[tid] = Math.max(0, (S.likeCount[tid] || 0) + (on ? 1 : -1));
+    _like(id, only);
+    (on ? sb.from('post_likes').insert({ user_id: me.id, target_id: tid }) : sb.from('post_likes').delete().eq('user_id', me.id).eq('target_id', tid)).then(() => {}, () => {});
+  };
   async function loadMe() {
     const { data, error } = await sb.rpc('my_profile');
     if (error || !data) { console.error(error); return false; }
