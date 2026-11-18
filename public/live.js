@@ -580,7 +580,7 @@
     const { data: { session } } = await sb.auth.getSession();
     window._tok = session ? session.access_token : null;
     if (session && (await loadMe())) await loadMine();
-    if (me && LS.get('oauthAfter', 0)) { LS.set('oauthAfter', 0); S.sheet = null; }
+    if (me && LS.get('oauthAfter', 0)) { LS.set('oauthAfter', 0); S.sheet = null; S.onboarded = true; LS.set('onboarded', true); }
     if (/[?&]code=|access_token=/.test(location.href)) history.replaceState(null, '', location.pathname);
     await loadMarket();
     buildFeed(); render();
