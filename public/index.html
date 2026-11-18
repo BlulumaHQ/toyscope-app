@@ -614,7 +614,7 @@ function buildFeed(){const out=[];let k=0;const when=k=>k<8?(k+1)+'h':Math.ceil(
  // shared toys (not for sale), newest first
  ITEMS.filter(i=>i.status==='public'&&vis(i.owner)&&!(isMinor()&&isSens(i))).sort((a,b)=>(b.added||0)-(a.added||0)).forEach(i=>{out.push({id:'f_'+i.id,kind:'shared',user:i.owner,items:[i.id],time:i.owner==='me'&&(i.added||0)>Date.now()/1000-3600?'now':when(k),likes:i.owner==='me'?0:40+((k*137)%600),cap:(i.desc||'').split('\n')[0],comments:[]});k++});
  // collection photos, mixed across collectors
- const us=Object.keys(ALBUMS).filter(u=>u!=='me'&&vis(u));for(let r=0;r<6;r++)us.forEach(u=>{const a=(ALBUMS[u]||[])[r];if(!a||(isMinor()&&a.rating==='sensitive'))return;const old=a.shelf?OLDPOSTS.find(p=>p.user===u&&p.items&&p.items.join()===a.shelf.join()):null;out.push({id:'f_'+a.id,kind:'album',user:u,items:a.shelf||[],shelf:true,album:a,time:when(k),likes:old?old.likes:300+((k*211)%1500),cap:a.cap,comments:old?old.comments:[]});k++});
+ const us=Object.keys(ALBUMS).filter(u=>u!=='me'&&vis(u)).sort((a,b)=>(USERS[a].demo?1:0)-(USERS[b].demo?1:0)||String((ALBUMS[b][0]||{}).at||'').localeCompare(String((ALBUMS[a][0]||{}).at||'')));for(let r=0;r<6;r++)us.forEach(u=>{const a=(ALBUMS[u]||[])[r];if(!a||(isMinor()&&a.rating==='sensitive'))return;const old=a.shelf?OLDPOSTS.find(p=>p.user===u&&p.items&&p.items.join()===a.shelf.join()):null;out.push({id:'f_'+a.id,kind:'album',user:u,items:a.shelf||[],shelf:true,album:a,time:when(k),likes:old?old.likes:300+((k*211)%1500),cap:a.cap,comments:old?old.comments:[]});k++});
  POSTS.length=0;out.forEach(x=>POSTS.push(x))}
 function tv(t){return t==='now'?0:parseInt(t)*({m:1,h:60,d:1440}[t.slice(-1)]||1)}
 const NOTIFS=[

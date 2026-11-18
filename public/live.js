@@ -84,6 +84,16 @@
     const { data, error } = await sb.from('items').select(ITEM_COLS).in('status', ['sale', 'public']).order('created_at', { ascending: false }).limit(300);
     if (error) { console.error(error); return; }
     data.forEach(itemFrom);
+    // collection photos from public collectors, for the Showcase feed
+    const al = await sb.from('album_photos').select('id,owner_id,path,caption,rating,created_at').order('created_at', { ascending: false }).limit(300);
+    if (!al.error && al.data && al.data.length) {
+      const owners = [...new Set(al.data.map((a) => a.owner_id))];
+      const pr = await sb.from('profiles').select(PROFILE_COLS).in('id', owners);
+      (pr.data || []).forEach(userFrom);
+      const by = {};
+      al.data.forEach((a) => { if (me && a.owner_id === me.id) return; (by[a.owner_id] = by[a.owner_id] || []).push({ id: a.id, img: pub('albums', a.path), cap: a.caption || '', rating: a.rating || 'general', at: a.created_at }); });
+      Object.keys(by).forEach((u) => { if (USERS[u] && !USERS[u].private) ALBUMS[u] = by[u]; });
+    }
     const real = ITEMS.filter((i) => i.db && i.status === 'sale').length;
     if (real >= 20) { // enough real listings: drop the samples
       for (let k = ITEMS.length - 1; k >= 0; k--) if (ITEMS[k].demo) ITEMS.splice(k, 1);
