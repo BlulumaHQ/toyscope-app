@@ -158,6 +158,7 @@
     const c = cur(); if (c.s === 'profile' && c.p && c.p.id === uuid) render();
   }
 
+  const OAUTH = { google: false }; // flip on once the provider is enabled in Supabase
   /* ---------- sign in with a one-time email code ---------- */
   const _signupBlocked = window.signupBlocked;
   window.signup = function (title) {
@@ -170,11 +171,23 @@
         <input id="otp" class="field" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Code" style="text-align:center;font-size:22px;letter-spacing:.3em" oninput="if(this.value.replace(/\\D/g,'').length===(window.OTP_LEN||6))LIVE.verifyCode()">
         <button class="btn pri full" style="margin-top:12px" ${A.busy ? 'disabled' : ''} onclick="LIVE.verifyCode()">${A.busy ? 'Checking…' : 'Continue'}</button>
         <button class="btn full" style="margin-top:6px" onclick="S._auth.step='email';render()">Use a different email</button>`;
-      return head + `<div class="muted small" style="text-align:center;margin:4px 0 14px">No password. We email you a one-time code.</div>
+      const g = OAUTH.google ? `<button class="btn full gbtn" style="margin:4px 0 6px" onclick="LIVE.oauth('google')"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg><span>Continue with Google</span></button>
+        <div class="orline"><span>or</span></div>` : '';
+      return head + g + `<div class="muted small" style="text-align:center;margin:4px 0 14px">No password. We email you a one-time code.</div>
         <input id="em" class="field" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" value="${esc(A.email)}" onkeydown="if(event.key==='Enter')LIVE.sendCode()">
         <button class="btn pri full" style="margin-top:12px" ${A.busy ? 'disabled' : ''} onclick="LIVE.sendCode()">${A.busy ? 'Sending…' : 'Email me a code'}</button>
         <div class="muted xs" style="text-align:center;margin-top:12px">You must be 13 or older. ${legalLink('terms', 'Terms')} · ${legalLink('privacy', 'Privacy')}</div>`;
     });
+  };
+  L.oauth = async function (provider) {
+    LS.set('oauthAfter', 1);
+    const { error } = await sb.auth.signInWithOAuth({ provider, options: { redirectTo: location.origin + '/' } });
+    if (error) toast(errMsg(error));
+  };
+  L.welcome = function () {
+    if (!me || LS.get('welcomed_' + me.id, false)) return;
+    fetch('/api/welcome', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-ToyScope': '1', Authorization: 'Bearer ' + (window._tok || '') }, body: JSON.stringify({ lang: S.lang }) })
+      .then(r => r.json()).then(d => { if (d && (d.ok || d.reason !== 'email_off')) LS.set('welcomed_' + me.id, true); }).catch(() => {});
   };
   L.sendCode = async function () {
     const A = S._auth; const email = ($('em').value || '').trim().toLowerCase();
@@ -203,6 +216,7 @@
     await loadMine(); buildFeed();
     const fn = S.after; S.after = null; render(true);
     toast('Signed in as @' + me.handle);
+    L.welcome();
     if (fn) setTimeout(fn, 60);
   }
   window.finishAge = async function () {
@@ -220,6 +234,7 @@
     S.sheet = null; const fn = S.after; S.after = null;
     toast(me.founder_tier ? fpText('fp_welcome', { n: me.founder_no }) : 'Account created');
     S.stack.push({ s: 'onboard' }); render(true); S._afterOnboard = fn;
+    L.welcome();
   };
   // First-time profile: pick a username and display name
   function setupProfile(done) {
@@ -565,10 +580,12 @@
     const { data: { session } } = await sb.auth.getSession();
     window._tok = session ? session.access_token : null;
     if (session && (await loadMe())) await loadMine();
+    if (me && LS.get('oauthAfter', 0)) { LS.set('oauthAfter', 0); S.sheet = null; }
     await loadMarket();
     buildFeed(); render();
     // signed in but never finished setup (e.g. signed up on an older version)
     if (me && !me.age_range) ageSheet();
-    else if (me && /^user_[0-9a-f]{10}$/.test(me.handle || '')) setupProfile(() => { render(); toast('Profile saved'); });
+    else if (me && /^user_[0-9a-f]{10}$/.test(me.handle || '')) setupProfile(() => { render(); toast('Profile saved'); L.welcome(); });
+    else if (me) L.welcome();
   })();
 })();
