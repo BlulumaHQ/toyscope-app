@@ -72,6 +72,10 @@ input,textarea,select{font:inherit;color:var(--text)}
 .demomark{position:absolute;inset:0;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;z-index:2;background:rgba(15,20,40,.18);container-type:inline-size}
 .demomark b{font-size:clamp(14px,22cqw,72px);font-weight:900;letter-spacing:.08em;color:#fff;line-height:1;text-shadow:0 2px 12px rgba(0,0,0,.55);border:3px solid rgba(255,255,255,.9);padding:.06em .3em;border-radius:.15em;transform:rotate(-12deg)}
 .demomark i{font-style:normal;font-size:clamp(8px,6.5cqw,20px);font-weight:800;color:#fff;margin-top:.7em;text-shadow:0 1px 6px rgba(0,0,0,.7);transform:rotate(-12deg);white-space:nowrap}
+.nmrow{display:flex;gap:10px;overflow-x:auto;padding:6px 16px 10px;scrollbar-width:none}.nmrow::-webkit-scrollbar{display:none}
+.nmc{flex:none;width:92px;text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:12px 4px 10px}
+.nmav{display:flex;justify-content:center;width:100%;background:none;border:0;padding:0;cursor:pointer}
+.fpbar{height:8px;border-radius:99px;background:var(--border);overflow:hidden;margin-top:6px}.fpbar i{display:block;height:100%;background:var(--accent);border-radius:99px}
 .dot{position:absolute;top:7px;right:7px;width:8px;height:8px;border-radius:50%;background:var(--bad);border:2px solid var(--bg)}
 .nav{position:relative;z-index:20;flex:none;display:flex;justify-content:space-around;align-items:center;height:76px;padding-bottom:14px;background:var(--surface);border-top:1px solid var(--border)}
 @media (max-width:520px){.nav{padding-bottom:calc(8px + env(safe-area-inset-bottom,0px));height:auto;padding-top:8px}}
@@ -894,6 +898,7 @@ function showcaseHTML(){if(!POSTS.length||POSTS[0].kind==='listing'&&!POSTS.some
  const body=[];POSTS.forEach((p,k)=>{if(k>0&&k%12===0)body.push(saleRow(k/12));body.push(postHTML(p))});if(POSTS.length<12)body.push(saleRow(0));
  return `<div class="homebar"><div class="row" style="justify-content:space-between;margin-bottom:10px"><img class="logoimg" src="brand/toyscope-logo.svg" alt="ToyScope" style="height:28px"><button class="ib" onclick="pickScan()" aria-label="Scan">${ic('scan',2)}</button></div>${homeTabs()}</div>
  ${S.fp&&S.fp.tier&&!S.fp.confirmed?`<div style="padding-top:12px">${founderCard()}</div>`:''}
+ ${newMembersRow()}
  <div class="pad muted small" style="padding-top:10px;padding-bottom:4px">Collections and finds shared by collectors. Not for sale unless marked.</div>
  ${body.join('')||'<div class="empty">No posts yet. Scan a toy and tap Share to be the first.</div>'}
  <div class="empty small">You’re all caught up · <button class="link small" onclick="setHome('market')">Browse the Marketplace</button></div>`}
@@ -1022,7 +1027,7 @@ async function startScan(dataUrl,blob,demo,extra){extra=extra||[];
  S.stack.pop();
  if(err){if(!demo&&S._lastShots&&S._lastShots.front){S.shots=S._lastShots;S.stack.push({s:'scan'})}render();return sheet(()=>`<h3>Scan didn’t finish</h3><div class="muted small" style="margin:6px 0 14px">${esc(err.message||err)} Your photos are still here.</div>${S.shots.front?`<button class="btn pri full" onclick="closeSheet();identifyShots()">Try again</button><button class="btn full" style="margin-top:8px" onclick="closeSheet()">Retake photos</button>`:`<button class="btn pri full" onclick="closeSheet()">OK</button>`}`)}
  r.ms=performance.now()-t0;r.img=demo?null:dataUrl;r.extra=extra.map(x=>({label:x.label,dataUrl:x.dataUrl}));r.engine=demo?'Demo result':engineLabel();
- S.scansToday++;if(!S.signedIn){S.anon++;LS.set('anon',S.anon)}r.when='Just now';S.recent.unshift(r);S.recent=S.recent.slice(0,20);S.lastResult=r;go('result');
+ S.scansToday++;if(!S.signedIn){S.anon++;LS.set('anon',S.anon)}r.when='Just now';r.fresh=!demo;S.recent.unshift(r);S.recent=S.recent.slice(0,20);S.lastResult=r;go('result');
 }
 function tryDemo(){if(S.plan!=='pro')return paywall('scan',()=>tryDemo());startScan(null,null,true)}
 
@@ -1090,7 +1095,24 @@ const CONF=[['A','High confidence — strong match'],['B','Likely match'],['C','
 const confIdx=c=>c>=.85?0:c>=.7?1:c>=.55?2:c>=.4?3:4;
 const CDN={paint:['Paint','How much of the original paint is left.'],structure:['Structure','Cracks, stress marks, loose or broken joints.'],plastic:['Plastic','Yellowing, fading, sticky or warped plastic.'],stickers:['Stickers & decals','Applied, peeling or missing stickers.'],accessories:['Accessories','How complete it is compared with the original release.'],packaging:['Packaging','Box, inserts and instructions.']};
 function infoTip(k){const d=CDN[k]||['Confidence','How sure the AI is about which toy this is. A is very sure, E is a guess.'];sheet(()=>`<h3>${d[0]}</h3><div class="muted small" style="margin:6px 0 14px">${d[1]}</div><button class="btn pri full" onclick="closeSheet()">OK</button>`)}
-SCR.result=()=>{const r=S.lastResult;if(!r)return SCR.home();
+const NWT={en:{nm:'New collectors',nmSub:'Just joined — say hi',fol:'Follow',foll:'Following',ask:'Share it on Showcase?',askSub:'Let other collectors see this one.',fpLeft:'Founder spot: {n} more photo(s) to lock it in',fpDone:'Founder spot locked ✓',post:'Post to Showcase',later:'Not now'},
+zh:{nm:'新加入的收藏家',nmSub:'剛加入，打個招呼吧',fol:'追蹤',foll:'追蹤中',ask:'要 PO 到 Showcase 給大家看嗎？',askSub:'讓其他收藏家也看看這件。',fpLeft:'創始會員：還差 {n} 張就鎖定名額',fpDone:'創始會員名額已鎖定 ✓',post:'PO 到 Showcase',later:'先不要'},
+'zh-Hans':{nm:'新加入的收藏家',nmSub:'刚加入，打个招呼吧',fol:'关注',foll:'已关注',ask:'要发到 Showcase 给大家看吗？',askSub:'让其他收藏家也看看这件。',fpLeft:'创始会员：还差 {n} 张就锁定名额',fpDone:'创始会员名额已锁定 ✓',post:'发到 Showcase',later:'先不要'},
+ja:{nm:'新しく参加したコレクター',nmSub:'参加したばかり — あいさつしよう',fol:'フォロー',foll:'フォロー中',ask:'Showcase に投稿してみんなに見せる？',askSub:'ほかのコレクターにも見てもらおう。',fpLeft:'Founder 枠：あと {n} 枚で確定',fpDone:'Founder 枠は確定済み ✓',post:'Showcase に投稿',later:'あとで'},
+ko:{nm:'새로 가입한 컬렉터',nmSub:'방금 가입했어요 — 인사해 보세요',fol:'팔로우',foll:'팔로잉',ask:'Showcase에 올려서 보여줄까요?',askSub:'다른 컬렉터들도 볼 수 있어요.',fpLeft:'Founder 자리: {n}장 더 올리면 확정',fpDone:'Founder 자리 확정 ✓',post:'Showcase에 올리기',later:'나중에'},
+fr:{nm:'Nouveaux collectionneurs',nmSub:'Ils viennent d’arriver — dites bonjour',fol:'Suivre',foll:'Abonné',ask:'Le partager dans Showcase ?',askSub:'Montrez-le aux autres collectionneurs.',fpLeft:'Place de Fondateur : encore {n} photo(s) pour la garder',fpDone:'Place de Fondateur confirmée ✓',post:'Publier dans Showcase',later:'Plus tard'},
+es:{nm:'Nuevos coleccionistas',nmSub:'Acaban de llegar — salúdalos',fol:'Seguir',foll:'Siguiendo',ask:'¿Lo compartes en Showcase?',askSub:'Que otros coleccionistas lo vean.',fpLeft:'Plaza de Fundador: {n} foto(s) más para asegurarla',fpDone:'Plaza de Fundador asegurada ✓',post:'Publicar en Showcase',later:'Ahora no'}};
+const nw=(k,n)=>((NWT[S.lang]||NWT.en)[k]||NWT.en[k]).replace('{n}',n);
+S.newMembers=[];
+function newMembersRow(){const ids=(S.newMembers||[]).filter(id=>USERS[id]&&id!=='me');if(!ids.length)return '';
+ return `<div class="pad" style="padding-top:12px;padding-bottom:4px"><div class="row" style="justify-content:space-between;align-items:baseline"><h3 style="margin:0;font-size:16px">${nw('nm')}</h3><span class="muted xs">${nw('nmSub')}</span></div></div>
+ <div class="hscroll nmrow">${ids.map(id=>{const u=USERS[id];const f=S.follow.has(id);return `<div class="nmc"><button class="nmav" onclick="openUser('${id}')" aria-label="@${esc(u.handle)}">${av(id,58)}</button><div class="xs ell" style="font-weight:600;max-width:84px;margin:6px auto 6px">@${esc(u.handle)}</div><button class="btn sm ${f?'sec2':'pri'}" style="min-height:32px;padding:0 12px" onclick="need(()=>fol('${id}'))">${f?nw('foll'):nw('fol')}</button></div>`}).join('')}</div>`}
+function sharePrompt(){const r=S.lastResult;if(!r||r._asked||!S.signedIn||cur().s!=='result')return;r._asked=true;if(LS.get('shareNo',0)>=3)return;
+ const f=S.fp;const fp=f&&f.tier?(f.confirmed?`<div class="small" style="color:var(--good,#16A34A);font-weight:600;margin-top:8px">${nw('fpDone')}</div>`:`<div class="small" style="margin-top:10px;font-weight:600">${nw('fpLeft',Math.max(0,(f.needed||10)-(f.count||0)))}</div><div class="fpbar"><i style="width:${Math.min(100,Math.round((f.count||0)/(f.needed||10)*100))}%"></i></div>`):'';
+ sheet(()=>`<h3 style="margin:2px 0 4px">${nw('ask')}</h3><div class="muted small">${nw('askSub')}</div>${fp}
+ <button class="btn pri full" style="margin-top:16px" onclick="closeSheet();LS.set('shareNo',0);showOff('result')">${ic('image',2,'width="18" height="18"')} ${nw('post')}</button>
+ <button class="btn full" style="margin-top:6px" onclick="LS.set('shareNo',LS.get('shareNo',0)+1);closeSheet()">${nw('later')}</button>`)}
+SCR.result=()=>{const r=S.lastResult;if(!r)return SCR.home();if(r.fresh&&!r._asked&&!r._sched){r._sched=true;setTimeout(sharePrompt,2800)}
  const low=r.conf<.6;const grail=['grail','very_rare'].includes(r.rarity);
  const exp=r.accExp;const vis=new Set(r.accVis.map(x=>x.toLowerCase()));const ci=confIdx(r.conf);
  const segs=n=>`<div class="segs">${[...Array(10)].map((_,k)=>`<i class="${n!=null&&k<n?'on':''}"></i>`).join('')}</div>`;

@@ -133,6 +133,7 @@
     (follows.data || []).forEach((f) => S.follow.add(f.following_id));
     S.unread = (inbox.count || 0) > 0;
     L.supportUnread();
+    L.loadNewMembers();
     if (!L._supT) L._supT = setInterval(() => {
       if (document.hidden) return;
       L.supportUnread();
@@ -361,6 +362,12 @@
       const d = await res.json(); return res.ok ? d : { error: d.error || 'Translation is not available right now.' };
     } catch (e) { return { error: 'Translation is not available right now.' }; }
   };
+  L.loadNewMembers = async function () {
+    const { data, error } = await sb.from('profiles').select(PROFILE_COLS).not('handle', 'like', 'user\\_%').eq('is_private', false).order('created_at', { ascending: false }).limit(20);
+    if (error || !data) return;
+    S.newMembers = data.filter((p) => !me || p.id !== me.id).map(userFrom).filter((id) => id && id !== 'me');
+    if (cur().s === 'explore' || cur().s === 'home') render();
+  };
   L.supportLoad = async function () {
     if (!me) return null;
     const { data, error } = await sb.from('support_messages').select('id,sender,body,image_path,created_at').eq('user_id', me.id).order('created_at');
@@ -584,6 +591,7 @@
     if (me) { S.onboarded = true; LS.set('onboarded', true); S.stack = S.stack.filter(x => x.s !== 'welcome'); }
     if (/[?&]code=|access_token=/.test(location.href)) history.replaceState(null, '', location.pathname);
     await loadMarket();
+    L.loadNewMembers();
     buildFeed(); render();
     // signed in but never finished setup (e.g. signed up on an older version)
     if (me && !me.age_range) ageSheet();
