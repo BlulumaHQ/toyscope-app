@@ -141,7 +141,7 @@
     delete USERS[me.id];
     return true;
   }
-  // Founder activation progress: 10 photos (collection + for sale) within 30 days
+  // Founder activation progress: 1 photo (collection or for sale) within 30 days
   async function loadFp() {
     const { data } = await sb.rpc('founder_progress');
     const was = S.fp && !S.fp.confirmed;
@@ -297,7 +297,7 @@
   window.foundingLine = function () {
     const sp = window.SPOTS;
     if (sp && sp.lifetime_left > 0) return fpText('fp_line_life', { n: sp.lifetime_left });
-    if (sp && sp.founding_left > 0) return fpText('fp_line_found', { n: sp.founding_left });
+    if (sp && (sp.founding_open || sp.founding_left > 0)) return fpText('fp_line_found');
     return 'Create a free account to browse, save and message sellers.';
   };
   // Guests: the Pro sheet invites them to join instead of a trial
@@ -320,7 +320,7 @@
     const after = S._proAfter; S._proAfter = null;
     const go2 = () => {
       if (S.plan === 'pro') { closeSheet(); toast(S.founderTier === 'lifetime' ? 'Founder · Pro is free for life' : S.founder ? 'Founding Collector · Pro is active' : 'Pro is active'); if (after) setTimeout(after, 60); }
-      else { closeSheet(); toast('Founding spots are full. Paid Pro is coming soon.'); }
+      else { closeSheet(); toast('The founding offer has ended. Paid Pro is coming soon.'); }
     };
     if (!S.signedIn) { S.sheet = null; return need(go2); }
     go2();
